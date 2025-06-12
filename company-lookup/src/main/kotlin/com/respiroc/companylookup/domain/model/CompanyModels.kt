@@ -1,4 +1,4 @@
-package com.respiroc.companylookup.model
+package com.respiroc.companylookup.domain.model
 
 /**
  * Represents a company search result

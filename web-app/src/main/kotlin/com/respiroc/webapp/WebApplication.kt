@@ -1,6 +1,6 @@
 package com.respiroc.webapp
 
-import com.respiroc.companylookup.config.CompanyLookupConfig
+import com.respiroc.companylookup.infrastructure.config.CompanyLookupConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Import

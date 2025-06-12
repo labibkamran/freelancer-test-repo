@@ -1,4 +1,4 @@
-package com.respiroc.companylookup.config
+package com.respiroc.companylookup.infrastructure.config
 
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
