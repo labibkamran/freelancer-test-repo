@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS roles
+CREATE TABLE IF NOT EXISTS tenant_permissions
 (
     record_id   BIGSERIAL PRIMARY KEY,
     name        VARCHAR(128) NOT NULL,
