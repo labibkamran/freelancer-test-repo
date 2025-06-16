@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS user_tenant_roles
     CONSTRAINT uq__user_tenant_roles__user_tenant UNIQUE (user_record_id, tenant_record_id, tenant_role_record_id)
 );
 
-CREATE INDEX idx__user_tenant_roles__composite ON user_tenant_roles (user_record_id, tenant_record_id, role_record_id);
+CREATE INDEX idx__user_tenant_roles__composite ON user_tenant_roles (user_record_id, tenant_record_id, tenant_role_record_id);
