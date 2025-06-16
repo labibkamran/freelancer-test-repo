@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS tenant_permissions
     name        VARCHAR(128) NOT NULL,
     code        VARCHAR(128) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMP    NULL
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NOT NULL
 );
