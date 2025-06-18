@@ -14,6 +14,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.session:spring-session-jdbc")
+    //implementation("org.springframework.boot:spring-boot-starter-validation")
+    //implementation("org.springframework.session:spring-session-jdbc")
 }

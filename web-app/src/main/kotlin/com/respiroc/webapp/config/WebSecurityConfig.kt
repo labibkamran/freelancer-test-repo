@@ -1,7 +1,7 @@
 package com.respiroc.webapp.config
 
 import com.respiroc.user.api.UserInternalApi
-import com.respiroc.webapp.model.SpringUser
+import com.respiroc.util.dto.SpringUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -38,6 +38,7 @@ class WebSecurityConfig {
                 requests
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/signup").permitAll()
                     .requestMatchers("/test/**").permitAll()
                     .requestMatchers("/error/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()

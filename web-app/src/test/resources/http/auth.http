@@ -1,0 +1,11 @@
+### Signup new user
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password",
+  "confirmPassword": "password"
+}
+
+###
