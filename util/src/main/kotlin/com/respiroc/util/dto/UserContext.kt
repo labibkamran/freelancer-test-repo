@@ -5,6 +5,6 @@ data class UserContext(
     val password: String,
     val isEnabled: Boolean,
     val isLocked: Boolean,
-    val currentTenant: TenantContext,
+    val currentTenant: TenantContext?,
     val roles: Set<RoleDTO>,
 )
