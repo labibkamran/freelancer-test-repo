@@ -19,6 +19,9 @@ open class UserSession : Serializable {
     @Column(name = "record_id", nullable = false)
     open var id: Long = -1
 
+    @Column(name = "user_record_id", nullable = false, updatable = false, insertable = false)
+    open val userId: Long = -1
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -40,7 +43,6 @@ open class UserSession : Serializable {
     @Column(name = "token_revoked_at")
     open var tokenRevokedAt: Instant? = null
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     open lateinit var createdAt: Instant

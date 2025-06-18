@@ -95,7 +95,7 @@ class JwtUtilsImpl: JwtUtils {
     }
 
     private fun secretKey(): SecretKey {
-        val keyByte = Decoders.BASE64.decode("SECRET_KEY")
+        val keyByte = Decoders.BASE64.decode("31579feb308e339c11ba43da454babb9b6da018f2f3969dfee314f9f0ea2ff55")
         return Keys.hmacShaKeyFor(keyByte)
     }
 }

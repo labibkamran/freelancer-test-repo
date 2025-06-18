@@ -39,7 +39,6 @@ open class User : Serializable {
     @Column(name = "last_login_at")
     open var lastLoginAt: Instant? = null
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     open lateinit var createdAt: Instant

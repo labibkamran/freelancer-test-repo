@@ -33,7 +33,6 @@ open class Role : Serializable {
     @Column(name = "description", nullable = false)
     open lateinit var description: String
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     open lateinit var createdAt: Instant
