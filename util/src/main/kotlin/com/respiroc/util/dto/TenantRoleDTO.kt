@@ -1,8 +1,8 @@
 package com.respiroc.util.dto
 
-data class Role(
+data class TenantRoleDTO(
     val name: String,
     val code: String,
     val description: String,
-    val permissions: Set<Permission>
+    val permissions: Set<TenantPermissionDTO>
 )
