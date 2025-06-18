@@ -4,5 +4,5 @@ data class RoleDTO(
     val name: String,
     val code: String,
     val description: String,
-    val permissions: Set<PermissionDTO>
+    val permissions: List<PermissionDTO>
 )
