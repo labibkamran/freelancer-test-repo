@@ -1,7 +1,7 @@
 package com.respiroc.user.domain.model
 
+import com.respiroc.tenant.domain.model.TenantRole
 import jakarta.persistence.*
-import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
@@ -19,12 +19,10 @@ open class User : Serializable {
     open var id: Long = -1
 
     @Size(max = 255)
-    @NotNull
     @Column(name = "email", nullable = false)
     open lateinit var email: String
 
     @Size(max = 255)
-    @NotNull
     @Column(name = "password_hash", nullable = false)
     open lateinit var passwordHash: String
 
@@ -43,11 +41,19 @@ open class User : Serializable {
     @Column(name = "created_at", nullable = false)
     open lateinit var createdAt: Instant
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     open lateinit var updatedAt: Instant
 
     @ManyToMany(targetEntity = Role::class, fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = [JoinColumn(name = "user_record_id")], inverseJoinColumns = [JoinColumn(name = "role_record_id")])
     open var roles: List<Role> = ArrayList()
+
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    open var tenantRoles: MutableSet<UserTenantRole> = HashSet()
+
+    @get:Transient
+    val rolesPerTenant: Map<String, Set<TenantRole>>
+        get() = tenantRoles.groupBy { it.tenant.id }
+            .mapValues { entry -> entry.value.map { it.tenantRole }.toSet() }
 }

@@ -1,8 +1,6 @@
 package com.respiroc.user.domain.model
 
 import jakarta.persistence.*
-import jakarta.validation.constraints.NotNull
-import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
@@ -22,21 +20,17 @@ open class UserSession : Serializable {
     @Column(name = "user_record_id", nullable = false, updatable = false, insertable = false)
     open val userId: Long = -1
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_record_id", nullable = false)
     open lateinit var user: User
 
-    @NotNull
     @Column(name = "token", nullable = false, length = Integer.MAX_VALUE)
     open lateinit var token: String
 
-    @NotNull
     @Column(name = "token_issue_at", nullable = false)
     open lateinit var tokenIssueAt: Instant
 
-    @NotNull
     @Column(name = "token_expire_at", nullable = false)
     open lateinit var tokenExpireAt: Instant
 
@@ -48,6 +42,6 @@ open class UserSession : Serializable {
     open lateinit var createdAt: Instant
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     open lateinit var updatedAt: Instant
 }
