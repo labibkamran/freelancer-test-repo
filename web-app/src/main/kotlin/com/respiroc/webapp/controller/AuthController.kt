@@ -4,6 +4,7 @@ import com.respiroc.user.api.UserInternalApi
 import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
 import com.respiroc.webapp.controller.response.LoginResponse
+import com.respiroc.webapp.controller.response.MeResponse
 import com.respiroc.webapp.controller.response.SignupResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -29,5 +30,10 @@ class AuthController(
         // TODO: Validate request data
         val result = userApi.loginByEmailPassword(email = request.email, password = request.password)
         return ResponseEntity.ok(LoginResponse(result.token))
+    }
+
+    @GetMapping(value = ["/me"])
+    fun me(): ResponseEntity<MeResponse> {
+        return ResponseEntity.ok(MeResponse(user().email))
     }
 } 
