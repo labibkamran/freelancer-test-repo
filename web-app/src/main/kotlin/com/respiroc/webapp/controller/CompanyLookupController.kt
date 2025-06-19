@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/companies")
-class CompanyController(
+class CompanyLookupController(
     private val companyLookupApi: CompanyLookupInternalApi
 ) {
 
