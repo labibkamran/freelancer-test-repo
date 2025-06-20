@@ -34,6 +34,7 @@ class AuthController(
 
     @GetMapping(value = ["/me"])
     fun me(): ResponseEntity<MeResponse> {
+        println(user())
         return ResponseEntity.ok(MeResponse(user().email))
     }
 } 

@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TenantRoleRepository : CustomJpaRepository<TenantRole, Long> {
+
+
+    fun findByCode(code: String): TenantRole
 }

@@ -5,6 +5,8 @@ import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.company.domain.model.Company
 import com.respiroc.company.domain.repository.CompanyRepository
 import com.respiroc.tenant.api.TenantInternalApi
+import com.respiroc.user.api.UserInternalApi
+import com.respiroc.util.constant.TenantRoleCode
 import com.respiroc.util.context.UserContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class CompanyService(
     private val companyRepository: CompanyRepository,
-    private val tenantApi: TenantInternalApi
+    private val tenantApi: TenantInternalApi,
+    private val userApi: UserInternalApi
 ) : CompanyInternalApi {
 
     override fun createNewCompany(
@@ -21,7 +24,9 @@ class CompanyService(
         user: UserContext
     ): Company {
         val tenant = tenantApi.createNewTenant(command.name)
-        // TODO: Add tenant to user
+        val tenantRole = tenantApi.findTenantRoleByCode(TenantRoleCode.OWNER)
+        userApi.addUserTenantRole(tenant, tenantRole, user)
+
         val company = Company()
         company.name = command.name
         company.tenant = tenant

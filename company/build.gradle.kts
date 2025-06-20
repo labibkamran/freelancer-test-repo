@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":util"))
     implementation(project(":tenant"))
+    implementation(project(":user"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework:spring-context")

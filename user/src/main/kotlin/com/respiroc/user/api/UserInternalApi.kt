@@ -1,5 +1,7 @@
 package com.respiroc.user.api
 
+import com.respiroc.tenant.domain.model.Tenant
+import com.respiroc.tenant.domain.model.TenantRole
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.user.api.result.SignupResult
@@ -17,4 +19,5 @@ interface UserInternalApi {
     fun findByToken(token: String): UserContext?
     fun findByEmail(email: String): UserContext?
     fun generateToken(user: SpringUser): String
+    fun addUserTenantRole(tenant: Tenant, role: TenantRole, user: UserContext)
 } 

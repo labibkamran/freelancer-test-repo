@@ -1,5 +1,6 @@
 package com.respiroc.user.application
 
+import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantPermission
 import com.respiroc.tenant.domain.model.TenantRole
 import com.respiroc.tenant.infrastructure.context.TenantContextHolder
@@ -12,8 +13,10 @@ import com.respiroc.user.domain.model.Permission
 import com.respiroc.user.domain.model.Role
 import com.respiroc.user.domain.model.User
 import com.respiroc.user.domain.model.UserSession
+import com.respiroc.user.domain.model.UserTenantRole
 import com.respiroc.user.domain.repository.UserRepository
 import com.respiroc.user.domain.repository.UserSessionRepository
+import com.respiroc.user.domain.repository.UserTenantRoleRepository
 import com.respiroc.util.context.PermissionContext
 import com.respiroc.util.context.RoleContext
 import com.respiroc.util.context.SpringUser
@@ -27,6 +30,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.file.attribute.UserPrincipalNotFoundException
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -37,6 +41,7 @@ import java.util.Base64
 class UserService(
     private val userRepository: UserRepository,
     private val userSessionRepository: UserSessionRepository,
+    private val userTenantRoleRepository: UserTenantRoleRepository,
     private val jwt: JwtUtils
 ) : UserInternalApi {
 
@@ -112,6 +117,19 @@ class UserService(
 
     override fun generateToken(user: SpringUser): String {
         TODO("Not yet implemented")
+    }
+
+    override fun addUserTenantRole(
+        tenant: Tenant,
+        role: TenantRole,
+        user: UserContext
+    ) {
+        val existUser = userRepository.findByEmail(user.email)  ?: throw UserPrincipalNotFoundException("User not found")
+        val utr = UserTenantRole()
+        utr.user = existUser
+        utr.tenant = tenant
+        utr.tenantRole = role
+        userTenantRoleRepository.save(utr)
     }
 
     // ---------------------------------
