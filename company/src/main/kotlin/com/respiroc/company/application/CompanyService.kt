@@ -1,0 +1,49 @@
+package com.respiroc.company.application
+
+import com.respiroc.company.api.CompanyInternalApi
+import com.respiroc.company.api.command.CreateCompanyCommand
+import com.respiroc.company.domain.model.Company
+import com.respiroc.company.domain.repository.CompanyRepository
+import com.respiroc.tenant.api.TenantInternalApi
+import com.respiroc.util.context.UserContext
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+@Transactional
+class CompanyService(
+    private val companyRepository: CompanyRepository,
+    private val tenantApi: TenantInternalApi
+) : CompanyInternalApi {
+
+    override fun createNewCompany(
+        command: CreateCompanyCommand,
+        user: UserContext
+    ): Company {
+        val tenant = tenantApi.createNewTenant(command.name)
+        // TODO: Add tenant to user
+        val company = Company()
+        company.name = command.name
+        company.tenant = tenant
+        company.organizationNumber = command.organizationNumber
+        company.countryCode = command.countryCode
+
+        return companyRepository.save(company)
+    }
+
+    override fun findAllCompanyByUser(user: UserContext): List<Company> {
+        return companyRepository.findByTenantIdIn(user.tenants.map { it.id })
+    }
+
+    override fun findCurrentCompanyByUser(user: UserContext): Company? {
+        if (user.currentTenant != null) return null
+        return companyRepository.findByTenantId(user.currentTenant!!.id)
+    }
+
+    override fun findCompanyByUserAndTenantId(
+        user: UserContext,
+        tenantId: Long
+    ): Company? {
+        TODO("Not yet implemented")
+    }
+}
