@@ -4,5 +4,5 @@ data class TenantRoleDTO(
     val name: String,
     val code: String,
     val description: String,
-    val permissions: Set<TenantPermissionDTO>
+    val permissions: List<TenantPermissionDTO>
 )
