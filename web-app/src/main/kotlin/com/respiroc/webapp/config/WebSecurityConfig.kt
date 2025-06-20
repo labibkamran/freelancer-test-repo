@@ -1,7 +1,8 @@
 package com.respiroc.webapp.config
 
 import com.respiroc.user.api.UserInternalApi
-import com.respiroc.util.dto.SpringUser
+import com.respiroc.util.context.SpringUser
+import com.respiroc.webapp.filter.TenantIdFilter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -54,6 +55,10 @@ class WebSecurityConfig {
             .addFilterBefore(
                 BearerTokenAuthenticationFilter(userApi),
                 UsernamePasswordAuthenticationFilter::class.java
+            )
+            .addFilterBefore(
+                TenantIdFilter(),
+                BearerTokenAuthenticationFilter::class.java
             )
             .build()
     }
