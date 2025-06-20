@@ -1,4 +1,4 @@
-package com.respiroc.webapp.controller
+package com.respiroc.webapp.controller.rest
 
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.companylookup.domain.model.CompanyInfo

@@ -1,6 +1,7 @@
-package com.respiroc.webapp.controller
+package com.respiroc.webapp.controller.rest
 
 import com.respiroc.user.api.UserInternalApi
+import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
 import com.respiroc.webapp.controller.response.LoginResponse

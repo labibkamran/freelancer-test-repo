@@ -1,8 +1,9 @@
-package com.respiroc.webapp.controller
+package com.respiroc.webapp.controller.rest
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.company.domain.model.Company
+import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
