@@ -4,20 +4,20 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.data.annotation.CreatedBy
+import org.springframework.data.annotation.LastModifiedBy
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 
 @Entity
 @Table(name = "tenants")
+@EntityListeners(AuditingEntityListener::class)
 open class Tenant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
-    open var recordId: Long = -1
-
-    @Size(max = 36)
-    @Column(name = "id", nullable = false, length = 36)
-    open lateinit var id: String
+    @Column(name = "id", nullable = false)
+    open var id: Long = -1
 
     @Size(max = 255)
     @Column(name = "name", nullable = false)
@@ -30,12 +30,4 @@ open class Tenant {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     open lateinit var updatedAt: Instant
-
-    @Size(max = 50)
-    @Column(name = "created_by", nullable = false, length = 50)
-    open lateinit var createdBy: String
-
-    @Size(max = 50)
-    @Column(name = "updated_by", nullable = false, length = 50)
-    open lateinit var updatedBy: String
 }

@@ -12,7 +12,7 @@ open class TenantRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "id", nullable = false)
     open var id: Long = -1
 
     @Size(max = 128)
@@ -36,6 +36,6 @@ open class TenantRole {
     open lateinit var updatedAt: Instant
 
     @ManyToMany(targetEntity = TenantPermission::class, fetch = FetchType.EAGER)
-    @JoinTable(name = "tenant_role_permission", joinColumns = [JoinColumn(name = "tenant_role_record_id")], inverseJoinColumns = [JoinColumn(name = "tenant_permission_record_id")])
+    @JoinTable(name = "tenant_role_permission", joinColumns = [JoinColumn(name = "tenant_role_id")], inverseJoinColumns = [JoinColumn(name = "tenant_permission_id")])
     open var tenantPermissions: Set<TenantPermission> = HashSet()
 }
