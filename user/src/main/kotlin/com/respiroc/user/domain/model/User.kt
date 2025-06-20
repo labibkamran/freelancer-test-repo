@@ -15,10 +15,10 @@ open class User : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "id", nullable = false)
     open var id: Long = -1
 
-    @Size(max = 255)
+    @Size(max = 128)
     @Column(name = "email", nullable = false)
     open lateinit var email: String
 
@@ -46,14 +46,14 @@ open class User : Serializable {
     open lateinit var updatedAt: Instant
 
     @ManyToMany(targetEntity = Role::class, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = [JoinColumn(name = "user_record_id")], inverseJoinColumns = [JoinColumn(name = "role_record_id")])
+    @JoinTable(name = "user_roles", joinColumns = [JoinColumn(name = "user_id")], inverseJoinColumns = [JoinColumn(name = "role_id")])
     open var roles: List<Role> = ArrayList()
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     open var tenantRoles: MutableSet<UserTenantRole> = HashSet()
 
     @get:Transient
-    val rolesPerTenant: Map<String, Set<TenantRole>>
+    val rolesPerTenant: Map<Long, Set<TenantRole>>
         get() = tenantRoles.groupBy { it.tenant.id }
             .mapValues { entry -> entry.value.map { it.tenantRole }.toSet() }
 }

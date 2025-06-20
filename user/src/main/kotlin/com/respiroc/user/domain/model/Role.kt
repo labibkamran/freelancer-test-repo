@@ -13,7 +13,7 @@ open class Role : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "id", nullable = false)
     open var id: Long = -1
 
     @Size(max = 128)
@@ -37,6 +37,6 @@ open class Role : Serializable {
     open lateinit var updatedAt: Instant
 
     @ManyToMany(targetEntity = Permission::class, fetch = FetchType.EAGER)
-    @JoinTable(name = "role_permissions", joinColumns = [JoinColumn(name = "role_record_id")], inverseJoinColumns = [JoinColumn(name = "permission_record_id")])
+    @JoinTable(name = "role_permissions", joinColumns = [JoinColumn(name = "role_id")], inverseJoinColumns = [JoinColumn(name = "permission_id")])
     open var permissions: Set<Permission> = HashSet()
 }

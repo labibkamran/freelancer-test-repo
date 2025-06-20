@@ -13,19 +13,19 @@ open class UserTenantRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "id", nullable = false)
     open var id: Long = -1
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_record_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     open lateinit var user: User
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tenant_record_id", nullable = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
     open lateinit var tenant: Tenant
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tenant_role_record_id", nullable = false)
+    @JoinColumn(name = "tenant_role_id", nullable = false)
     open lateinit var tenantRole: TenantRole
 
     @CreationTimestamp

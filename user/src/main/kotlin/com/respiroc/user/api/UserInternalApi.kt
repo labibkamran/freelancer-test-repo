@@ -3,8 +3,8 @@ package com.respiroc.user.api
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.user.api.result.SignupResult
-import com.respiroc.util.dto.SpringUser
-import com.respiroc.util.dto.UserContext
+import com.respiroc.util.context.SpringUser
+import com.respiroc.util.context.UserContext
 
 interface UserInternalApi {
     fun signupByEmailPassword(email: String, password: String): SignupResult

@@ -13,7 +13,7 @@ open class Permission : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "id", nullable = false)
     open var id: Long = -1
 
     @Size(max = 128)

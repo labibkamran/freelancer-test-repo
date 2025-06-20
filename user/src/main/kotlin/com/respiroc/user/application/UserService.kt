@@ -1,5 +1,8 @@
 package com.respiroc.user.application
 
+import com.respiroc.tenant.domain.model.TenantPermission
+import com.respiroc.tenant.domain.model.TenantRole
+import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.user.api.UserInternalApi
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
@@ -11,10 +14,13 @@ import com.respiroc.user.domain.model.User
 import com.respiroc.user.domain.model.UserSession
 import com.respiroc.user.domain.repository.UserRepository
 import com.respiroc.user.domain.repository.UserSessionRepository
-import com.respiroc.util.dto.PermissionDTO
-import com.respiroc.util.dto.RoleDTO
-import com.respiroc.util.dto.SpringUser
-import com.respiroc.util.dto.UserContext
+import com.respiroc.util.context.PermissionContext
+import com.respiroc.util.context.RoleContext
+import com.respiroc.util.context.SpringUser
+import com.respiroc.util.context.TenantContext
+import com.respiroc.util.context.TenantPermissionContext
+import com.respiroc.util.context.TenantRoleContext
+import com.respiroc.util.context.UserContext
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -157,22 +163,57 @@ class UserService(
             password = this.passwordHash,
             isEnabled = this.isEnabled,
             isLocked = this.isLocked,
-            currentTenant = null, // TODO : Set tenant context when tenant module finished
-            roles = this.roles.map { it -> it.toRoleDTO() }.toList()
+            currentTenant = this.getCurrentTenant(),
+            tenants = this.getTenantContexts(),
+            roles = this.roles.map { it -> it.toRoleContext() }.toList()
         )
     }
 
-    private fun Role.toRoleDTO(): RoleDTO {
-        return RoleDTO(
+    private fun User.getCurrentTenant(): TenantContext? =
+        TenantContextHolder.getTenantId()?.let { tenantId ->
+            TenantContext(
+                tenantId,
+                rolesPerTenant[tenantId]?.map { it.toTenantRoleContext() } ?: emptyList()
+            )
+        }
+
+    private fun User.getTenantContexts(): List<TenantContext> {
+        return rolesPerTenant.map { (tenantId, tenantRoles) ->
+            TenantContext(
+                tenantId,
+                tenantRoles.map { it.toTenantRoleContext() }
+            )
+        }
+    }
+
+    private fun TenantRole.toTenantRoleContext(): TenantRoleContext {
+        return TenantRoleContext(
             name = this.name,
             code = this.code,
             description = this.description,
-            permissions = this.permissions.map { it.toPermissionDTO() }.toList()
+            permissions = this.tenantPermissions.map { it.toTenantPermissionContext() }.toList()
         )
     }
 
-    private fun Permission.toPermissionDTO(): PermissionDTO {
-        return PermissionDTO(
+    private fun TenantPermission.toTenantPermissionContext(): TenantPermissionContext {
+        return TenantPermissionContext(
+            name = this.name,
+            code = this.code,
+            description = this.description
+        )
+    }
+
+    private fun Role.toRoleContext(): RoleContext {
+        return RoleContext(
+            name = this.name,
+            code = this.code,
+            description = this.description,
+            permissions = this.permissions.map { it.toPermissionContext() }.toList()
+        )
+    }
+
+    private fun Permission.toPermissionContext(): PermissionContext {
+        return PermissionContext(
             name = this.name,
             code = this.code,
             description = this.description
