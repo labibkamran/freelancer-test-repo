@@ -5,15 +5,14 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.annotation.CreatedBy
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
 import java.time.Instant
 
 @Entity
 @Table(name = "companies")
 @EntityListeners(AuditingEntityListener::class)
-open class Company {
+open class Company : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +22,7 @@ open class Company {
     @Column(name = "tenant_id", nullable = false, updatable = false, insertable = false)
     open val tenantId: Long = -1
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "tenant_id", nullable = false)
     open lateinit var tenant: Tenant
 
