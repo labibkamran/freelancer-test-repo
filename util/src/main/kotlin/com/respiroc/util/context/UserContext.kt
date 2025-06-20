@@ -1,4 +1,4 @@
-package com.respiroc.util.dto
+package com.respiroc.util.context
 
 data class UserContext(
     val email: String,
@@ -6,5 +6,6 @@ data class UserContext(
     val isEnabled: Boolean,
     val isLocked: Boolean,
     val currentTenant: TenantContext?,
-    val roles: List<RoleDTO>,
+    val tenants: List<TenantContext>,
+    val roles: List<RoleContext>,
 )

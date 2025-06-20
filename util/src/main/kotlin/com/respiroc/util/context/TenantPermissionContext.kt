@@ -1,6 +1,7 @@
-package com.respiroc.util.dto
+package com.respiroc.util.context
 
-data class TenantPermissionDTO(
+data class TenantPermissionContext(
     val name: String,
     val code: String,
-    val description: String)
+    val description: String
+)

@@ -1,6 +1,6 @@
-package com.respiroc.util.dto
+package com.respiroc.util.context
 
 data class TenantContext(
     val id: Long,
-    val roles: List<TenantRoleDTO>
+    val roles: List<TenantRoleContext>
 )

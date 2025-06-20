@@ -1,39 +1,39 @@
-package com.respiroc.util.dto
+package com.respiroc.util.context
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import java.util.stream.Collectors
 
-class SpringUser(val user: UserContext) : User(
-    user.email,
-    user.password,
-    user.isEnabled,
+class SpringUser(val ctx: UserContext) : User(
+    ctx.email,
+    ctx.password,
+    ctx.isEnabled,
     true,
     true,
-    !user.isLocked,
-    mapToGrantedAuthorities(user.roles, user.currentTenant?.roles)
+    !ctx.isLocked,
+    mapToGrantedAuthorities(ctx.roles, ctx.currentTenant?.roles)
 ) {
     companion object {
 
         private fun mapToGrantedAuthorities(
-            roles: Collection<RoleDTO>,
-            tenantRoles: Collection<TenantRoleDTO>?
+            roles: Collection<RoleContext>,
+            tenantRoles: Collection<TenantRoleContext>?
         ): List<GrantedAuthority> {
             val authorities: MutableList<GrantedAuthority> = ArrayList()
 
             authorities.addAll(
                 roles.stream()
-                    .flatMap { role: RoleDTO -> role.permissions.stream() }
-                    .map { permission: PermissionDTO -> SimpleGrantedAuthority(permission.code) }
+                    .flatMap { role: RoleContext -> role.permissions.stream() }
+                    .map { permission: PermissionContext -> SimpleGrantedAuthority(permission.code) }
                     .collect(Collectors.toList<GrantedAuthority>())
             )
 
             if (tenantRoles != null) {
                 authorities.addAll(
                     tenantRoles.stream()
-                        .flatMap { role: TenantRoleDTO -> role.permissions.stream() }
-                        .map { permission: TenantPermissionDTO -> SimpleGrantedAuthority(permission.code) }
+                        .flatMap { role: TenantRoleContext -> role.permissions.stream() }
+                        .map { permission: TenantPermissionContext -> SimpleGrantedAuthority(permission.code) }
                         .collect(Collectors.toList<GrantedAuthority>())
                 )
             }

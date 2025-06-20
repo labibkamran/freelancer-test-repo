@@ -1,8 +1,8 @@
-package com.respiroc.util.dto
+package com.respiroc.util.context
 
-data class RoleDTO(
+data class RoleContext(
     val name: String,
     val code: String,
     val description: String,
-    val permissions: List<PermissionDTO>
+    val permissions: List<PermissionContext>
 )
