@@ -38,6 +38,8 @@ class WebSecurityConfig {
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers("/").permitAll()
+                    .requestMatchers("/auth/login").permitAll()
+                    .requestMatchers("/auth/signup").permitAll()
                     .requestMatchers("/api/auth/login").permitAll()
                     .requestMatchers("/api/auth/signup").permitAll()
                     .requestMatchers("/test/**").permitAll()
@@ -50,7 +52,7 @@ class WebSecurityConfig {
             }
             .cors { }
             .csrf { it.disable() }
-            .httpBasic{ it.disable() }
+            .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .addFilterBefore(
                 BearerTokenAuthenticationFilter(userApi),
@@ -83,17 +85,35 @@ class WebSecurityConfig {
     class BearerTokenAuthenticationFilter(private val userApi: UserInternalApi) : OncePerRequestFilter() {
         override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
             if (SecurityContextHolder.getContext().authentication == null) {
-                val authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION)
-                var token = if (StringUtils.isNotEmpty(authorizationHeader)) authorizationHeader else ""
-                token = StringUtils.removeStart(token, "Bearer").trim()
+                var token = ""
 
-                val user = userApi.findByToken(token)
-                if (user != null) {
-                    val userDetails: UserDetails = SpringUser(user)
-                    val usernamePasswordAuthenticationToken =
-                        UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-                    usernamePasswordAuthenticationToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-                    SecurityContextHolder.getContext().authentication = usernamePasswordAuthenticationToken
+                // Check Authorization header first (for API calls)
+                val authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION)
+                if (StringUtils.isNotEmpty(authorizationHeader)) {
+                    token = StringUtils.removeStart(authorizationHeader, "Bearer").trim()
+                }
+
+                // If no token in header, check JWT cookie (for web app)
+                if (StringUtils.isEmpty(token)) {
+                    val cookies = request.cookies
+                    if (cookies != null) {
+                        val jwtCookie = cookies.find { it.name == "jwt_token" }
+                        if (jwtCookie != null && StringUtils.isNotEmpty(jwtCookie.value)) {
+                            token = jwtCookie.value
+                        }
+                    }
+                }
+
+                if (StringUtils.isNotEmpty(token)) {
+                    val user = userApi.findByToken(token)
+                    if (user != null) {
+                        val userDetails: UserDetails = SpringUser(user)
+                        val usernamePasswordAuthenticationToken =
+                            UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+                        usernamePasswordAuthenticationToken.details =
+                            WebAuthenticationDetailsSource().buildDetails(request)
+                        SecurityContextHolder.getContext().authentication = usernamePasswordAuthenticationToken
+                    }
                 }
             }
             chain.doFilter(request, response)
