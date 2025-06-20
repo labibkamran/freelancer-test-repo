@@ -1,8 +1,8 @@
 package com.respiroc.webapp.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.respiroc.util.dto.UserContext
-import com.respiroc.util.dto.SpringUser
+import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.SpringUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -21,6 +21,6 @@ open class BaseController {
     }
 
     fun user(): UserContext {
-        return springUser().user
+        return springUser().ctx
     }
 }

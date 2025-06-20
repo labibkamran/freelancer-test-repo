@@ -1,0 +1,10 @@
+### Create Company
+POST http://localhost:8080/api/companies
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzUwNDE0NzU1LCJleHAiOjE3NTA1MDExNTV9.-nb1jzuI6X0uW7mKPjq9URb9MbVQzWj27x3KjYjX-eY_rIGtbkLpyvp_LEdkgY9y
+
+{
+  "name": "Test",
+  "organizationNumber": "123132",
+  "countryCode": "NO"
+}
