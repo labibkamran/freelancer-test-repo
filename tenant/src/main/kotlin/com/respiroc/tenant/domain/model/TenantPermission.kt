@@ -4,11 +4,12 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.io.Serializable
 import java.time.Instant
 
 @Entity
 @Table(name = "tenant_permissions")
-open class TenantPermission {
+open class TenantPermission : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

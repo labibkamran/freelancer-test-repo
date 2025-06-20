@@ -5,11 +5,12 @@ import com.respiroc.tenant.domain.model.TenantRole
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.io.Serializable
 import java.time.Instant
 
 @Entity
 @Table(name = "user_tenant_roles")
-open class UserTenantRole {
+open class UserTenantRole : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

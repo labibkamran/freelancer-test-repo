@@ -4,15 +4,14 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.annotation.CreatedBy
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
 import java.time.Instant
 
 @Entity
 @Table(name = "tenants")
 @EntityListeners(AuditingEntityListener::class)
-open class Tenant {
+open class Tenant : Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
