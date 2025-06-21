@@ -1,4 +1,4 @@
-package com.respiroc.webapp.controller
+package com.respiroc.webapp.controller.rest
 
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.companylookup.domain.model.CompanyInfo
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/companies")
-class CompanyController(
+class CompanyLookupController(
     private val companyLookupApi: CompanyLookupInternalApi
 ) {
 
