@@ -16,7 +16,7 @@
                         <h1 class="h3 mb-2">
                             📊 Dashboard
                             <span th:if="${currentTenantId}" class="text-muted small">
-                                (Company ID: <span th:text="${currentTenantId}">23</span>)
+                                Company name: <span th:text="${currentTenantId}">23</span>
                             </span>
                         </h1>
                         <p class="text-muted mb-0">
@@ -27,17 +27,6 @@
             </div>
         </div>
 
-        <!-- Cash Flow Alert -->
-        <div class="row" th:if="${showCashFlowAlert}">
-            <div class="col">
-                <wa-alert variant="warning" open>
-                    <wa-icon slot="icon" name="exclamation-triangle"></wa-icon>
-                    <strong>Cash Flow Alert</strong><br>
-                    Your cash flow is projected to be low next month. Consider following up on pending invoices.
-                    <!-- TODO: Link to cash flow management -->
-                </wa-alert>
-            </div>
-        </div>
     </div>
 </main>
 
