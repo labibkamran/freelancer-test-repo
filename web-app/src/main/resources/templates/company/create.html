@@ -21,53 +21,57 @@
         <!-- Company Search -->
         <div class="row">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">🔍 Company Search</h5>
+                <wa-card>
+                    <div slot="header">
+                        <h5 style="margin: 0; display: flex; align-items: center;">
+                            🔍 Company Search
+                        </h5>
                     </div>
-                    <div class="card-body">
+                    <div style="padding: 1.5rem;">
                         <!-- Search Form -->
                         <form id="companySearchForm">
-                            <div class="mb-3">
-                                <label for="searchQuery" class="form-label">
+                            <div style="margin-bottom: 1rem;">
+                                <label for="searchQuery" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                                     Company Name or Organization Number
                                 </label>
-                                <input type="text" 
-                                       class="form-control form-control-lg" 
-                                       id="searchQuery" 
-                                       name="searchQuery" 
-                                       placeholder="Enter company name or organization number"
-                                       required>
+                                <wa-input 
+                                    id="searchQuery" 
+                                    name="searchQuery" 
+                                    placeholder="Enter company name or organization number"
+                                    size="large"
+                                    required>
+                                </wa-input>
                             </div>
-                            <button type="submit" class="btn btn-primary" id="searchButton">
+                            <wa-button type="submit" variant="primary" size="large" id="searchButton">
                                 🔍 Search Company
-                            </button>
+                            </wa-button>
                         </form>
 
                         <!-- Search Results -->
-                        <div id="searchResults" class="mt-4" style="display: none;"></div>
+                        <div id="searchResults" style="margin-top: 1.5rem; display: none;"></div>
                     </div>
-                </div>
+                </wa-card>
             </div>
 
             <!-- Help Card -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">💡 Help</h5>
+                <wa-card>
+                    <div slot="header">
+                        <h5 style="margin: 0;">💡 Help</h5>
                     </div>
-                    <div class="card-body">
-                        <p class="mb-3">You can search for companies by:</p>
-                        <ul class="mb-3">
+                    <div style="padding: 1.5rem;">
+                        <p style="margin-bottom: 1rem;">You can search for companies by:</p>
+                        <ul style="margin-bottom: 1rem; padding-left: 1.5rem;">
                             <li>Full company name</li>
                             <li>Partial company name</li>
                             <li>Organization number (9 digits)</li>
                         </ul>
-                        <p class="text-muted small">
+                        <wa-alert variant="primary" open>
+                            <wa-icon slot="icon" name="info-circle"></wa-icon>
                             <strong>Note:</strong> Only Norwegian companies registered in Brønnøysundregistrene are available.
-                        </p>
+                        </wa-alert>
                     </div>
-                </div>
+                </wa-card>
             </div>
         </div>
     </div>
@@ -84,13 +88,12 @@
             }
             
             const searchButton = document.getElementById('searchButton');
-            const originalText = searchButton.innerHTML;
             
             // Show loading state
             searchButton.disabled = true;
-            searchButton.innerHTML = '<div class="spinner" style="width: 1rem; height: 1rem; margin-right: 0.5rem;"></div> Searching...';
+            searchButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Searching...';
             
-            // Simulate API call (replace with actual HTMX call when backend is ready)
+            // TODO: Replace with actual HTMX call when backend is ready
             setTimeout(() => {
                 // Mock search results
                 const mockResults = [
@@ -102,7 +105,7 @@
                     },
                     {
                         name: "Test Company AS",
-                        organizationNumber: "987654321",
+                        organizationNumber: "987654321", 
                         address: "Test Street 2, 0456 Bergen",
                         status: "Active"
                     }
@@ -112,7 +115,7 @@
                 
                 // Reset button
                 searchButton.disabled = false;
-                searchButton.innerHTML = originalText;
+                searchButton.innerHTML = '🔍 Search Company';
             }, 1500);
         });
         
@@ -121,36 +124,42 @@
             
             if (results.length === 0) {
                 resultsContainer.innerHTML = `
-                    <div class="alert alert-info">
+                    <wa-alert variant="neutral" open>
+                        <wa-icon slot="icon" name="search"></wa-icon>
                         <strong>No companies found</strong><br>
                         Try searching with a different name or organization number.
-                    </div>
+                    </wa-alert>
                 `;
                 resultsContainer.style.display = 'block';
                 return;
             }
             
             const resultsHtml = `
-                <h6 class="mb-3">Search Results (${results.length} found)</h6>
-                <div class="list-group">
+                <h6 style="margin-bottom: 1rem; display: flex; align-items: center;">
+                    📋 Search Results 
+                    <wa-tag variant="primary" size="small" style="margin-left: 1rem;">${results.length} found</wa-tag>
+                </h6>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
                     ${results.map(company => `
-                        <div class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">${company.name}</h6>
-                                    <p class="mb-1 text-muted">${company.address}</p>
-                                    <small class="text-muted">Org. Nr: ${company.organizationNumber}</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge ${company.status === 'Active' ? 'bg-success' : 'bg-secondary'} mb-2">
-                                        ${company.status}
-                                    </span><br>
-                                    <button class="btn btn-sm btn-primary" onclick="selectCompany('${company.organizationNumber}', '${company.name}')">
-                                        ✅ Select
-                                    </button>
+                        <wa-card style="border: 1px solid #e2e8f0;">
+                            <div style="padding: 1rem;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="flex-grow: 1;">
+                                        <h6 style="margin-bottom: 0.5rem; font-weight: 600;">${company.name}</h6>
+                                        <p style="margin-bottom: 0.5rem; color: #6b7280;">📍 ${company.address}</p>
+                                        <small style="color: #6b7280;">🏢 Org. Nr: ${company.organizationNumber}</small>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <wa-tag variant="${company.status === 'Active' ? 'success' : 'neutral'}" size="small" style="margin-bottom: 1rem;">
+                                            ${company.status === 'Active' ? '✅' : '⏸️'} ${company.status}
+                                        </wa-tag><br>
+                                        <wa-button variant="primary" size="small" onclick="selectCompany('${company.organizationNumber}', '${company.name}')">
+                                            ✅ Select This Company
+                                        </wa-button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </wa-card>
                     `).join('')}
                 </div>
             `;
@@ -160,20 +169,35 @@
         }
         
         function selectCompany(orgNumber, companyName) {
-            if (confirm(`Create company "${companyName}" (${orgNumber})?`)) {
-                // Show loading state
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.disabled = true;
-                button.innerHTML = '<div class="spinner" style="width: 0.8rem; height: 0.8rem;"></div>';
+            // Show confirmation dialog
+            const confirmed = confirm(`Create company "${companyName}" (${orgNumber})?`);
+            if (!confirmed) return;
+            
+            // Show loading state
+            const button = event.target;
+            button.disabled = true;
+            button.innerHTML = '<wa-spinner></wa-spinner> Creating...';
+            
+            // TODO: Replace with actual API call to create company
+            setTimeout(() => {
+                // Show success message
+                const successHtml = `
+                    <wa-alert variant="success" open style="margin-top: 1rem;">
+                        <wa-icon slot="icon" name="check-circle"></wa-icon>
+                        <strong>Success!</strong> Company "${companyName}" created successfully!
+                        <br><small>Redirecting to dashboard...</small>
+                    </wa-alert>
+                `;
                 
-                // Simulate company creation (replace with actual API call)
+                document.getElementById('searchResults').innerHTML += successHtml;
+                
+                // Redirect to dashboard with the new company
                 setTimeout(() => {
-                    alert(`Company "${companyName}" created successfully!`);
-                    // Redirect to dashboard
-                    window.location.href = '/dashboard';
-                }, 1000);
-            }
+                    // TODO: Use actual company ID from API response
+                    const newTenantId = Math.floor(Math.random() * 1000) + 100;
+                    window.location.href = `/dashboard?tenantId=${newTenantId}`;
+                }, 2000);
+            }, 1000);
         }
     </script>
 </th:block>
