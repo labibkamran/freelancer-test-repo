@@ -19,9 +19,6 @@ class AuthController(
     @PostMapping(value = ["/signup"])
     fun signup(@RequestBody request: SignupRequest): ResponseEntity<SignupResponse> {
         // TODO: Validate request data
-        if (request.password != request.confirmPassword) {
-            throw IllegalArgumentException("Passwords don't match")
-        }
         val result = userApi.signupByEmailPassword(request.email, request.password)
         return ResponseEntity.ok(SignupResponse(result.token))
     }

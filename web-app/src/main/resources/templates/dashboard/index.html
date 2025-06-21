@@ -10,165 +10,47 @@
     <div class="container py-4">
         <!-- Welcome Header -->
         <div class="row mb-4">
-            <div class="col-12">
+            <div class="col">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h1 class="h3 mb-1">
-                            <i class="fa-solid fa-house me-2 text-primary"></i>
-                            Dashboard
+                        <h1 class="h3 mb-2">
+                            🏠 Dashboard
                         </h1>
                         <p class="text-muted mb-0">
                             Welcome, <span class="fw-bold" th:text="${user.email}">User</span>
                         </p>
                     </div>
-                    <div class="text-end">
-                        <span class="badge bg-success">
-                            <i class="fa-solid fa-circle me-1"></i>
-                            Online
-                        </span>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
+        <!-- Main Actions -->
         <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <i class="fa-solid fa-building fa-2x text-primary"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Companies</h5>
-                        <h3 class="text-primary mb-0" id="companiesCount">
-                            <span class="spinner-border spinner-border-sm" role="status"></span>
-                        </h3>
-                        <small class="text-muted">Registered companies</small>
+            <!-- Create Company Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card" style="height: 200px;">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🏢</div>
+                        <h5 class="mb-3">Create New Company</h5>
+                        <p class="text-muted mb-3">Start by creating your first company</p>
+                        <a href="/companies/create" class="btn btn-primary">
+                            ➕ Create Company
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <i class="fa-solid fa-receipt fa-2x text-success"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Invoices</h5>
-                        <h3 class="text-success mb-0">0</h3>
-                        <small class="text-muted">This month</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <i class="fa-solid fa-users fa-2x text-info"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Customers</h5>
-                        <h3 class="text-info mb-0">0</h3>
-                        <small class="text-muted">Active customers</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <i class="fa-solid fa-chart-line fa-2x text-warning"></i>
-                        </div>
-                        <h5 class="card-title mb-2">Revenue</h5>
-                        <h3 class="text-warning mb-0">$0</h3>
-                        <small class="text-muted">This month</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
+            
+            <!-- Companies List Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card" style="height: 200px;">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fa-solid fa-bolt me-2"></i>
-                            Quick Actions
+                        <h5 class="mb-0">
+                            🏢 Your Companies
                         </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <a href="/companies/create" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                    <i class="fa-solid fa-plus-circle fa-2x mb-2"></i>
-                                    <span>Create New Company</span>
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <a href="/invoices/create" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                    <i class="fa-solid fa-file-invoice fa-2x mb-2"></i>
-                                    <span>Create Invoice</span>
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <a href="/customers/create" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                    <i class="fa-solid fa-user-plus fa-2x mb-2"></i>
-                                    <span>Add Customer</span>
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <a href="/reports" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                    <i class="fa-solid fa-chart-bar fa-2x mb-2"></i>
-                                    <span>View Reports</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activities & Companies -->
-        <div class="row">
-            <div class="col-lg-8 mb-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                            Recent Activities
-                        </h5>
-                        <a href="/activities" class="btn btn-sm btn-outline-primary">
-                            View All
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center py-4">
-                            <i class="fa-solid fa-history fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No activities recorded yet</p>
-                            <small class="text-muted">Your activities will appear here as you start using the system</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="fa-solid fa-building me-2"></i>
-                            Your Companies
-                        </h5>
-                        <a href="/companies" class="btn btn-sm btn-outline-primary">
-                            View All
-                        </a>
                     </div>
                     <div class="card-body" id="companiesList">
                         <div class="text-center py-3">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
+                            <div class="spinner"></div>
                             <p class="text-muted mt-2 mb-0">Loading companies...</p>
                         </div>
                     </div>
@@ -176,63 +58,25 @@
             </div>
         </div>
 
-        <!-- Getting Started Guide -->
-        <div class="row" id="gettingStartedGuide">
-            <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fa-solid fa-rocket me-2"></i>
-                            Getting Started Guide
+        <!-- Getting Started Message -->
+        <div class="row" th:if="${companies == null or companies.isEmpty()}">
+            <div class="col">
+                <div class="card" style="border-color: var(--primary-color);">
+                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                        <h5 class="mb-0">
+                            🚀 Getting Started
                         </h5>
                     </div>
                     <div class="card-body">
-                        <p class="mb-3">Follow these steps to get started with the accounting system:</p>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; font-size: 14px;">
-                                        1
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Create Company</h6>
-                                        <small class="text-muted">Register your first company</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-success rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; font-size: 14px;">
-                                        2
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Setup Profile</h6>
-                                        <small class="text-muted">Complete your profile information</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-warning rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; font-size: 14px;">
-                                        3
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Start Working</h6>
-                                        <small class="text-muted">Create your first invoice</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <a href="/companies/create" class="btn btn-primary me-2">
-                                <i class="fa-solid fa-plus me-1"></i>
-                                Create Company
-                            </a>
-                            <button type="button" class="btn btn-outline-secondary" onclick="dismissGettingStarted()">
-                                <i class="fa-solid fa-times me-1"></i>
-                                Hide Guide
-                            </button>
-                        </div>
+                        <p class="mb-3">Welcome to your accounting system! To get started:</p>
+                        <ol class="mb-3">
+                            <li>Create your first company using the button above</li>
+                            <li>Once created, you'll be taken to the company dashboard</li>
+                            <li>Start adding transactions and managing your accounting</li>
+                        </ol>
+                        <p class="text-muted mb-0">
+                            💡 <strong>Tip:</strong> You can create multiple companies and switch between them easily.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -242,101 +86,21 @@
 
 <th:block layout:fragment="scripts">
     <script>
-        // Load companies count and list
+        // Load companies list on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadCompaniesData();
+            // Simulate loading companies (replace with actual HTMX call when backend is ready)
+            setTimeout(function() {
+                const companiesContainer = document.getElementById('companiesList');
+                
+                // For now, show empty state
+                companiesContainer.innerHTML = `
+                    <div class="text-center py-2">
+                        <p class="text-muted mb-2">No companies yet</p>
+                        <small class="text-muted">Create your first company to get started</small>
+                    </div>
+                `;
+            }, 1000);
         });
-
-        function loadCompaniesData() {
-            // Load companies count
-            fetch('/api/companies', {
-                headers: {
-                    'Authorization': 'Bearer ' + getAuthToken()
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('companiesCount').textContent = data.length;
-                renderCompaniesList(data);
-            })
-            .catch(error => {
-                console.error('Error loading companies:', error);
-                document.getElementById('companiesCount').textContent = '0';
-                renderEmptyCompaniesList();
-            });
-        }
-
-        function renderCompaniesList(companies) {
-            const companiesList = document.getElementById('companiesList');
-            
-            if (companies.length === 0) {
-                renderEmptyCompaniesList();
-                return;
-            }
-
-            const html = companies.slice(0, 3).map(company => `
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-0">${company.name}</h6>
-                        <small class="text-muted">${company.organizationNumber}</small>
-                    </div>
-                    <div>
-                        <span class="badge bg-light text-dark">${company.countryCode}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            companiesList.innerHTML = html;
-            
-            // Hide getting started guide if user has companies
-            if (companies.length > 0) {
-                const guide = document.getElementById('gettingStartedGuide');
-                if (guide) {
-                    guide.style.display = 'none';
-                }
-            }
-        }
-
-        function renderEmptyCompaniesList() {
-            const companiesList = document.getElementById('companiesList');
-            companiesList.innerHTML = `
-                <div class="text-center py-3">
-                    <i class="fa-solid fa-building fa-2x text-muted mb-2"></i>
-                    <p class="text-muted mb-2">No companies registered yet</p>
-                    <a href="/companies/create" class="btn btn-sm btn-primary">
-                        <i class="fa-solid fa-plus me-1"></i>
-                        Create First Company
-                    </a>
-                </div>
-            `;
-        }
-
-        function dismissGettingStarted() {
-            const guide = document.getElementById('gettingStartedGuide');
-            guide.style.display = 'none';
-            
-            // Store in localStorage
-            localStorage.setItem('gettingStartedDismissed', 'true');
-        }
-
-        function getAuthToken() {
-            // This should return the JWT token from wherever it's stored
-            // For now, return empty string - will be implemented with proper auth
-            return '';
-        }
-
-        // Check if getting started guide should be hidden
-        if (localStorage.getItem('gettingStartedDismissed') === 'true') {
-            document.addEventListener('DOMContentLoaded', function() {
-                const guide = document.getElementById('gettingStartedGuide');
-                if (guide) {
-                    guide.style.display = 'none';
-                }
-            });
-        }
     </script>
 </th:block>
 </body>

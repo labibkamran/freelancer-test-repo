@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Create Company</title>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-2">
+                    ➕ Create New Company
+                </h1>
+                <p class="text-muted">Search for your company in the Norwegian business registry</p>
+            </div>
+        </div>
+
+        <!-- Company Search -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">🔍 Company Search</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Search Form -->
+                        <form id="companySearchForm">
+                            <div class="mb-3">
+                                <label for="searchQuery" class="form-label">
+                                    Company Name or Organization Number
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="searchQuery" 
+                                       name="searchQuery" 
+                                       placeholder="Enter company name or organization number"
+                                       required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="searchButton">
+                                🔍 Search Company
+                            </button>
+                        </form>
+
+                        <!-- Search Results -->
+                        <div id="searchResults" class="mt-4" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">💡 Help</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-3">You can search for companies by:</p>
+                        <ul class="mb-3">
+                            <li>Full company name</li>
+                            <li>Partial company name</li>
+                            <li>Organization number (9 digits)</li>
+                        </ul>
+                        <p class="text-muted small">
+                            <strong>Note:</strong> Only Norwegian companies registered in Brønnøysundregistrene are available.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.getElementById('companySearchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const searchQuery = document.getElementById('searchQuery').value.trim();
+            if (!searchQuery) {
+                return;
+            }
+            
+            const searchButton = document.getElementById('searchButton');
+            const originalText = searchButton.innerHTML;
+            
+            // Show loading state
+            searchButton.disabled = true;
+            searchButton.innerHTML = '<div class="spinner" style="width: 1rem; height: 1rem; margin-right: 0.5rem;"></div> Searching...';
+            
+            // Simulate API call (replace with actual HTMX call when backend is ready)
+            setTimeout(() => {
+                // Mock search results
+                const mockResults = [
+                    {
+                        name: "Example AS",
+                        organizationNumber: "123456789",
+                        address: "Example Street 1, 0123 Oslo",
+                        status: "Active"
+                    },
+                    {
+                        name: "Test Company AS",
+                        organizationNumber: "987654321",
+                        address: "Test Street 2, 0456 Bergen",
+                        status: "Active"
+                    }
+                ];
+                
+                displaySearchResults(mockResults);
+                
+                // Reset button
+                searchButton.disabled = false;
+                searchButton.innerHTML = originalText;
+            }, 1500);
+        });
+        
+        function displaySearchResults(results) {
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>No companies found</strong><br>
+                        Try searching with a different name or organization number.
+                    </div>
+                `;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+            
+            const resultsHtml = `
+                <h6 class="mb-3">Search Results (${results.length} found)</h6>
+                <div class="list-group">
+                    ${results.map(company => `
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${company.name}</h6>
+                                    <p class="mb-1 text-muted">${company.address}</p>
+                                    <small class="text-muted">Org. Nr: ${company.organizationNumber}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge ${company.status === 'Active' ? 'bg-success' : 'bg-secondary'} mb-2">
+                                        ${company.status}
+                                    </span><br>
+                                    <button class="btn btn-sm btn-primary" onclick="selectCompany('${company.organizationNumber}', '${company.name}')">
+                                        ✅ Select
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+        }
+        
+        function selectCompany(orgNumber, companyName) {
+            if (confirm(`Create company "${companyName}" (${orgNumber})?`)) {
+                // Show loading state
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner" style="width: 0.8rem; height: 0.8rem;"></div>';
+                
+                // Simulate company creation (replace with actual API call)
+                setTimeout(() => {
+                    alert(`Company "${companyName}" created successfully!`);
+                    // Redirect to dashboard
+                    window.location.href = '/dashboard';
+                }, 1000);
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html> 

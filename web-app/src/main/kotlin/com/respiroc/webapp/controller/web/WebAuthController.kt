@@ -68,11 +68,6 @@ class WebAuthController(
         redirectAttributes: RedirectAttributes
     ): String {
         try {
-            if (signupRequest.password != signupRequest.confirmPassword) {
-                redirectAttributes.addFlashAttribute("error", "Passwords do not match")
-                return "redirect:/auth/signup"
-            }
-            
             val result = userApi.signupByEmailPassword(
                 signupRequest.email,
                 signupRequest.password

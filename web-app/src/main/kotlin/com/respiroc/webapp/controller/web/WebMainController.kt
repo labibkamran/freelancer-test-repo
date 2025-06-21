@@ -23,4 +23,15 @@ class WebMainController : BaseController() {
         }
         return "dashboard/index"
     }
+
+    @GetMapping("/companies/create")
+    fun createCompany(model: Model): String {
+        try {
+            val currentUser = user()
+            model.addAttribute("user", currentUser)
+        } catch (e: Exception) {
+            return "redirect:/auth/login"
+        }
+        return "company/create"
+    }
 } 
