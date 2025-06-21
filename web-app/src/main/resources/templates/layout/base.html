@@ -460,6 +460,13 @@
         .main-wrapper.sidebar-collapsed {
             margin-left: 0;
         }
+        
+        /* Auth Content Area */
+        .auth-wrapper {
+            margin-left: 0;
+            min-height: 100vh;
+            width: 100%;
+        }
 
         /* Top Navigation adjustments */
         .navbar {
@@ -675,8 +682,8 @@
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <!-- Main Content Wrapper -->
-    <div class="main-wrapper" id="mainWrapper">
+    <!-- Main Content Wrapper - Only for authenticated users -->
+    <div class="main-wrapper" id="mainWrapper" th:if="${user != null}">
         <!-- Top Navigation (only show if authenticated) -->
         <nav class="navbar" th:if="${user != null}">
             <div class="container">
@@ -766,6 +773,14 @@
                 </p>
             </div>
         </footer>
+    </div>
+    
+    <!-- Auth Content Wrapper - Only for non-authenticated users -->
+    <div class="auth-wrapper" th:if="${user == null}">
+        <!-- Main Content -->
+        <main layout:fragment="content">
+            <!-- Page content will be inserted here -->
+        </main>
     </div>
 
     <!-- HTMX Extensions -->
