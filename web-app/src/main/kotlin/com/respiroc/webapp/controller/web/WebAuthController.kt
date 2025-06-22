@@ -16,6 +16,8 @@ class WebAuthController(
     private val userApi: UserInternalApi
 ) : BaseController() {
 
+    private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
+
     @GetMapping("/login")
     fun loginPage(): String {
         // If user is already authenticated, redirect to dashboard
@@ -24,7 +26,7 @@ class WebAuthController(
             if (currentUser != null) {
                 return "redirect:/dashboard"
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // User not authenticated, continue to login page
         }
         return "auth/login"
@@ -47,11 +49,11 @@ class WebAuthController(
             jwtCookie.isHttpOnly = true
             jwtCookie.secure = false // Set to true in production with HTTPS
             jwtCookie.path = "/"
-            jwtCookie.maxAge = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
+            jwtCookie.maxAge = JWT_TOKEN_PERIOD
             response.addCookie(jwtCookie)
             
             return "redirect:/dashboard"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             redirectAttributes.addFlashAttribute("error", "Invalid email or password")
             return "redirect:/auth/login"
         }
@@ -59,6 +61,15 @@ class WebAuthController(
 
     @GetMapping("/signup")
     fun signupPage(): String {
+        // If user is already authenticated, redirect to dashboard
+        try {
+            val currentUser = user()
+            if (currentUser != null) {
+                return "redirect:/dashboard"
+            }
+        } catch (_: Exception) {
+            // User not authenticated, continue to signup page
+        }
         return "auth/signup"
     }
 
@@ -68,7 +79,7 @@ class WebAuthController(
         redirectAttributes: RedirectAttributes
     ): String {
         try {
-            val result = userApi.signupByEmailPassword(
+            userApi.signupByEmailPassword(
                 signupRequest.email,
                 signupRequest.password
             )

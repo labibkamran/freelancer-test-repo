@@ -51,7 +51,7 @@ class UserService(
 
     private val JWT_TOKEN_PERIOD : Long = 24 * 60 * 60 * 1000
 
-    override fun signupByEmailPassword(email: String, password: String): SignupResult {
+    override fun signupByEmailPassword(email: String, password: String) {
         val existUser = userRepository.findByEmail(email)
         if (existUser != null) {
             throw IllegalArgumentException("User already exists")
@@ -60,8 +60,7 @@ class UserService(
         val newUser = User()
         newUser.email = email
         newUser.passwordHash = passwordEncoder.encode(password)
-
-        return signup(newUser)
+        signup(newUser)
     }
 
     override fun loginByEmailPassword(
@@ -136,24 +135,8 @@ class UserService(
     // Private Helper
     // ---------------------------------
 
-    private fun signup(user: User) : SignupResult {
+    private fun signup(user: User) {
         val savedUser: User = userRepository.saveAndFlush(user)
-        val springUser = SpringUser(savedUser.toUserContext())
-        AccountStatusUserDetailsChecker().check(springUser)
-
-        val token = jwt.generateToken(springUser.username, JWT_TOKEN_PERIOD)
-
-        val userSession = UserSession()
-        userSession.user = savedUser
-        userSession.token = token
-        userSession.tokenIssueAt = Instant.now()
-        userSession.tokenExpireAt = Instant.now().plus(30, ChronoUnit.DAYS)
-        userSessionRepository.save(userSession)
-
-        savedUser.lastLoginAt = Instant.now()
-        userRepository.save(savedUser)
-
-        return SignupResult(token, springUser)
     }
 
     private fun login(user: User) : LoginResult {

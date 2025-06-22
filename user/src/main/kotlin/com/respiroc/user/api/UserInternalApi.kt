@@ -9,7 +9,7 @@ import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 
 interface UserInternalApi {
-    fun signupByEmailPassword(email: String, password: String): SignupResult
+    fun signupByEmailPassword(email: String, password: String)
     fun loginByEmailPassword(email: String, password: String): LoginResult
     fun changePassword(user: SpringUser, oldPassword: String, newPassword: String)
     fun logout(token: String)

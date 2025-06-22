@@ -7,6 +7,7 @@ import com.respiroc.webapp.controller.request.SignupRequest
 import com.respiroc.webapp.controller.response.LoginResponse
 import com.respiroc.webapp.controller.response.MeResponse
 import com.respiroc.webapp.controller.response.SignupResponse
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -20,7 +21,7 @@ class AuthController(
     fun signup(@RequestBody request: SignupRequest): ResponseEntity<SignupResponse> {
         // TODO: Validate request data
         val result = userApi.signupByEmailPassword(request.email, request.password)
-        return ResponseEntity.ok(SignupResponse(result.token))
+        return ResponseEntity.status(HttpStatus.CREATED).body(SignupResponse("success"))
     }
 
     @PostMapping(value = ["/login"])
