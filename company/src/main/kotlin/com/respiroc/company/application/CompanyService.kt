@@ -30,6 +30,7 @@ class CompanyService(
         val company = Company()
         company.name = command.name
         company.tenant = tenant
+        company.tenantId = tenant.id
         company.organizationNumber = command.organizationNumber
         company.countryCode = command.countryCode
 

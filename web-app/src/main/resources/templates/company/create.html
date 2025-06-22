@@ -72,105 +72,102 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <wa-card>
-                    <div slot="header">
-                        <h5 style="margin: 0;">
-                            🏢 Company Information
-                        </h5>
-                    </div>
-                    <div style="padding: 2rem;">
-                        <form id="createCompanyForm">
-                            <!-- Company Name Field with Search -->
-                            <div class="form-group">
-                                <label for="companyName" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                    Company Name *
-                                </label>
-                                <wa-input 
-                                    id="companyName" 
-                                    name="companyName" 
+        <div>
+
+            <wa-card style="margin-bottom: 1rem;">
+                <div slot="header">
+                    <h5 style="margin: 0;">
+                        🏢 Company Information
+                    </h5>
+                </div>
+                <div style="padding: 2rem;">
+                    <form id="createCompanyForm">
+                        <!-- Company Name Field with Search -->
+                        <div class="form-group">
+                            <label for="companyName" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                Company Name *
+                            </label>
+                            <wa-input
+                                    id="companyName"
+                                    name="companyName"
                                     placeholder="Enter company name or search registry..."
                                     size="medium"
                                     required
                                     autocomplete="off">
-                                </wa-input>
-                                <wa-spinner id="nameSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
-                                <div id="nameDropdown" class="search-dropdown"></div>
-                            </div>
+                            </wa-input>
+                            <wa-spinner id="nameSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
+                            <div id="nameDropdown" class="search-dropdown"></div>
+                        </div>
 
-                            <!-- Organization Number Field with Search -->
-                            <div class="form-group">
-                                <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                    Organization Number *
-                                </label>
-                                <wa-input 
-                                    id="organizationNumber" 
-                                    name="organizationNumber" 
+                        <!-- Organization Number Field with Search -->
+                        <div class="form-group">
+                            <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                Organization Number *
+                            </label>
+                            <wa-input
+                                    id="organizationNumber"
+                                    name="organizationNumber"
                                     placeholder="Enter organization number..."
                                     size="medium"
                                     required
                                     autocomplete="off">
-                                </wa-input>
-                                <wa-spinner id="orgSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
-                                <div id="orgDropdown" class="search-dropdown"></div>
-                            </div>
+                            </wa-input>
+                            <wa-spinner id="orgSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
+                            <div id="orgDropdown" class="search-dropdown"></div>
+                        </div>
 
-                            <!-- Country Code Field -->
-                            <div class="form-group">
-                                <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                    Country *
-                                </label>
-                                <wa-select id="countryCode" name="countryCode" value="NO" required>
-                                    <wa-option value="NO">🇳🇴 Norway</wa-option>
-                                </wa-select>
-                                <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                                    Currently, only Norwegian companies are supported
-                                </small>
-                            </div>
+                        <!-- Country Code Field -->
+                        <div class="form-group">
+                            <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                Country *
+                            </label>
+                            <wa-select id="countryCode" name="countryCode" value="NO" required>
+                                <wa-option value="NO">🇳🇴 Norway</wa-option>
+                            </wa-select>
+                            <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
+                                Currently, only Norwegian companies are supported
+                            </small>
+                        </div>
 
-                            <!-- Submit Button -->
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <wa-button type="submit" variant="primary" size="medium" id="submitButton">
-                                    <wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>
-                                    Create Company
-                                </wa-button>
-                                <wa-button type="button" variant="neutral" size="medium" onclick="clearForm()">
-                                    Clear Form
-                                </wa-button>
-                            </div>
-                        </form>
-                    </div>
-                </wa-card>
-            </div>
+                        <!-- Submit Button -->
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <wa-button type="submit" variant="success" size="small" id="submitButton">
+                                <wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>
+                                Create Company
+                            </wa-button>
+                            <wa-button type="button" variant="neutral" size="small" onclick="clearForm()">
+                                Clear Form
+                            </wa-button>
+                        </div>
+                    </form>
+                </div>
+            </wa-card>
 
             <!-- Help Card -->
-            <div class="col-lg-4">
-                <wa-card>
-                    <div slot="header">
-                        <h5 style="margin: 0;">💡 Tips</h5>
-                    </div>
-                    <div style="padding: 1.5rem;">
-                        <h6>Smart Search Features:</h6>
-                        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.6;">
-                            <li>Type in the <strong>Company Name</strong> field to search for companies</li>
-                            <li>Enter an <strong>Organization Number</strong> to find exact matches</li>
-                            <li>Click on any suggestion to auto-fill the form</li>
-                            <li>If not found, you can manually enter the details</li>
-                        </ul>
-                        
-                        <wa-alert variant="primary" open>
-                            <wa-icon slot="icon" name="info-circle"></wa-icon>
-                            <strong>Registry Search:</strong> Data is fetched from Brønnøysundregistrene in real-time.
-                        </wa-alert>
-                        
-                        <wa-alert variant="warning" open style="margin-top: 1rem;">
-                            <wa-icon slot="icon" name="exclamation-triangle"></wa-icon>
-                            <strong>Note:</strong> All fields are required to create a company.
-                        </wa-alert>
-                    </div>
-                </wa-card>
-            </div>
+            <wa-card>
+                <div slot="header">
+                    <h5 style="margin: 0;">💡 Tips</h5>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <h6>Smart Search Features:</h6>
+                    <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.6;">
+                        <li>Type in the <strong>Company Name</strong> field to search for companies</li>
+                        <li>Enter an <strong>Organization Number</strong> to find exact matches</li>
+                        <li>Click on any suggestion to auto-fill the form</li>
+                        <li>If not found, you can manually enter the details</li>
+                    </ul>
+
+                    <wa-alert variant="primary" open>
+                        <wa-icon slot="icon" name="info-circle"></wa-icon>
+                        <strong>Registry Search:</strong> Data is fetched from Brønnøysundregistrene in real-time.
+                    </wa-alert>
+
+                    <wa-alert variant="warning" open style="margin-top: 1rem;">
+                        <wa-icon slot="icon" name="exclamation-triangle"></wa-icon>
+                        <strong>Note:</strong> All fields are required to create a company.
+                    </wa-alert>
+                </div>
+            </wa-card>
         </div>
     </div>
 </main>
