@@ -58,7 +58,7 @@ class WebSecurityConfig {
                 BearerTokenAuthenticationFilter(userApi),
                 UsernamePasswordAuthenticationFilter::class.java
             )
-            .addFilterBefore(
+            .addFilterAfter(
                 TenantIdFilter(),
                 BearerTokenAuthenticationFilter::class.java
             )
