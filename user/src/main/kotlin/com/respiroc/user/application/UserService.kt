@@ -3,11 +3,9 @@ package com.respiroc.user.application
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantPermission
 import com.respiroc.tenant.domain.model.TenantRole
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.user.api.UserInternalApi
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
-import com.respiroc.user.api.result.SignupResult
 import com.respiroc.user.application.jwt.JwtUtils
 import com.respiroc.user.domain.model.Permission
 import com.respiroc.user.domain.model.Role
@@ -164,19 +162,11 @@ class UserService(
             password = this.passwordHash,
             isEnabled = this.isEnabled,
             isLocked = this.isLocked,
-            currentTenant = this.getCurrentTenant(),
+            currentTenant = null, // Should be set on tenant filter process
             tenants = this.getTenantContexts(),
             roles = this.roles.map { it -> it.toRoleContext() }.toList()
         )
     }
-
-    private fun User.getCurrentTenant(): TenantContext? =
-        TenantContextHolder.getTenantId()?.let { tenantId ->
-            TenantContext(
-                tenantId,
-                rolesPerTenant[tenantId]?.map { it.toTenantRoleContext() } ?: emptyList()
-            )
-        }
 
     private fun User.getTenantContexts(): List<TenantContext> {
         return rolesPerTenant.map { (tenantId, tenantRoles) ->

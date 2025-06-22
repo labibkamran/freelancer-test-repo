@@ -42,7 +42,7 @@ class TenantIdFilter(
         }
 
         if (!tenantId.isNullOrBlank() && isTenantAccessibleByUser(tenantId)) {
-            TenantContextHolder.setTenantId(tenantId.toLong())
+            setCurrentTenant(tenantId)
         } else if (!tenantId.isNullOrBlank()) {
             // TODO: Use custom error for better visibility
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot access this resource")
@@ -58,5 +58,11 @@ class TenantIdFilter(
     private fun isTenantAccessibleByUser(tenantId: String): Boolean {
         val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
         return springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+    }
+
+    private fun setCurrentTenant(tenantId: String) {
+        TenantContextHolder.setTenantId(tenantId.toLong())
+        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
+        springUser.ctx.currentTenant = springUser.ctx.tenants.filter { it.id == tenantId.toLong() }.first()
     }
 }

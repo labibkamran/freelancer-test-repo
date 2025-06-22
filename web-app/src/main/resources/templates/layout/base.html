@@ -709,7 +709,6 @@
                             </wa-button>
                             
                             <wa-menu>
-                                <!-- TODO: Replace with actual company list -->
                                 <wa-menu-item th:each="company : ${companies}" 
                                              th:onclick="'switchCompany(' + ${company.id} + ')'"
                                              th:class="${currentCompany != null and currentCompany.id == company.id} ? 'selected' : ''">
@@ -717,22 +716,11 @@
                                     <span th:text="${company.name}">Company Name</span>
                                 </wa-menu-item>
                                 
-                                <!-- Hardcoded examples for now -->
-                                <wa-menu-item onclick="switchCompany(1)" class="selected">
-                                    <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
-                                    <span>Example Company AS</span>
-                                </wa-menu-item>
-                                
-                                <wa-menu-item onclick="switchCompany(2)">
-                                    <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
-                                    <span>Test Company AS</span>
-                                </wa-menu-item>
-                                
                                 <wa-divider></wa-divider>
                                 
                                 <wa-menu-item onclick="window.open('/companies/create', '_blank')">
-                                    <wa-icon name="plus" style="margin-right: 0.5rem; color: var(--wa-color-success-600);"></wa-icon>
-                                    <span style="color: var(--wa-color-success-600);">Create New Company</span>
+                                    <wa-icon name="plus"></wa-icon>
+                                    <span>Create New Company</span>
                                 </wa-menu-item>
                             </wa-menu>
                         </wa-dropdown>

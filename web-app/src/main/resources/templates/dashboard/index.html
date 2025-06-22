@@ -15,8 +15,8 @@
                     <div>
                         <h1 class="h3 mb-2">
                             📊 Dashboard
-                            <span th:if="${currentTenantId}" class="text-muted small">
-                                Company name: <span th:text="${currentTenantId}">23</span>
+                            <span th:if="${currentCompany}" class="text-muted small">
+                                Company id: <span th:text="${currentCompany.organizationNumber}"></span>
                             </span>
                         </h1>
                         <p class="text-muted mb-0">
