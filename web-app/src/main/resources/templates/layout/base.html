@@ -702,7 +702,7 @@
                         
                         <!-- Company Selector Dropdown -->
                         <wa-dropdown placement="bottom-start" hoist>
-                            <wa-button slot="trigger" size="small" variant="text" style="color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
                                 <wa-icon name="buildings" style="margin-right: 0.5rem;"></wa-icon>
                                 <span th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">Select Company</span>
                                 <wa-icon name="chevron-down" style="margin-left: 0.5rem;"></wa-icon>
@@ -732,7 +732,7 @@
                                 
                                 <wa-menu-item onclick="window.open('/companies/create', '_blank')">
                                     <wa-icon name="plus" style="margin-right: 0.5rem; color: var(--wa-color-success-600);"></wa-icon>
-                                    <span style="color: var(--wa-color-success-600);">➕ Create New Company</span>
+                                    <span style="color: var(--wa-color-success-600);">Create New Company</span>
                                 </wa-menu-item>
                             </wa-menu>
                         </wa-dropdown>
@@ -740,19 +740,13 @@
                     
                     <!-- Right Side: User Account Dropdown -->
                     <div class="d-flex align-items-center">
-                        <wa-dropdown placement="bottom-end" hoist>
-                            <wa-button slot="trigger" size="small" variant="text" style="color: white;">
-                                <wa-icon name="person-circle" style="margin-right: 0.5rem;"></wa-icon>
-                                <span th:text="${user.email}">User Account</span>
-                                <wa-icon name="chevron-down" style="margin-left: 0.5rem;"></wa-icon>
+                        <wa-dropdown placement="bottom-end">
+                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
+                                <wa-icon slot="prefix" name="user" variant="solid"></wa-icon>
+                                <th:block th:text="${user.email}"></th:block>
                             </wa-button>
-                            
                             <wa-menu>
-                                <!-- TODO: Add profile, settings, etc. later -->
-                                <wa-menu-item onclick="window.location.href='/auth/logout'">
-                                    <wa-icon name="box-arrow-right" style="margin-right: 0.5rem; color: var(--wa-color-danger-600);"></wa-icon>
-                                    <span style="color: var(--wa-color-danger-600);">🚪 Logout</span>
-                                </wa-menu-item>
+                                <wa-menu-item onclick="window.location.href='/auth/logout'">Logout</wa-menu-item>
                             </wa-menu>
                         </wa-dropdown>
                     </div>
@@ -769,7 +763,7 @@
         <footer style="background: #f8f9fa; padding: 2rem 0; margin-top: 3rem;" th:if="${user != null}">
             <div class="container text-center">
                 <p class="text-muted mb-0">
-                    © 2024 - Accounting System
+                    © 2025 - Accounting System
                 </p>
             </div>
         </footer>
