@@ -42,6 +42,7 @@ class WebSecurityConfig {
                     .requestMatchers("/auth/signup").permitAll()
                     .requestMatchers("/api/auth/login").permitAll()
                     .requestMatchers("/api/auth/signup").permitAll()
+                    .requestMatchers("/api/company-lookup/**").permitAll()
                     .requestMatchers("/test/**").permitAll()
                     .requestMatchers("/error/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
@@ -58,7 +59,7 @@ class WebSecurityConfig {
                 BearerTokenAuthenticationFilter(userApi),
                 UsernamePasswordAuthenticationFilter::class.java
             )
-            .addFilterBefore(
+            .addFilterAfter(
                 TenantIdFilter(),
                 BearerTokenAuthenticationFilter::class.java
             )

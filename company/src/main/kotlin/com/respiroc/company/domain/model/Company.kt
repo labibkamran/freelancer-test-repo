@@ -20,7 +20,7 @@ open class Company : Serializable {
     open var id: Long = -1
 
     @Column(name = "tenant_id", nullable = false, updatable = false, insertable = false)
-    open val tenantId: Long = -1
+    open var tenantId: Long = -1
 
     @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "tenant_id", nullable = false)
