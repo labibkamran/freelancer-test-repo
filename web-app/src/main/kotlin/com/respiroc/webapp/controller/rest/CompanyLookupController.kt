@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/companies")
+@RequestMapping("/api/company-lookup")
 class CompanyLookupController(
     private val companyLookupApi: CompanyLookupInternalApi
 ) {
