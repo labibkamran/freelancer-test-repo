@@ -12,15 +12,15 @@
         <div class="row mb-4">
             <div class="col">
                 <h1 class="h3 mb-2">
-                    ➕ Create New Company
+                    Create New Company
                 </h1>
                 <p class="text-muted">Search for your company in the Norwegian business registry</p>
             </div>
         </div>
 
         <!-- Company Search -->
-        <div class="row">
-            <div class="col-md-8">
+        <div class="row wa-gap-s">
+            <div class="col-md-8 ">
                 <wa-card>
                     <div slot="header">
                         <h5 style="margin: 0; display: flex; align-items: center;">
@@ -38,12 +38,12 @@
                                     id="searchQuery" 
                                     name="searchQuery" 
                                     placeholder="Enter company name or organization number"
-                                    size="large"
+                                    size="medium"
                                     required>
                                 </wa-input>
                             </div>
-                            <wa-button type="submit" variant="primary" size="large" id="searchButton">
-                                🔍 Search Company
+                            <wa-button type="submit" variant="primary" size="small" id="searchButton">
+                                Search
                             </wa-button>
                         </form>
 
@@ -64,7 +64,6 @@
                         <ul style="margin-bottom: 1rem; padding-left: 1.5rem;">
                             <li>Full company name</li>
                             <li>Partial company name</li>
-                            <li>Organization number (9 digits)</li>
                         </ul>
                         <wa-alert variant="primary" open>
                             <wa-icon slot="icon" name="info-circle"></wa-icon>
