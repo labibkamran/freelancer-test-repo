@@ -21,6 +21,8 @@ class WebCompanyController(
         val companies = companyApi.findAllCompanyByUser(user)
         model.addAttribute("companies", companies)
 
+        model.addAttribute("title", "Create Company")
+
         return "company/create"
     }
 }
