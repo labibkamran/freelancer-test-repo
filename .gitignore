@@ -50,3 +50,5 @@ pyproject.toml
 uv.lock
 
 .kamal
+
+reai.log*
