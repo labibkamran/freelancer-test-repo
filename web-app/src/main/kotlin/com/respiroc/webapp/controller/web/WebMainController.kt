@@ -37,6 +37,9 @@ class WebMainController(
         val currentCompany = companies.find { it.tenantId == tenantId }
         model.addAttribute("currentCompany", currentCompany)
 
+        val companyName = currentCompany?.name ?: "Default Company"
+        model.addAttribute("title", "$companyName - Dashboard")
+
         return "dashboard/index"
     }
 } 

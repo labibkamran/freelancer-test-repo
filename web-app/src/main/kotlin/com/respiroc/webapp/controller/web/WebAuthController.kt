@@ -5,6 +5,7 @@ import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import jakarta.servlet.http.HttpServletResponse
@@ -19,7 +20,7 @@ class WebAuthController(
     private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
 
     @GetMapping("/login")
-    fun loginPage(): String {
+    fun loginPage(model: Model): String {
         // If user is already authenticated, redirect to dashboard
         try {
             val currentUser = user()
@@ -29,6 +30,7 @@ class WebAuthController(
         } catch (_: Exception) {
             // User not authenticated, continue to login page
         }
+        model.addAttribute("title", "Login")
         return "auth/login"
     }
 
@@ -60,7 +62,7 @@ class WebAuthController(
     }
 
     @GetMapping("/signup")
-    fun signupPage(): String {
+    fun signupPage(model: Model): String {
         // If user is already authenticated, redirect to dashboard
         try {
             val currentUser = user()
@@ -70,6 +72,7 @@ class WebAuthController(
         } catch (_: Exception) {
             // User not authenticated, continue to signup page
         }
+        model.addAttribute("title", "Sign Up")
         return "auth/signup"
     }
 
