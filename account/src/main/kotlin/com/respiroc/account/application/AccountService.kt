@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
 @Service
-class AccountsService : AccountInternalApi {
+class AccountService : AccountInternalApi {
 
     private lateinit var accounts: Map<String, Account>
 
