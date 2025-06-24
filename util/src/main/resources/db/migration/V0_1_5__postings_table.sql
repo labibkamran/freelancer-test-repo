@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS postings
     account_id   BIGINT         NOT NULL,
     amount       DECIMAL(15, 2) NOT NULL,
     currency     VARCHAR(3)     NOT NULL,
-    posting_date TIMESTAMP      NOT NULL,
+    posting_date DATE           NOT NULL,
     description  TEXT,
     tenant_id    BIGINT         NOT NULL,
     created_at   TIMESTAMP      NOT NULL,
