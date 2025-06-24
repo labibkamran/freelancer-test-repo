@@ -1,0 +1,2 @@
+### Get all Chart of accounts
+GET http://localhost:8080/api/chart-of-accounts
