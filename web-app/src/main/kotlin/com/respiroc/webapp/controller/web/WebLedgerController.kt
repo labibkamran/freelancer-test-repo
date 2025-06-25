@@ -71,55 +71,6 @@ class WebLedgerController(
         return "ledger/index"
     }
 
-    @PostMapping("/postings")
-    fun createPosting(
-        @Valid @ModelAttribute createPostingRequest: CreatePostingRequest,
-        bindingResult: BindingResult,
-        redirectAttributes: RedirectAttributes,
-        model: Model
-    ): String {
-        val springUser = springUser()
-        model.addAttribute("user", springUser)
-        
-        if (bindingResult.hasErrors()) {
-
-            model.addAttribute("title", "General Ledger")
-            val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-            model.addAttribute("postings", postings)
-            val accounts = accountApi.findAllAccounts()
-            model.addAttribute("accounts", accounts)
-            return "ledger/index"
-        }
-
-        // Validate account exists
-        if (!accountApi.accountExists(createPostingRequest.accountNumber)) {
-            bindingResult.rejectValue("accountNumber", "error.accountNumber", "Account not found")
-            model.addAttribute("title", "General Ledger")
-            val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-            model.addAttribute("postings", postings)
-            val accounts = accountApi.findAllAccounts()
-            model.addAttribute("accounts", accounts)
-            return "ledger/index"
-        }
-
-        try {
-            postingApi.createPosting(
-                accountNumber = createPostingRequest.accountNumber,
-                amount = createPostingRequest.amount,
-                currency = createPostingRequest.currency,
-                postingDate = createPostingRequest.postingDate,
-                description = createPostingRequest.description,
-                user = springUser.ctx
-            )
-            
-            redirectAttributes.addFlashAttribute("successMessage", "Posting created successfully!")
-        } catch (e: Exception) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to create posting: ${e.message}")
-        }
-
-        return "redirect:/dashboard/ledger"
-    }
-
     @PostMapping("/batch-postings")
     fun createBatchPostings(
         @Valid @ModelAttribute createBatchPostingRequest: CreateBatchPostingRequest,
@@ -137,121 +88,6 @@ class WebLedgerController(
         model: Model
     ): String {
         return handleBatchPostingSubmission(createBatchPostingRequest, bindingResult, null, model, true)
-    }
-    
-    private fun handleBatchPostingSubmission(
-        createBatchPostingRequest: CreateBatchPostingRequest,
-        bindingResult: BindingResult,
-        redirectAttributes: RedirectAttributes?,
-        model: Model,
-        isHtmx: Boolean
-    ): String {
-        val springUser = springUser()
-        model.addAttribute("user", springUser)
-        
-        // Filter valid entries first
-        val validEntries = createBatchPostingRequest.entries.filterNotNull().filter { it.isValid() }
-        
-        // Enhanced backend validation
-        if (createBatchPostingRequest.postingDate == null) {
-            bindingResult.rejectValue("postingDate", "error.postingDate", "Posting date is required")
-        }
-        
-        if (createBatchPostingRequest.currency.isBlank()) {
-            bindingResult.rejectValue("currency", "error.currency", "Currency is required")
-        }
-        
-        // Validate that we have at least one valid entry
-        if (validEntries.isEmpty()) {
-            bindingResult.reject("entries.empty", "At least one posting entry is required")
-        }
-        
-        // Enhanced validation for each entry
-        validEntries.forEachIndexed { index: Int, entry: PostingEntry ->
-            if (entry.accountNumber.isBlank()) {
-                bindingResult.rejectValue("entries[$index].accountNumber", "error.accountNumber", "Account number is required")
-            }
-            
-            val hasDebit = entry.debitAmount != null && entry.debitAmount > BigDecimal.ZERO
-            val hasCredit = entry.creditAmount != null && entry.creditAmount > BigDecimal.ZERO
-            
-            if (!hasDebit && !hasCredit) {
-                bindingResult.rejectValue("entries[$index]", "error.amount", "Either debit or credit amount is required")
-            }
-            
-            if (hasDebit && hasCredit) {
-                bindingResult.rejectValue("entries[$index]", "error.both", "Cannot have both debit and credit amounts")
-            }
-        }
-        
-        if (!createBatchPostingRequest.validate()) {
-            bindingResult.reject("batch.invalid", "Debit and credit amounts must be equal")
-        }
-        
-        if (bindingResult.hasErrors()) {
-            if (isHtmx) {
-                val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
-                model.addAttribute("errorMessage", errorMessages)
-                return "ledger/fragments :: messages"
-            } else {
-                model.addAttribute("title", "General Ledger")
-                val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-                model.addAttribute("postings", postings)
-                val accounts = accountApi.findAllAccounts()
-                model.addAttribute("accounts", accounts)
-                return "ledger/index"
-            }
-        }
-
-        // Validate accounts exist
-        
-        validEntries.forEach { entry ->
-            if (!accountApi.accountExists(entry.accountNumber)) {
-                bindingResult.rejectValue("entries", "error.accountNumber", "Account ${entry.accountNumber} not found")
-                if (isHtmx) {
-                    model.addAttribute("errorMessage", "Account ${entry.accountNumber} not found")
-                    return "ledger/fragments :: messages"
-                } else {
-                    model.addAttribute("title", "General Ledger")
-                    val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-                    model.addAttribute("postings", postings)
-                    val accounts = accountApi.findAllAccounts()
-                    model.addAttribute("accounts", accounts)
-                    return "ledger/index"
-                }
-            }
-        }
-
-        try {
-            // Convert to PostingCommand objects
-            val postingDataList = validEntries.map { entry ->
-                CreatePostingCommand(
-                    accountNumber = entry.accountNumber,
-                    amount = entry.getAmount(),
-                    currency = createBatchPostingRequest.currency,
-                    postingDate = createBatchPostingRequest.postingDate!!,
-                    description = entry.description
-                )
-            }
-
-            postingApi.createBatchPostings(postingDataList, springUser.ctx)
-            
-            if (isHtmx) {
-                model.addAttribute("successMessage", "Journal entry saved successfully!")
-                return "ledger/fragments :: messages-and-refresh"
-            } else {
-                redirectAttributes?.addFlashAttribute("successMessage", "Batch postings created successfully!")
-            }
-        } catch (e: Exception) {
-            if (isHtmx) {
-                model.addAttribute("errorMessage", "Failed to save journal entry: ${e.message}")
-                return "ledger/fragments :: messages"
-            } else {
-                redirectAttributes?.addFlashAttribute("errorMessage", "Failed to create batch postings: ${e.message}")
-            }
-        }
-
-        return if (isHtmx) "ledger/fragments :: messages" else "redirect:/dashboard/ledger"
     }
 
     @GetMapping("/postings-table")
@@ -299,5 +135,124 @@ class WebLedgerController(
             "accountName" to (account?.accountName ?: "Unknown Account"),
             "accountType" to (account?.accountType?.name ?: "Unknown")
         )
+    }
+
+    // -------------------------------
+    // Private Helper
+    // -------------------------------
+
+    private fun handleBatchPostingSubmission(
+        createBatchPostingRequest: CreateBatchPostingRequest,
+        bindingResult: BindingResult,
+        redirectAttributes: RedirectAttributes?,
+        model: Model,
+        isHtmx: Boolean
+    ): String {
+        val springUser = springUser()
+        model.addAttribute("user", springUser)
+
+        // Filter valid entries first
+        val validEntries = createBatchPostingRequest.entries.filterNotNull().filter { it.isValid() }
+
+        // Enhanced backend validation
+        if (createBatchPostingRequest.postingDate == null) {
+            bindingResult.rejectValue("postingDate", "error.postingDate", "Posting date is required")
+        }
+
+        if (createBatchPostingRequest.currency.isBlank()) {
+            bindingResult.rejectValue("currency", "error.currency", "Currency is required")
+        }
+
+        // Validate that we have at least one valid entry
+        if (validEntries.isEmpty()) {
+            bindingResult.reject("entries.empty", "At least one posting entry is required")
+        }
+
+        // Enhanced validation for each entry
+        validEntries.forEachIndexed { index: Int, entry: PostingEntry ->
+            if (entry.accountNumber.isBlank()) {
+                bindingResult.rejectValue("entries[$index].accountNumber", "error.accountNumber", "Account number is required")
+            }
+
+            val hasDebit = entry.debitAmount != null && entry.debitAmount > BigDecimal.ZERO
+            val hasCredit = entry.creditAmount != null && entry.creditAmount > BigDecimal.ZERO
+
+            if (!hasDebit && !hasCredit) {
+                bindingResult.rejectValue("entries[$index]", "error.amount", "Either debit or credit amount is required")
+            }
+
+            if (hasDebit && hasCredit) {
+                bindingResult.rejectValue("entries[$index]", "error.both", "Cannot have both debit and credit amounts")
+            }
+        }
+
+        if (!createBatchPostingRequest.validate()) {
+            bindingResult.reject("batch.invalid", "Debit and credit amounts must be equal")
+        }
+
+        if (bindingResult.hasErrors()) {
+            if (isHtmx) {
+                val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
+                model.addAttribute("errorMessage", errorMessages)
+                return "ledger/fragments :: messages"
+            } else {
+                model.addAttribute("title", "General Ledger")
+                val postings = postingApi.findAllPostingsByUser(springUser.ctx)
+                model.addAttribute("postings", postings)
+                val accounts = accountApi.findAllAccounts()
+                model.addAttribute("accounts", accounts)
+                return "ledger/index"
+            }
+        }
+
+        // Validate accounts exist
+
+        validEntries.forEach { entry ->
+            if (!accountApi.accountExists(entry.accountNumber)) {
+                bindingResult.rejectValue("entries", "error.accountNumber", "Account ${entry.accountNumber} not found")
+                if (isHtmx) {
+                    model.addAttribute("errorMessage", "Account ${entry.accountNumber} not found")
+                    return "ledger/fragments :: messages"
+                } else {
+                    model.addAttribute("title", "General Ledger")
+                    val postings = postingApi.findAllPostingsByUser(springUser.ctx)
+                    model.addAttribute("postings", postings)
+                    val accounts = accountApi.findAllAccounts()
+                    model.addAttribute("accounts", accounts)
+                    return "ledger/index"
+                }
+            }
+        }
+
+        try {
+            // Convert to PostingCommand objects
+            val postingDataList = validEntries.map { entry ->
+                CreatePostingCommand(
+                    accountNumber = entry.accountNumber,
+                    amount = entry.getAmount(),
+                    currency = createBatchPostingRequest.currency,
+                    postingDate = createBatchPostingRequest.postingDate!!,
+                    description = entry.description
+                )
+            }
+
+            postingApi.createBatchPostings(postingDataList, springUser.ctx)
+
+            if (isHtmx) {
+                model.addAttribute("successMessage", "Journal entry saved successfully!")
+                return "ledger/fragments :: messages-and-refresh"
+            } else {
+                redirectAttributes?.addFlashAttribute("successMessage", "Batch postings created successfully!")
+            }
+        } catch (e: Exception) {
+            if (isHtmx) {
+                model.addAttribute("errorMessage", "Failed to save journal entry: ${e.message}")
+                return "ledger/fragments :: messages"
+            } else {
+                redirectAttributes?.addFlashAttribute("errorMessage", "Failed to create batch postings: ${e.message}")
+            }
+        }
+
+        return if (isHtmx) "ledger/fragments :: messages" else "redirect:/dashboard/ledger"
     }
 } 
