@@ -1,0 +1,24 @@
+{
+	"name": "reai-email-worker",
+	"version": "1.0.0",
+	"description": "Cloudflare Worker for processing email vouchers",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy --env production",
+		"deploy:dev": "wrangler deploy --env development",
+		"dev": "wrangler dev --env development",
+		"start": "wrangler dev --env development",
+		"test": "vitest",
+		"cf-typegen": "wrangler types"
+	},
+	"dependencies": {
+		"postal-mime": "^2.4.3"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@cloudflare/workers-types": "^4.20250620.0",
+		"typescript": "^5.8.3",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.21.2"
+	}
+}
