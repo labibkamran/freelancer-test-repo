@@ -731,7 +731,7 @@
                         <wa-dropdown placement="bottom-end">
                             <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
                                 <wa-icon slot="prefix" name="user" variant="solid"></wa-icon>
-                                <th:block th:text="${user.email}"></th:block>
+                                <th:block th:text="${user.username}"></th:block>
                             </wa-button>
                             <wa-menu>
                                 <wa-menu-item onclick="window.location.href='/auth/logout'">Logout</wa-menu-item>
@@ -923,6 +923,27 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+    </script>
+
+    <script th:inline="javascript">
+        // Get tenant ID from URL on page load for authenticated users
+        document.addEventListener('DOMContentLoaded', function() {
+            /*[# th:if="${user != null}"]*/
+            const user = /*[[${user}]]*/ null;
+            const tenantId = getCurrentTenantId();
+            
+            if (!tenantId) {
+                // User is logged in but no tenantId in URL
+                if (user && user.ctx && user.ctx.currentTenant) {
+                    // Redirect to page with user's current tenant
+                    const currentUrl = new URL(window.location.href);
+                    const currentTenantId = user.ctx.currentTenant.id || user.ctx.currentTenant;
+                    currentUrl.searchParams.set('tenantId', currentTenantId);
+                    window.location.href = currentUrl.toString();
+                }
+            }
+            /*[/]*/
+        });
     </script>
     
     <!-- Custom scripts -->
