@@ -19,37 +19,34 @@
                             </span>
                         </h1>
                         <p class="text-muted mb-0">
-                            Welcome back, <span class="fw-bold" th:text="${user.email}">User</span>
+                            Welcome back, <span class="fw-bold" th:text="${user.username}">User</span>
                         </p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col">
+                <wa-card>
+                    <div slot="header">
+                        <h5 style="margin: 0;">🚀 Quick Actions</h5>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <wa-button variant="primary" size="small" onclick="window.location.href='/dashboard/ledger'">
+                                <wa-icon name="calculator"></wa-icon>
+                                General Ledger
+                            </wa-button>
+                        </div>
+                    </div>
+                </wa-card>
+            </div>
+        </div>
+
     </div>
 </main>
 
-<th:block layout:fragment="scripts">
-    <script>
-        // Get tenant ID from URL on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const tenantId = getCurrentTenantId();
-            if (!tenantId) {
-                // If no tenantId in URL, add default one
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('tenantId', '23');
-                window.history.replaceState({}, '', currentUrl.toString());
-            }
-            
-            // TODO: Load actual dashboard data based on tenantId
-            console.log('Loading dashboard for tenant:', tenantId || '23');
-        });
-        
-        // TODO: Implement chart initialization when actual data is available
-        function initializeCharts() {
-            // Chart.js integration will go here
-        }
-    </script>
-</th:block>
 </body>
 </html> 
