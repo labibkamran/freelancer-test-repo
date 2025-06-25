@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":user"))
     implementation(project(":tenant"))
     implementation(project(":company"))
+    implementation(project(":ledger"))
     
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
