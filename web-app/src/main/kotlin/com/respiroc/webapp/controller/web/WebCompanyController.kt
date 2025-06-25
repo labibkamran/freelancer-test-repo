@@ -15,10 +15,10 @@ class WebCompanyController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        val user = user()
-        model.addAttribute("user", user)
+        val springUser = springUser()
+        model.addAttribute("user", springUser)
 
-        val companies = companyApi.findAllCompanyByUser(user)
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         model.addAttribute("companies", companies)
 
         model.addAttribute("title", "Create Company")
