@@ -243,15 +243,12 @@
                 <small class="text-muted">Debits must equal credits</small>
             </div>
             
-            <form hx-post="/dashboard/ledger/batch-postings" 
+            <form th:attr="hx-post='/dashboard/ledger/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
                   hx-target="#form-messages" 
                   hx-swap="innerHTML"
                   hx-indicator="#loading-indicator"
-                  hx-include="[name='tenantId']"
                   id="batchPostingForm" 
                   onsubmit="return validateAndPrepareForm(event)">
-                <!-- Hidden tenant ID for filter -->
-                <input type="hidden" name="tenantId" th:value="${user.ctx.currentTenant?.id}" />
                 
                 <!-- Form Meta Information -->
                 <div class="form-meta">
@@ -323,7 +320,7 @@
         </div>
 
         <!-- Postings Table -->
-        <div class="postings-table" id="postings-table">
+        <!--<div class="postings-table" id="postings-table">
             <div class="table-header">
                 <div class="table-row" style="font-weight: 600;">
                     <div>Date</div>
@@ -367,7 +364,7 @@
                     </wa-button>
                 </div>
             </div>
-        </div>
+        </div>-->
     </div>
 </main>
 

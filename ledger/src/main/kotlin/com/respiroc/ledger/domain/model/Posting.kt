@@ -47,12 +47,12 @@ open class Posting : Serializable {
     @Column(name = "description", length = Integer.MAX_VALUE)
     open var description: String? = null
 
-    @Column(name = "tenant_id", nullable = false, updatable = false, insertable = false)
+    @Column(name = "tenant_id", nullable = false)
     open var tenantId: Long = -1
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @JoinColumn(name = "tenant_id", nullable = false, updatable = false, insertable = false)
     open lateinit var tenant: Tenant
 
     @CreationTimestamp
