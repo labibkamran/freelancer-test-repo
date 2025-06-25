@@ -43,7 +43,6 @@ class WebSecurityConfig {
                     .requestMatchers("/api/auth/login").permitAll()
                     .requestMatchers("/api/auth/signup").permitAll()
                     .requestMatchers("/api/company-lookup/**").permitAll()
-                    .requestMatchers("/api/chart-of-accounts/**").permitAll()
                     .requestMatchers("/test/**").permitAll()
                     .requestMatchers("/error/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
