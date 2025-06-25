@@ -28,24 +28,22 @@ class TenantIdFilter(
         chain: FilterChain
     ) {
         val tenantId = request.getParameter(paramName)
+        val springUser = getCurrentSpringUser()
 
         // Wrap the request so the parameter disappears for the rest of the app
-        val wrappedRequest = object : HttpServletRequestWrapper(request) {
-            override fun getParameter(name: String?): String? =
-                if (name == paramName) null else super.getParameter(name)
+        val wrappedRequest = createWrappedRequest(request)
 
-            override fun getParameterValues(name: String?): Array<String>? =
-                if (name == paramName) null else super.getParameterValues(name)
-
-            override fun getParameterMap(): MutableMap<String, Array<String>> =
-                super.getParameterMap().toMutableMap().apply { remove(paramName) }
-        }
-
-        if (!tenantId.isNullOrBlank() && isTenantAccessibleByUser(tenantId)) {
-            setCurrentTenant(tenantId)
-        } else if (!tenantId.isNullOrBlank()) {
-            // TODO: Use custom error for better visibility
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot access this resource")
+        when {
+            !tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser) -> {
+                setCurrentTenant(tenantId, springUser)
+            }
+            !tenantId.isNullOrBlank() -> {
+                // TODO: Use custom error for better visibility
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot access this resource")
+            }
+            springUser.ctx.tenants.isNotEmpty() -> {
+                setFirstAvailableTenant(springUser)
+            }
         }
 
         try {
@@ -55,14 +53,44 @@ class TenantIdFilter(
         }
     }
 
-    private fun isTenantAccessibleByUser(tenantId: String): Boolean {
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
+    private fun getCurrentSpringUser(): SpringUser {
+        return try {
+            SecurityContextHolder.getContext().authentication.principal as SpringUser
+        } catch (e: ClassCastException) {
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user context")
+        }
+    }
+
+    private fun createWrappedRequest(request: HttpServletRequest): HttpServletRequestWrapper {
+        return object : HttpServletRequestWrapper(request) {
+            override fun getParameter(name: String?): String? =
+                if (name == paramName) null else super.getParameter(name)
+
+            override fun getParameterValues(name: String?): Array<String>? =
+                if (name == paramName) null else super.getParameterValues(name)
+
+            override fun getParameterMap(): MutableMap<String, Array<String>> =
+                super.getParameterMap().toMutableMap().apply { remove(paramName) }
+        }
+    }
+
+    private fun isTenantAccessible(tenantId: String, springUser: SpringUser): Boolean {
         return springUser.ctx.tenants.any { it.id == tenantId.toLong() }
     }
 
-    private fun setCurrentTenant(tenantId: String) {
-        TenantContextHolder.setTenantId(tenantId.toLong())
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
-        springUser.ctx.currentTenant = springUser.ctx.tenants.filter { it.id == tenantId.toLong() }.first()
+    private fun setCurrentTenant(tenantId: String, springUser: SpringUser) {
+        val tenantIdLong = tenantId.toLong()
+        val tenant = springUser.ctx.tenants.find { it.id == tenantIdLong }
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant not found")
+
+        TenantContextHolder.setTenantId(tenantIdLong)
+        springUser.ctx.currentTenant = tenant
+        println("DEBUG: TenantId set to $tenantIdLong") // Debug log
+    }
+
+    private fun setFirstAvailableTenant(springUser: SpringUser) {
+        val tenant = springUser.ctx.tenants.first()
+        TenantContextHolder.setTenantId(tenant.id)
+        springUser.ctx.currentTenant = tenant
     }
 }
