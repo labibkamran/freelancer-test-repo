@@ -85,7 +85,6 @@ class TenantIdFilter(
 
         TenantContextHolder.setTenantId(tenantIdLong)
         springUser.ctx.currentTenant = tenant
-        println("DEBUG: TenantId set to $tenantIdLong") // Debug log
     }
 
     private fun setFirstAvailableTenant(springUser: SpringUser) {
