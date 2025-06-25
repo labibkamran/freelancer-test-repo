@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Messages Fragment -->
+<div th:fragment="messages">
+    <div th:if="${successMessage}" class="alert alert-success">
+        <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
+        <span th:text="${successMessage}"></span>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <wa-icon name="exclamation-triangle" style="margin-right: 0.5rem;"></wa-icon>
+        <span th:text="${errorMessage}"></span>
+    </div>
+</div>
+
+<!-- Messages and Refresh Fragment -->
+<div th:fragment="messages-and-refresh">
+    <div th:if="${successMessage}" class="alert alert-success">
+        <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
+        <span th:text="${successMessage}"></span>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <wa-icon name="exclamation-triangle" style="margin-right: 0.5rem;"></wa-icon>
+        <span th:text="${errorMessage}"></span>
+    </div>
+    
+    <script>
+        // Clear form after successful submission
+        if (document.querySelector('.alert-success')) {
+            // Clear all input fields
+            document.querySelectorAll('#batchPostingForm input').forEach(input => {
+                if (input.type === 'date') {
+                    input.value = new Date().toISOString().split('T')[0];
+                } else if (input.type === 'text' || input.type === 'number') {
+                    input.value = '';
+                }
+                input.classList.remove('field-error');
+            });
+            
+            // Reset currency to default
+            document.getElementById('currency').value = 'NOK';
+            
+            // Clear description
+            document.getElementById('description').value = '';
+            
+            // Remove all posting rows and add fresh ones
+            document.getElementById('postingEntries').innerHTML = '';
+            rowCounter = 0;
+            addPostingRow();
+            addPostingRow();
+            
+            // Update balance display
+            updateBalance();
+            
+                         // Trigger table refresh with tenantId
+             const tenantId = document.querySelector('input[name="tenantId"]')?.value;
+             const url = tenantId ? `/dashboard/ledger/postings-table?tenantId=${tenantId}` : '/dashboard/ledger/postings-table';
+             htmx.ajax('GET', url, '#postings-table');
+        }
+    </script>
+</div>
+
+<!-- Postings Table Fragment -->
+<div th:fragment="postings-table">
+    <div class="table-header">
+        <div class="table-row" style="font-weight: 600;">
+            <div>Date</div>
+            <div>Account</div>
+            <div>Amount</div>
+            <div>Currency</div>
+            <div>Balance</div>
+            <div>Description</div>
+            <div>Actions</div>
+        </div>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(postings)}" style="padding: 3rem; text-align: center; color: #6b7280;">
+        <wa-icon name="inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></wa-icon>
+        <p>No postings yet. Create your first journal entry above!</p>
+    </div>
+
+    <div th:each="posting : ${postings}" class="table-row">
+        <div th:text="${#temporals.format(posting.postingDate, 'dd.MM.yyyy')}"></div>
+        <div>
+            <div style="font-weight: 500;" th:text="${posting.accountNumber}"></div>
+            <div style="font-size: 0.875rem; color: #6b7280;" 
+                 th:text="${accounts.?[noAccountNumber == __${posting.accountNumber}__][0]?.accountName ?: 'Unknown Account'}"></div>
+        </div>
+        <div th:class="${posting.amount.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'amount-positive' : 'amount-negative'}"
+             th:text="${#numbers.formatDecimal(posting.amount, 1, 2)}"></div>
+        <div th:text="${posting.currency}"></div>
+        <div>
+            <wa-button size="small" variant="neutral" 
+                       th:onclick="'showBalance(\'' + ${posting.accountNumber} + '\')'">
+                <wa-icon name="calculator"></wa-icon>
+                View
+            </wa-button>
+        </div>
+        <div th:text="${posting.description ?: '-'}"></div>
+        <div>
+            <wa-button size="small" variant="neutral"
+                       th:onclick="'showAccountPostings(\'' + ${posting.accountNumber} + '\')'">
+                <wa-icon name="list"></wa-icon>
+                History
+            </wa-button>
+        </div>
+    </div>
+</div>
+
+</html> 

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <style>
+        .posting-form {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .form-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .posting-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .posting-table th {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e9ecef;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .posting-table td {
+            padding: 0.5rem;
+            border: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        
+        .posting-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .posting-row input,
+        .posting-row select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0.25rem;
+        }
+        
+        .posting-row input:focus,
+        .posting-row select:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: -1px;
+            border-radius: 4px;
+        }
+        
+        .amount-input {
+            text-align: right;
+        }
+        
+        .balance-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .balance-item {
+            text-align: center;
+        }
+        
+        .balance-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .balance-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .balance-matched {
+            color: #16a34a;
+        }
+        
+        .balance-unmatched {
+            color: #dc2626;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .account-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .account-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .account-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .account-search {
+            position: relative;
+        }
+        
+        .postings-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-header {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        
+        .table-row {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            display: grid;
+            grid-template-columns: 100px 1fr 120px 100px 120px 150px auto;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .table-row:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .amount-positive {
+            color: #16a34a;
+            font-weight: 600;
+        }
+        
+        .amount-negative {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 500ms ease-in;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+        
+        .field-error {
+            border: 2px solid #dc2626 !important;
+            background-color: #fef2f2 !important;
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-2">General Ledger (Posting)</h1>
+                <p class="text-muted">Double-entry bookkeeping system</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="form-messages">
+        <div th:if="${successMessage}" class="alert alert-success">
+            <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
+            <span th:text="${successMessage}"></span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <wa-icon name="exclamation-triangle" style="margin-right: 0.5rem;"></wa-icon>
+            <span th:text="${errorMessage}"></span>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="htmx-indicator" style="display: none;">
+            <div class="alert alert-info">
+                <wa-icon name="clock" style="margin-right: 0.5rem;"></wa-icon>
+                Saving journal entry...
+            </div>
+        </div>
+
+        <!-- Batch Posting Form -->
+        <div class="posting-form">
+            <div class="form-header">
+                <h4 style="margin: 0;">⚡ Journal Entry</h4>
+                <small class="text-muted">Debits must equal credits</small>
+            </div>
+            
+            <form hx-post="/dashboard/ledger/batch-postings" 
+                  hx-target="#form-messages" 
+                  hx-swap="innerHTML"
+                  hx-indicator="#loading-indicator"
+                  hx-include="[name='tenantId']"
+                  id="batchPostingForm" 
+                  onsubmit="return validateAndPrepareForm(event)">
+                <!-- Hidden tenant ID for filter -->
+                <input type="hidden" name="tenantId" th:value="${user.ctx.currentTenant?.id}" />
+                
+                <!-- Form Meta Information -->
+                <div class="form-meta">
+                    <div>
+                        <label for="postingDate">Date *</label>
+                        <wa-input type="date" id="postingDate" name="postingDate" required></wa-input>
+                        <span id="postingDate-error" class="error-message" style="display: none;"></span>
+                    </div>
+                    <div>
+                        <label for="currency">Currency *</label>
+                        <wa-select id="currency" name="currency" required>
+                            <wa-option value="NOK">NOK</wa-option>
+                            <wa-option value="USD">USD</wa-option>
+                            <wa-option value="EUR">EUR</wa-option>
+                        </wa-select>
+                        <span id="currency-error" class="error-message" style="display: none;"></span>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <wa-input id="description" name="description" placeholder="Journal entry description"></wa-input>
+                    </div>
+                </div>
+
+                <!-- Balance Display -->
+                <div class="balance-display" id="balanceDisplay">
+                    <div class="balance-item">
+                        <div class="balance-value" id="totalDebit">0.00</div>
+                        <div class="balance-label">Total Debit</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-value" id="balanceStatus">⚖️</div>
+                        <div class="balance-label">Balance</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-value" id="totalCredit">0.00</div>
+                        <div class="balance-label">Total Credit</div>
+                    </div>
+                </div>
+
+                <!-- Posting Entries Table -->
+                <table class="posting-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Account</th>
+                            <th style="width: 120px;">Debit</th>
+                            <th style="width: 120px;">Credit</th>
+                            <th>Description</th>
+                            <th style="width: 80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postingEntries">
+                        <!-- Entries will be added dynamically -->
+                    </tbody>
+                </table>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <wa-button type="button" variant="neutral" onclick="addPostingRow()">
+                        <wa-icon name="plus"></wa-icon>
+                        Add Row
+                    </wa-button>
+                    
+                    <wa-button type="submit" variant="success" id="saveButton" disabled>
+                        <wa-icon name="save"></wa-icon>
+                        Save Journal Entry
+                    </wa-button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Postings Table -->
+        <div class="postings-table" id="postings-table">
+            <div class="table-header">
+                <div class="table-row" style="font-weight: 600;">
+                    <div>Date</div>
+                    <div>Account</div>
+                    <div>Amount</div>
+                    <div>Currency</div>
+                    <div>Balance</div>
+                    <div>Description</div>
+                    <div>Actions</div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(postings)}" style="padding: 3rem; text-align: center; color: #6b7280;">
+                <wa-icon name="inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></wa-icon>
+                <p>No postings yet. Create your first journal entry above!</p>
+            </div>
+
+            <div th:each="posting : ${postings}" class="table-row">
+                <div th:text="${#temporals.format(posting.postingDate, 'dd.MM.yyyy')}"></div>
+                <div>
+                    <div style="font-weight: 500;" th:text="${posting.accountNumber}"></div>
+                    <div style="font-size: 0.875rem; color: #6b7280;" 
+                         th:text="${accounts.?[noAccountNumber == __${posting.accountNumber}__][0]?.accountName ?: 'Unknown Account'}"></div>
+                </div>
+                <div th:class="${posting.amount.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'amount-positive' : 'amount-negative'}"
+                     th:text="${#numbers.formatDecimal(posting.amount, 1, 2)}"></div>
+                <div th:text="${posting.currency}"></div>
+                <div>
+                    <wa-button size="small" variant="neutral" 
+                               th:onclick="'showBalance(\'' + ${posting.accountNumber} + '\')'">
+                        <wa-icon name="calculator"></wa-icon>
+                        View
+                    </wa-button>
+                </div>
+                <div th:text="${posting.description ?: '-'}"></div>
+                <div>
+                    <wa-button size="small" variant="neutral"
+                               th:onclick="'showAccountPostings(\'' + ${posting.accountNumber} + '\')'">
+                        <wa-icon name="list"></wa-icon>
+                        History
+                    </wa-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block layout:fragment="scripts">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script th:inline="javascript">
+        // Accounts data for search
+        const accounts = /*[[${accounts}]]*/ [];
+        let rowCounter = 0;
+        
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('postingDate').value = new Date().toISOString().split('T')[0];
+            addPostingRow();
+            addPostingRow();
+        });
+        
+        function addPostingRow() {
+            const tbody = document.getElementById('postingEntries');
+            const row = document.createElement('tr');
+            row.className = 'posting-row';
+            row.id = 'row-' + rowCounter;
+            
+            row.innerHTML = `
+                <td>
+                    <div class="account-search">
+                        <input type="text" 
+                               name="entries[${rowCounter}].accountNumber" 
+                               placeholder="Search account..." 
+                               autocomplete="off"
+                               onkeyup="searchAccounts(this, ${rowCounter})"
+                               onfocus="searchAccounts(this, ${rowCounter})"
+                               onblur="validateRowFields(${rowCounter})"
+                               required>
+                        <div id="dropdown-${rowCounter}" class="account-dropdown"></div>
+                    </div>
+                </td>
+                <td>
+                    <input type="number" 
+                           step="0.01" 
+                           name="entries[${rowCounter}].debitAmount" 
+                           class="amount-input debit-input"
+                           placeholder="0.00"
+                           onchange="validateAmounts(${rowCounter}); updateBalance()"
+                           onblur="validateRowFields(${rowCounter})">
+                </td>
+                <td>
+                    <input type="number" 
+                           step="0.01" 
+                           name="entries[${rowCounter}].creditAmount" 
+                           class="amount-input credit-input"
+                           placeholder="0.00"
+                           onchange="validateAmounts(${rowCounter}); updateBalance()"
+                           onblur="validateRowFields(${rowCounter})">
+                </td>
+                <td>
+                    <input type="text" 
+                           name="entries[${rowCounter}].description" 
+                           placeholder="Entry description">
+                </td>
+                <td>
+                    <wa-button type="button" size="small" variant="danger" onclick="removeRow(${rowCounter})">
+                        <wa-icon name="trash"></wa-icon>
+                    </wa-button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            rowCounter++;
+            updateBalance();
+        }
+        
+        function removeRow(id) {
+            const rows = document.querySelectorAll('.posting-row');
+            if (rows.length > 1) {
+                document.getElementById('row-' + id).remove();
+                updateBalance();
+            }
+        }
+        
+        function validateAmounts(rowId) {
+            const debitInput = document.querySelector(`input[name="entries[${rowId}].debitAmount"]`);
+            const creditInput = document.querySelector(`input[name="entries[${rowId}].creditAmount"]`);
+            
+            if (debitInput.value && creditInput.value) {
+                // Both filled - clear one
+                if (event.target === debitInput) {
+                    creditInput.value = '';
+                } else {
+                    debitInput.value = '';
+                }
+            }
+            
+            // Real-time validation
+            validateRowFields(rowId);
+        }
+        
+        function validateRowFields(rowId) {
+            const accountInput = document.querySelector(`input[name="entries[${rowId}].accountNumber"]`);
+            const debitInput = document.querySelector(`input[name="entries[${rowId}].debitAmount"]`);
+            const creditInput = document.querySelector(`input[name="entries[${rowId}].creditAmount"]`);
+            
+            // Clear previous error states
+            [accountInput, debitInput, creditInput].forEach(input => {
+                if (input) input.classList.remove('field-error');
+            });
+            
+            const hasAccount = accountInput && accountInput.value.trim() !== '';
+            const hasDebit = debitInput && debitInput.value && parseFloat(debitInput.value) > 0;
+            const hasCredit = creditInput && creditInput.value && parseFloat(creditInput.value) > 0;
+            
+            // If any field has data, validate the entire row
+            if (hasAccount || hasDebit || hasCredit) {
+                if (!hasAccount) {
+                    accountInput.classList.add('field-error');
+                }
+                
+                if (!hasDebit && !hasCredit) {
+                    if (debitInput) debitInput.classList.add('field-error');
+                    if (creditInput) creditInput.classList.add('field-error');
+                }
+                
+                if (hasDebit && hasCredit) {
+                    debitInput.classList.add('field-error');
+                    creditInput.classList.add('field-error');
+                }
+            }
+        }
+        
+        function updateBalance() {
+            let totalDebit = 0;
+            let totalCredit = 0;
+            
+            document.querySelectorAll('.debit-input').forEach(input => {
+                if (input.value && !isNaN(input.value)) {
+                    totalDebit += parseFloat(input.value);
+                }
+            });
+            
+            document.querySelectorAll('.credit-input').forEach(input => {
+                if (input.value && !isNaN(input.value)) {
+                    totalCredit += parseFloat(input.value);
+                }
+            });
+            
+            document.getElementById('totalDebit').textContent = totalDebit.toFixed(2);
+            document.getElementById('totalCredit').textContent = totalCredit.toFixed(2);
+            
+            const balanced = Math.abs(totalDebit - totalCredit) < 0.01;
+            const hasEntries = totalDebit > 0 || totalCredit > 0;
+            
+            const balanceStatus = document.getElementById('balanceStatus');
+            const saveButton = document.getElementById('saveButton');
+            
+            if (balanced && hasEntries) {
+                balanceStatus.textContent = '✅';
+                balanceStatus.className = 'balance-value balance-matched';
+                saveButton.disabled = false;
+            } else {
+                balanceStatus.textContent = '❌';
+                balanceStatus.className = 'balance-value balance-unmatched';
+                saveButton.disabled = true;
+            }
+        }
+        
+        function searchAccounts(input, rowId) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById('dropdown-' + rowId);
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            const filteredAccounts = accounts.filter(account => 
+                account.noAccountNumber.includes(query) ||
+                account.accountName.toLowerCase().includes(query) ||
+                account.accountDescription.toLowerCase().includes(query)
+            );
+            
+            if (filteredAccounts.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            dropdown.innerHTML = filteredAccounts.map(account => `
+                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId})">
+                        <div style="font-weight: 500;">${account.noAccountNumber}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">${account.accountName}</div>
+                </div>
+            `).join('');
+            
+            dropdown.style.display = 'block';
+        }
+        
+        function selectAccount(accountNumber, accountName, rowId) {
+            const input = document.querySelector(`input[name="entries[${rowId}].accountNumber"]`);
+            input.value = accountNumber;
+            document.getElementById('dropdown-' + rowId).style.display = 'none';
+        }
+        
+        // Hide dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.account-search')) {
+                document.querySelectorAll('.account-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+        
+        // Show account balance (existing functionality)
+        function showBalance(accountNumber) {
+            if (!accountNumber) return;
+            
+            fetch(`/dashboard/ledger/accounts/balance/${accountNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    alert(`Account: ${data.accountNumber} - ${data.accountName}\nBalance: ${Number(data.balance).toLocaleString('no-NO', {minimumFractionDigits: 2, maximumFractionDigits: 2})} NOK`);
+                })
+                .catch(error => {
+                    console.error('Error fetching balance:', error);
+                });
+        }
+        
+        // Show account posting history (existing functionality)
+        function showAccountPostings(accountNumber) {
+            alert(`Showing posting history for account ${accountNumber}`);
+        }
+        
+        // Frontend validation functions
+        function validateField(fieldId, value, errorMessage) {
+            const field = document.getElementById(fieldId);
+            const errorSpan = document.getElementById(fieldId + '-error');
+            
+            if (!value || value.trim() === '') {
+                field.classList.add('field-error');
+                errorSpan.textContent = errorMessage;
+                errorSpan.style.display = 'block';
+                return false;
+            } else {
+                field.classList.remove('field-error');
+                errorSpan.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function validateFormFields() {
+            let isValid = true;
+            
+            // Validate posting date
+            const postingDate = document.getElementById('postingDate').value;
+            if (!validateField('postingDate', postingDate, 'Posting date is required')) {
+                isValid = false;
+            }
+            
+            // Validate currency
+            const currency = document.getElementById('currency').value;
+            if (!validateField('currency', currency, 'Currency is required')) {
+                isValid = false;
+            }
+            
+            // Validate entries
+            const rows = document.querySelectorAll('.posting-row');
+            let hasValidEntries = false;
+            
+            rows.forEach((row, index) => {
+                const accountInput = row.querySelector('input[name*=".accountNumber"]');
+                const debitInput = row.querySelector('input[name*=".debitAmount"]');
+                const creditInput = row.querySelector('input[name*=".creditAmount"]');
+                
+                // Clear previous errors
+                [accountInput, debitInput, creditInput].forEach(input => {
+                    if (input) input.classList.remove('field-error');
+                });
+                
+                const hasAccount = accountInput && accountInput.value.trim() !== '';
+                const hasDebit = debitInput && debitInput.value && parseFloat(debitInput.value) > 0;
+                const hasCredit = creditInput && creditInput.value && parseFloat(creditInput.value) > 0;
+                
+                if (hasAccount || hasDebit || hasCredit) {
+                    // This row has some data, validate it
+                    if (!hasAccount) {
+                        accountInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (!hasDebit && !hasCredit) {
+                        if (debitInput) debitInput.classList.add('field-error');
+                        if (creditInput) creditInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (hasDebit && hasCredit) {
+                        // Both debit and credit filled
+                        debitInput.classList.add('field-error');
+                        creditInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    hasValidEntries = true;
+                }
+            });
+            
+            if (!hasValidEntries) {
+                showMessage('Please add at least one valid posting entry.', 'error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('form-messages');
+            const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+            const iconName = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+            
+            messagesDiv.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <wa-icon name="${iconName}" style="margin-right: 0.5rem;"></wa-icon>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        // Combined validation and form preparation
+        function validateAndPrepareForm(event) {
+            // First validate all fields
+            if (!validateFormFields()) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Then prepare form data
+            return prepareFormData(event);
+        }
+        
+        // Prepare form data before submission
+        function prepareFormData(event) {
+            // Remove empty rows and reindex
+            const tbody = document.getElementById('postingEntries');
+            const rows = Array.from(tbody.querySelectorAll('.posting-row'));
+            
+            // Filter out empty rows
+            const validRows = rows.filter(row => {
+                const accountInput = row.querySelector('input[name*=".accountNumber"]');
+                const debitInput = row.querySelector('input[name*=".debitAmount"]');
+                const creditInput = row.querySelector('input[name*=".creditAmount"]');
+                
+                const hasAccount = accountInput && accountInput.value.trim() !== '';
+                const hasAmount = (debitInput && debitInput.value && parseFloat(debitInput.value) > 0) ||
+                                (creditInput && creditInput.value && parseFloat(creditInput.value) > 0);
+                
+                return hasAccount && hasAmount;
+            });
+            
+            // Remove all rows
+            rows.forEach(row => row.remove());
+            
+            // Re-add only valid rows with proper indexing
+            validRows.forEach((row, index) => {
+                // Update input names to use sequential indexing
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name && name.includes('entries[')) {
+                        const newName = name.replace(/entries\[\d+\]/, `entries[${index}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+                
+                tbody.appendChild(row);
+            });
+            
+            // If no valid rows, prevent form submission
+            if (validRows.length === 0) {
+                event.preventDefault();
+                alert('Please add at least one valid posting entry.');
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
+</th:block>
+</body>
+</html> 
