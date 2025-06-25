@@ -52,20 +52,17 @@ class PostingService(
         val tenantId = TenantContextHolder.getTenantId()
             ?: throw IllegalStateException("No tenant context available")
 
-        // Validate all accounts exist
         postings.forEach { postingData ->
             if (accountApi.findAccountByNumber(postingData.accountNumber) == null) {
                 throw IllegalArgumentException("No account found with account number = ${postingData.accountNumber}")
             }
         }
 
-        // Validate double-entry balance
         val totalAmount = postings.sumOf { it.amount }
         if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
             throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
         }
 
-        // Create all postings
         val createdPostings = postings.map { postingData ->
             val posting = Posting()
             posting.accountNumber = postingData.accountNumber
