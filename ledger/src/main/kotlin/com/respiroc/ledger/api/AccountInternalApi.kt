@@ -1,7 +1,7 @@
-package com.respiroc.account.api
+package com.respiroc.ledger.api
 
-import com.respiroc.account.domain.model.Account
-import com.respiroc.account.domain.model.AccountType
+import com.respiroc.ledger.domain.model.Account
+import com.respiroc.ledger.domain.model.AccountType
 
 interface AccountInternalApi {
     fun findAccountByNumber(noAccountNumber: String): Account?

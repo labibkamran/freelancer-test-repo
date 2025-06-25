@@ -1,7 +1,7 @@
 package com.respiroc.webapp.controller.rest
 
-import com.respiroc.account.api.AccountInternalApi
-import com.respiroc.account.domain.model.Account
+import com.respiroc.ledger.api.AccountInternalApi
+import com.respiroc.ledger.domain.model.Account
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

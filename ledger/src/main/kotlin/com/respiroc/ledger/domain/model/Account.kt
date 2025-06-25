@@ -1,4 +1,4 @@
-package com.respiroc.account.domain.model
+package com.respiroc.ledger.domain.model
 
 data class Account(
     val noAccountNumber: String,

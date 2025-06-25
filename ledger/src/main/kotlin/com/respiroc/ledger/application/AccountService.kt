@@ -1,8 +1,8 @@
-package com.respiroc.account.application
+package com.respiroc.ledger.application
 
-import com.respiroc.account.api.AccountInternalApi
-import com.respiroc.account.domain.model.Account
-import com.respiroc.account.domain.model.AccountType
+import com.respiroc.ledger.api.AccountInternalApi
+import com.respiroc.ledger.domain.model.Account
+import com.respiroc.ledger.domain.model.AccountType
 import jakarta.annotation.PostConstruct
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
