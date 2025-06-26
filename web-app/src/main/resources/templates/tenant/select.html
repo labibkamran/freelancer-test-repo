@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Select Company</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        <div class="container py-4">
+            <div class="justify-content-center">
+                <div>
+                    <wa-card>
+                        <div slot="header">
+                            <h5 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <wa-icon name="building" size="small"></wa-icon>
+                                Select Company
+                            </h5>
+                        </div>
+                        
+                        <div style="padding: 1.5rem;">
+                            <p style="margin-bottom: 1.5rem;">
+                                Please select the company you would like to work with:
+                            </p>
+                            
+                            <!-- Company List -->
+                            <div th:if="${companies != null and !companies.empty}" style="margin-bottom: 1.5rem;">
+                                <div th:each="company : ${companies}" 
+                                     style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--wa-color-neutral-200); border-radius: 8px; margin-bottom: 0.75rem; transition: all 0.2s ease;"
+                                     onmouseover="this.style.borderColor='var(--wa-color-primary-300)'; this.style.backgroundColor='var(--wa-color-primary-50)'"
+                                     onmouseout="this.style.borderColor='var(--wa-color-neutral-200)'; this.style.backgroundColor='transparent'">
+                                    
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;" th:text="${company.name}">
+                                            Company Name
+                                        </div>
+                                        <div style="font-size: 0.875rem;" th:text="${company.organizationNumber}">
+                                            Organization Number
+                                        </div>
+                                    </div>
+                                    
+                                    <wa-button variant="primary" size="small" th:onclick="'window.location.href=\'/dashboard?tenantId=' + ${company.tenantId} + '\''">
+                                        <wa-icon name="arrow-right" slot="suffix"></wa-icon>
+                                        Select
+                                    </wa-button>
+                                </div>
+                            </div>
+                            
+                            <!-- Empty State -->
+                            <div th:if="${companies == null or companies.empty}" 
+                                 style="text-align: center; padding: 2rem; border: 2px dashed border-radius: 12px; margin-bottom: 1.5rem;">
+                                <wa-icon name="building" size="large" style="margin-bottom: 1rem;"></wa-icon>
+                                <h4 style="margin-bottom: 0.5rem;">No Companies Found</h4>
+                                <p>
+                                    You are not a member of any company yet. You can create a new company.
+                                </p>
+                            </div>
+                        </div>
+                    </wa-card>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+</body>
+</html> 

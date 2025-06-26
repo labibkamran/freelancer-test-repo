@@ -6,21 +6,23 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
-import org.springframework.web.server.ResponseStatusException
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**"),
+    private val paths: List<String> = listOf("/dashboard/**", "/ledger/**", "/companies/**"),
+    private val excludePaths: List<String> = listOf("/companies/create", "/tenant/**", "/error/**"),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {
 
     private val matcher = AntPathMatcher()
 
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
-        paths.none { matcher.match(it, request.requestURI) }
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        val uri = request.requestURI
+        return paths.none { matcher.match(it, uri) } || 
+               excludePaths.any { matcher.match(it, uri) }
+    }
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -37,12 +39,28 @@ class TenantIdFilter(
             !tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser) -> {
                 setCurrentTenant(tenantId, springUser)
             }
-            !tenantId.isNullOrBlank() -> {
-                // TODO: Use custom error for better visibility
-                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot access this resource")
+            !tenantId.isNullOrBlank() && !isTenantExists(tenantId, springUser) -> {
+                response.sendRedirect("/error/tenant-not-found")
+                return
             }
-            springUser.ctx.tenants.isNotEmpty() -> {
-                setFirstAvailableTenant(springUser)
+            !tenantId.isNullOrBlank() && !isTenantAccessible(tenantId, springUser) -> {
+                response.sendRedirect("/error/tenant-access-denied")
+                return
+            }
+            tenantId.isNullOrBlank() -> {
+                // Handle no tenant case - redirect based on user's companies
+                val companies = try {
+                    springUser.ctx.tenants
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                
+                if (companies.isEmpty()) {
+                    response.sendRedirect("/companies/create")
+                } else {
+                    response.sendRedirect("/tenant/select")
+                }
+                return
             }
         }
 
@@ -54,11 +72,7 @@ class TenantIdFilter(
     }
 
     private fun getCurrentSpringUser(): SpringUser {
-        return try {
-            SecurityContextHolder.getContext().authentication.principal as SpringUser
-        } catch (e: ClassCastException) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user context")
-        }
+        return SecurityContextHolder.getContext().authentication.principal as SpringUser
     }
 
     private fun createWrappedRequest(request: HttpServletRequest): HttpServletRequestWrapper {
@@ -74,22 +88,28 @@ class TenantIdFilter(
         }
     }
 
+    private fun isTenantExists(tenantId: String, springUser: SpringUser): Boolean {
+        return try {
+            springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
     private fun isTenantAccessible(tenantId: String, springUser: SpringUser): Boolean {
-        return springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+        return try {
+            springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+        } catch (e: NumberFormatException) {
+            false
+        }
     }
 
     private fun setCurrentTenant(tenantId: String, springUser: SpringUser) {
         val tenantIdLong = tenantId.toLong()
         val tenant = springUser.ctx.tenants.find { it.id == tenantIdLong }
-            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant not found")
+            ?: return // This shouldn't happen due to prior checks
 
         TenantContextHolder.setTenantId(tenantIdLong)
-        springUser.ctx.currentTenant = tenant
-    }
-
-    private fun setFirstAvailableTenant(springUser: SpringUser) {
-        val tenant = springUser.ctx.tenants.first()
-        TenantContextHolder.setTenantId(tenant.id)
         springUser.ctx.currentTenant = tenant
     }
 }

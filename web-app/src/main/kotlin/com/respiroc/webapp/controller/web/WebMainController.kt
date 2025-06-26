@@ -24,11 +24,7 @@ class WebMainController(
         val springUser = springUser()
         model.addAttribute("user", springUser)
 
-        val tenantId = TenantContextHolder.getTenantId()
-        if (TenantContextHolder.getTenantId() == null) {
-            return "redirect:/companies/create"
-        }
-
+        val tenantId = TenantContextHolder.getTenantId()!!
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         model.addAttribute("companies", companies)
 

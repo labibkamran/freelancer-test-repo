@@ -31,11 +31,6 @@ class WebLedgerController(
         val springUser = springUser()
         model.addAttribute("user", springUser)
 
-        val tenantId = TenantContextHolder.getTenantId()
-        if (tenantId == null) {
-            return "redirect:/companies/create"
-        }
-
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         model.addAttribute("companies", companies)
 
