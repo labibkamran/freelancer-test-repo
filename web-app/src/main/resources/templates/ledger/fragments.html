@@ -53,60 +53,10 @@
             
             // Update balance display
             updateBalance();
-            
-                         // Trigger table refresh with tenantId
-             const tenantId = document.querySelector('input[name="tenantId"]')?.value;
-             const url = tenantId ? `/dashboard/ledger/postings-table?tenantId=${tenantId}` : '/dashboard/ledger/postings-table';
-             htmx.ajax('GET', url, '#postings-table');
         }
     </script>
 </div>
 
-<!-- Postings Table Fragment -->
-<div th:fragment="postings-table">
-    <div class="table-header">
-        <div class="table-row" style="font-weight: 600;">
-            <div>Date</div>
-            <div>Account</div>
-            <div>Amount</div>
-            <div>Currency</div>
-            <div>Balance</div>
-            <div>Description</div>
-            <div>Actions</div>
-        </div>
-    </div>
-    
-    <div th:if="${#lists.isEmpty(postings)}" style="padding: 3rem; text-align: center; color: #6b7280;">
-        <wa-icon name="inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></wa-icon>
-        <p>No postings yet. Create your first journal entry above!</p>
-    </div>
 
-    <div th:each="posting : ${postings}" class="table-row">
-        <div th:text="${#temporals.format(posting.postingDate, 'dd.MM.yyyy')}"></div>
-        <div>
-            <div style="font-weight: 500;" th:text="${posting.accountNumber}"></div>
-            <div style="font-size: 0.875rem; color: #6b7280;" 
-                 th:text="${accounts.?[noAccountNumber == __${posting.accountNumber}__][0]?.accountName ?: 'Unknown Account'}"></div>
-        </div>
-        <div th:class="${posting.amount.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'amount-positive' : 'amount-negative'}"
-             th:text="${#numbers.formatDecimal(posting.amount, 1, 2)}"></div>
-        <div th:text="${posting.currency}"></div>
-        <div>
-            <wa-button size="small" variant="neutral" 
-                       th:onclick="'showBalance(\'' + ${posting.accountNumber} + '\')'">
-                <wa-icon name="calculator"></wa-icon>
-                View
-            </wa-button>
-        </div>
-        <div th:text="${posting.description ?: '-'}"></div>
-        <div>
-            <wa-button size="small" variant="neutral"
-                       th:onclick="'showAccountPostings(\'' + ${posting.accountNumber} + '\')'">
-                <wa-icon name="list"></wa-icon>
-                History
-            </wa-button>
-        </div>
-    </div>
-</div>
 
 </html> 
