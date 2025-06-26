@@ -212,8 +212,7 @@
         <!-- Header -->
         <div class="row mb-4">
             <div class="col">
-                <h1 class="h3 mb-2">General Ledger (Posting)</h1>
-                <p class="text-muted">Double-entry bookkeeping system</p>
+                <h2 class="h3 mb-2">Register advanced voucher</h2>
             </div>
         </div>
 
@@ -241,7 +240,7 @@
         <!-- Batch Posting Form -->
         <div class="posting-form">
             <div class="form-header">
-                <h4 style="margin: 0;">⚡ Journal Entry</h4>
+                <h4 style="margin: 0;">Postings</h4>
                 <small class="text-muted">Debits must equal credits</small>
             </div>
             
@@ -257,8 +256,8 @@
                     <thead>
                         <tr>
                             <th style="width: 90px;">Date</th>
-                            <th style="width: 160px;">Debit Account</th>
-                            <th style="width: 160px;">Credit Account</th>
+                            <th style="width: 160px;">Debit (+)</th>
+                            <th style="width: 160px;">Credit (-)</th>
                             <th style="width: 100px;">Amount</th>
                             <th style="width: 70px;">Currency</th>
                             <th>Description</th>
@@ -281,13 +280,12 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <wa-button type="button" variant="neutral" onclick="addPostingLine()">
+                    <wa-button type="button" size="small" variant="neutral" onclick="addPostingLine()">
                         <wa-icon name="plus"></wa-icon>
-                        Add Posting
+                        New row
                     </wa-button>
                     
-                    <wa-button type="submit" variant="success" id="saveButton" disabled>
-                        <wa-icon name="save"></wa-icon>
+                    <wa-button type="submit" size="small" variant="success" id="saveButton" disabled>
                         Save Postings
                     </wa-button>
                 </div>
