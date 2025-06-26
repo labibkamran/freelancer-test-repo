@@ -710,8 +710,8 @@
                             
                             <wa-menu>
                                 <wa-menu-item th:each="company : ${companies}" 
-                                             th:onclick="'switchCompany(' + ${company.id} + ')'"
-                                             th:class="${currentCompany != null and currentCompany.id == company.id} ? 'selected' : ''">
+                                             th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
+                                             th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
                                     <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
                                     <span th:text="${company.name}">Company Name</span>
                                 </wa-menu-item>
@@ -731,7 +731,7 @@
                         <wa-dropdown placement="bottom-end">
                             <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
                                 <wa-icon slot="prefix" name="user" variant="solid"></wa-icon>
-                                <th:block th:text="${user.email}"></th:block>
+                                <th:block th:text="${user.username}"></th:block>
                             </wa-button>
                             <wa-menu>
                                 <wa-menu-item onclick="window.location.href='/auth/logout'">Logout</wa-menu-item>
@@ -888,9 +888,9 @@
         
         // Company switching function
         function switchCompany(tenantId) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('tenantId', tenantId);
-            window.open(currentUrl.toString(), '_blank');
+            const dashboardUrl = new URL('/dashboard', window.location.origin);
+            dashboardUrl.searchParams.set('tenantId', tenantId);
+            window.open(dashboardUrl.toString(), '_blank');
         }
         
         // Get current tenant ID from URL
@@ -924,6 +924,8 @@
             });
         }, 5000);
     </script>
+
+
     
     <!-- Custom scripts -->
     <th:block layout:fragment="scripts"></th:block>

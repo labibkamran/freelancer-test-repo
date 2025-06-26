@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <style>
+        .posting-form {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .balance-row {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .balance-row td {
+            padding: 0.5rem 0.4rem;
+            font-weight: 500;
+        }
+        
+        .balance-total {
+            text-align: right;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .balance-error {
+            color: #dc2626 !important;
+        }
+        
+        .balance-success {
+            color: #16a34a !important;
+        }
+        
+        .converted-amount {
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        
+        .posting-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .posting-table th {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            text-align: left;
+            border: 1px solid #e9ecef;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .posting-table td {
+            padding: 0.4rem;
+            border: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        
+        .posting-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .posting-line-row input,
+        .posting-line-row select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0.2rem;
+            font-size: 0.85rem;
+        }
+        
+        .posting-line-row input:focus,
+        .posting-line-row select:focus {
+            outline: 1px solid #3b82f6;
+            outline-offset: -1px;
+            border-radius: 3px;
+        }
+        
+        .posting-line-row input:disabled {
+            background-color: #f5f5f5;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .currency-select {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .amount-input {
+            text-align: right;
+            font-size: 0.85rem;
+        }
+        
+        .balance-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .balance-item {
+            text-align: center;
+        }
+        
+        .balance-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .balance-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .balance-matched {
+            color: #16a34a;
+        }
+        
+        .balance-unmatched {
+            color: #dc2626;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .account-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .account-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .account-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .account-search {
+            position: relative;
+        }
+        
+
+        
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 500ms ease-in;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+        
+        .field-error {
+            border: 2px solid #dc2626 !important;
+            background-color: #fef2f2 !important;
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h3 mb-2">Register advanced voucher</h2>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="form-messages">
+        <div th:if="${successMessage}" class="alert alert-success">
+            <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
+            <span th:text="${successMessage}"></span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <wa-icon name="exclamation-triangle" style="margin-right: 0.5rem;"></wa-icon>
+            <span th:text="${errorMessage}"></span>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="htmx-indicator" style="display: none;">
+            <div class="alert alert-info">
+                <wa-icon name="clock" style="margin-right: 0.5rem;"></wa-icon>
+                Saving journal entry...
+            </div>
+        </div>
+
+        <!-- Batch Posting Form -->
+        <div class="posting-form">
+            <div class="form-header">
+                <h4 style="margin: 0;">Postings</h4>
+                <small class="text-muted">Debits must equal credits</small>
+            </div>
+            
+            <form th:attr="hx-post='/dashboard/ledger/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
+                  hx-target="#form-messages" 
+                  hx-swap="innerHTML"
+                  hx-indicator="#loading-indicator"
+                  id="batchPostingForm" 
+                                      onsubmit="event.preventDefault(); validateAndPrepareForm(event).then(result => { if(result) event.target.submit(); })">
+                
+                <!-- Individual Posting Lines Table -->
+                <table class="posting-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">Date</th>
+                            <th style="width: 160px;">Debit (+)</th>
+                            <th style="width: 160px;">Credit (-)</th>
+                            <th style="width: 100px;">Amount</th>
+                            <th style="width: 70px;">Currency</th>
+                            <th>Description</th>
+                            <th style="width: 60px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postingLines">
+                        <!-- Entries will be added dynamically -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="balance-row">
+                            <td></td>
+                            <td class="balance-total"><span id="totalDebit">0.00</span></td>
+                            <td class="balance-total"><span id="totalCredit">0.00</span></td>
+                            <td class="balance-total"><span id="balanceAmount">0.00</span></td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <wa-button type="button" size="small" variant="neutral" onclick="addPostingLine()">
+                        <wa-icon name="plus"></wa-icon>
+                        New row
+                    </wa-button>
+                    
+                    <wa-button type="submit" size="small" variant="success" id="saveButton" disabled>
+                        Save Postings
+                    </wa-button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+</main>
+
+<th:block layout:fragment="scripts">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script th:inline="javascript">
+        // Accounts data for search
+        const accounts = /*[[${accounts}]]*/ [];
+        const companyCurrency = /*[[${companyCurrency}]]*/ 'NOK';
+        const supportedCurrencies = /*[[${supportedCurrencies}]]*/ ['NOK', 'USD', 'EUR'];
+        let rowCounter = 0;
+        
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            addPostingLine();
+            addPostingLine();
+        });
+        
+        function addPostingLine() {
+            const tbody = document.getElementById('postingLines');
+            const row = document.createElement('tr');
+            row.className = 'posting-line-row';
+            row.id = 'posting-line-row-' + rowCounter;
+            
+            const currencyOptions = supportedCurrencies.map(currency => 
+                `<option value="${currency}" ${currency === companyCurrency ? 'selected' : ''}>${currency}</option>`
+            ).join('');
+            
+            row.innerHTML = `
+                <td>
+                    <input type="date" 
+                           name="postingLines[${rowCounter}].postingDate" 
+                           value="${new Date().toISOString().split('T')[0]}"
+                           onchange="validatePostingLineFields(${rowCounter})"
+                           required>
+                </td>
+                <td>
+                    <div class="account-search">
+                        <input type="text" 
+                               name="postingLines[${rowCounter}].debitAccount" 
+                               placeholder="Search debit account..." 
+                               autocomplete="off"
+                               onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
+                               onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
+                               onblur="validatePostingLineFields(${rowCounter})"
+                               oninput="toggleAccountSelection(${rowCounter}, 'debit')">
+                        <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="account-search">
+                        <input type="text" 
+                               name="postingLines[${rowCounter}].creditAccount" 
+                               placeholder="Search credit account..." 
+                               autocomplete="off"
+                               onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
+                               onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
+                               onblur="validatePostingLineFields(${rowCounter})"
+                               oninput="toggleAccountSelection(${rowCounter}, 'credit')">
+                        <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                    </div>
+                </td>
+                <td>
+                    <input type="number" 
+                           step="0.01" 
+                           name="postingLines[${rowCounter}].amount" 
+                           class="amount-input"
+                           placeholder="0.00"
+                           onchange="handleAmountChange(${rowCounter})"
+                           onblur="validatePostingLineFields(${rowCounter})"
+                           required>
+                    <div id="converted-amount-${rowCounter}" class="converted-amount" style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;"></div>
+                </td>
+                <td>
+                    <select name="postingLines[${rowCounter}].currency" 
+                            class="currency-select"
+                            onchange="handleCurrencyChange(${rowCounter})">
+                        ${currencyOptions}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" 
+                           name="postingLines[${rowCounter}].description" 
+                           placeholder="Description">
+                </td>
+                <td>
+                    <wa-button type="button" size="small" variant="danger" onclick="removePostingLine(${rowCounter})">
+                        <wa-icon name="trash"></wa-icon>
+                    </wa-button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            rowCounter++;
+            updateBalance();
+        }
+        
+        function removePostingLine(id) {
+            const rows = document.querySelectorAll('.posting-line-row');
+            if (rows.length > 1) {
+                document.getElementById('posting-line-row-' + id).remove();
+                updateBalance();
+            }
+        }
+        
+        function validatePostingLineFields(rowId) {
+            const dateInput = document.querySelector(`input[name="postingLines[${rowId}].postingDate"]`);
+            const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
+            const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+            const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
+            
+            // Clear previous error states
+            [dateInput, debitInput, creditInput, amountInput].forEach(input => {
+                if (input) input.classList.remove('field-error');
+            });
+            
+            const hasDate = dateInput && dateInput.value.trim() !== '';
+            const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+            const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+            const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+            
+            // If any field has data, validate the entire row
+            if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
+                if (!hasDate) {
+                    dateInput.classList.add('field-error');
+                }
+                
+                if (!hasDebitAccount && !hasCreditAccount) {
+                    debitInput.classList.add('field-error');
+                    creditInput.classList.add('field-error');
+                }
+                
+                if (!hasAmount) {
+                    amountInput.classList.add('field-error');
+                }
+            }
+        }
+        
+        function updateBalance() {
+            let totalDebit = 0;
+            let totalCredit = 0;
+            let hasValidEntries = false;
+            
+            console.log('=== Updating Balance ===');
+            
+            // Calculate totals from individual posting lines using converted amounts
+            document.querySelectorAll('.posting-line-row').forEach((row, index) => {
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value && dateInput && dateInput.value) {
+                    const originalAmount = parseFloat(amountInput.value);
+                    const currency = currencySelect ? currencySelect.value : companyCurrency;
+                    
+                    // Use converted amount if available, otherwise use original amount
+                    const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
+                    const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : originalAmount;
+                    
+                    console.log(`Row ${index}: Original=${originalAmount} ${currency}, Converted=${convertedAmount} ${companyCurrency}`);
+                    
+                    if (!isNaN(convertedAmount) && convertedAmount > 0) {
+                        if (debitInput && debitInput.value.trim() !== '') {
+                            totalDebit += convertedAmount;
+                            hasValidEntries = true;
+                            console.log(`Added ${convertedAmount} to debit (account: ${debitInput.value})`);
+                        } else if (creditInput && creditInput.value.trim() !== '') {
+                            totalCredit += convertedAmount;
+                            hasValidEntries = true;
+                            console.log(`Added ${convertedAmount} to credit (account: ${creditInput.value})`);
+                        }
+                    }
+                }
+            });
+            
+            const balance = totalDebit - totalCredit;
+            const isBalanced = Math.abs(balance) < 0.01;
+            
+            console.log(`Total Debit: ${totalDebit.toFixed(2)} ${companyCurrency}`);
+            console.log(`Total Credit: ${totalCredit.toFixed(2)} ${companyCurrency}`);
+            console.log(`Balance: ${balance.toFixed(2)} ${companyCurrency} (Balanced: ${isBalanced})`);
+            
+            // Update display (show amounts in company currency)
+            document.getElementById('totalDebit').textContent = totalDebit.toFixed(2) + ' ' + companyCurrency;
+            document.getElementById('totalCredit').textContent = totalCredit.toFixed(2) + ' ' + companyCurrency;
+            document.getElementById('balanceAmount').textContent = balance.toFixed(2) + ' ' + companyCurrency;
+            
+            const saveButton = document.getElementById('saveButton');
+            const totalDebitElement = document.getElementById('totalDebit');
+            const totalCreditElement = document.getElementById('totalCredit');
+            const balanceAmountElement = document.getElementById('balanceAmount');
+            
+            if (isBalanced && hasValidEntries && totalDebit > 0) {
+                balanceAmountElement.className = 'balance-success';
+                totalDebitElement.className = 'balance-success';
+                totalCreditElement.className = 'balance-success';
+                saveButton.disabled = false;
+                console.log('✅ Form is balanced and ready to submit');
+            } else {
+                balanceAmountElement.className = 'balance-error';
+                totalDebitElement.className = 'balance-success';
+                totalCreditElement.className = 'balance-success';
+                saveButton.disabled = true;
+                console.log('❌ Form is not balanced or has invalid entries');
+            }
+        }
+        
+        // Handle amount changes with proper async/await
+        async function handleAmountChange(rowId) {
+            await updateConvertedAmount(rowId);
+            updateBalance();
+        }
+        
+        // Handle currency changes with proper async/await
+        async function handleCurrencyChange(rowId) {
+            await updateConvertedAmount(rowId);
+            updateBalance();
+        }
+        
+        // Update converted amount display
+        async function updateConvertedAmount(rowId) {
+            const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
+            const currencySelect = document.querySelector(`select[name="postingLines[${rowId}].currency"]`);
+            const convertedAmountDiv = document.getElementById(`converted-amount-${rowId}`);
+            
+            if (amountInput && currencySelect && convertedAmountDiv) {
+                const amount = parseFloat(amountInput.value);
+                const currency = currencySelect.value;
+                
+                console.log(`Converting amount ${amount} from ${currency} to ${companyCurrency} for row ${rowId}`);
+                
+                if (!isNaN(amount) && amount > 0 && currency !== companyCurrency) {
+                    try {
+                        const response = await fetch(`/dashboard/ledger/convert-amount?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const convertedAmount = parseFloat(data.convertedAmount);
+                            convertedAmountDiv.textContent = `≈ ${convertedAmount.toFixed(2)} ${companyCurrency}`;
+                            
+                            // Store the converted amount for balance calculation
+                            amountInput.setAttribute('data-converted-amount', convertedAmount.toString());
+                            console.log(`Converted ${amount} ${currency} to ${convertedAmount} ${companyCurrency}`);
+                        } else {
+                            console.error('Failed to convert currency, using original amount');
+                            convertedAmountDiv.textContent = `≈ ${amount.toFixed(2)} ${companyCurrency}`;
+                            amountInput.setAttribute('data-converted-amount', amount.toString());
+                        }
+                    } catch (error) {
+                        console.error('Error converting amount:', error);
+                        convertedAmountDiv.textContent = `≈ ${amount.toFixed(2)} ${companyCurrency}`;
+                        amountInput.setAttribute('data-converted-amount', amount.toString());
+                    }
+                } else if (!isNaN(amount) && amount > 0) {
+                    // Same currency, no conversion needed
+                    convertedAmountDiv.textContent = '';
+                    amountInput.setAttribute('data-converted-amount', amount.toString());
+                    console.log(`No conversion needed for ${amount} ${currency}`);
+                } else {
+                    // Invalid amount
+                    convertedAmountDiv.textContent = '';
+                    amountInput.removeAttribute('data-converted-amount');
+                    console.log(`Invalid amount: ${amount}`);
+                }
+            }
+        }
+        
+        function toggleAccountSelection(rowId, type) {
+            const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
+            const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+            
+            if (type === 'debit' && debitInput.value.trim() !== '') {
+                creditInput.value = '';
+                creditInput.disabled = true;
+            } else if (type === 'credit' && creditInput.value.trim() !== '') {
+                debitInput.value = '';
+                debitInput.disabled = true;
+            } else {
+                debitInput.disabled = false;
+                creditInput.disabled = false;
+            }
+            
+            validatePostingLineFields(rowId);
+            updateBalance();
+        }
+        
+        function searchAccounts(input, rowId, type) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById(type + '-dropdown-' + rowId);
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            const filteredAccounts = accounts.filter(account => 
+                account.noAccountNumber.includes(query) ||
+                account.accountName.toLowerCase().includes(query) ||
+                account.accountDescription.toLowerCase().includes(query)
+            );
+            
+            if (filteredAccounts.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            dropdown.innerHTML = filteredAccounts.map(account => `
+                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId}, '${type}')">
+                        <div style="font-weight: 500;">${account.noAccountNumber}</div>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${account.accountName}</div>
+                </div>
+            `).join('');
+            
+            dropdown.style.display = 'block';
+        }
+        
+        function selectAccount(accountNumber, accountName, rowId, type) {
+            const input = document.querySelector(`input[name="postingLines[${rowId}].${type}Account"]`);
+            input.value = accountNumber;
+            document.getElementById(type + '-dropdown-' + rowId).style.display = 'none';
+            
+            // Trigger toggle function to disable the other input
+            toggleAccountSelection(rowId, type);
+        }
+        
+        // Hide dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.account-search')) {
+                document.querySelectorAll('.account-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+        
+
+        
+        // Frontend validation functions
+        function validateField(fieldId, value, errorMessage) {
+            const field = document.getElementById(fieldId);
+            const errorSpan = document.getElementById(fieldId + '-error');
+            
+            if (!value || value.trim() === '') {
+                field.classList.add('field-error');
+                errorSpan.textContent = errorMessage;
+                errorSpan.style.display = 'block';
+                return false;
+            } else {
+                field.classList.remove('field-error');
+                errorSpan.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function validateFormFields() {
+            let isValid = true;
+            
+            // Validate posting lines
+            const rows = document.querySelectorAll('.posting-line-row');
+            let hasValidEntries = false;
+            
+            rows.forEach((row, index) => {
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                
+                // Clear previous errors
+                [dateInput, debitInput, creditInput, amountInput].forEach(input => {
+                    if (input) input.classList.remove('field-error');
+                });
+                
+                const hasDate = dateInput && dateInput.value.trim() !== '';
+                const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+                const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+                const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+                
+                if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
+                    // This row has some data, validate it completely
+                    if (!hasDate) {
+                        dateInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (!hasDebitAccount && !hasCreditAccount) {
+                        debitInput.classList.add('field-error');
+                        creditInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (!hasAmount) {
+                        amountInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
+                        hasValidEntries = true;
+                    }
+                }
+            });
+            
+            if (!hasValidEntries) {
+                showMessage('Please add at least one complete posting line.', 'error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('form-messages');
+            const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+            const iconName = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+            
+            messagesDiv.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <wa-icon name="${iconName}" style="margin-right: 0.5rem;"></wa-icon>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        // Combined validation and form preparation
+        async function validateAndPrepareForm(event) {
+            // First validate all fields
+            if (!validateFormFields()) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Then prepare form data
+            return await prepareFormData(event);
+        }
+        
+        // Prepare form data before submission
+        async function prepareFormData(event) {
+            console.log('=== Preparing Form Data ===');
+            
+            // First, make sure all conversions are up to date
+            const rows = Array.from(document.querySelectorAll('.posting-line-row'));
+            
+            // Update all conversions before validating
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const rowId = row.id.replace('posting-line-row-', '');
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value && currencySelect && currencySelect.value) {
+                    await updateConvertedAmount(rowId);
+                }
+            }
+            
+            // Now validate the balance
+            updateBalance();
+            
+            // Remove empty rows and reindex
+            const tbody = document.getElementById('postingLines');
+            const allRows = Array.from(tbody.querySelectorAll('.posting-line-row'));
+            
+            // Filter out empty rows
+            const validRows = allRows.filter(row => {
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                
+                const hasDate = dateInput && dateInput.value.trim() !== '';
+                const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+                const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+                const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+                
+                return hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount;
+            });
+            
+            console.log(`Found ${validRows.length} valid rows out of ${allRows.length} total rows`);
+            
+            // Check balance before submission
+            let totalDebit = 0;
+            let totalCredit = 0;
+            
+            validRows.forEach((row, index) => {
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value) {
+                    const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
+                    const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : parseFloat(amountInput.value);
+                    
+                    console.log(`Row ${index}: Amount=${amountInput.value} ${currencySelect.value}, Converted=${convertedAmount} ${companyCurrency}`);
+                    
+                    if (debitInput && debitInput.value.trim() !== '') {
+                        totalDebit += convertedAmount;
+                    } else if (creditInput && creditInput.value.trim() !== '') {
+                        totalCredit += convertedAmount;
+                    }
+                }
+            });
+            
+            const balance = totalDebit - totalCredit;
+            console.log(`Final balance check: Debit=${totalDebit}, Credit=${totalCredit}, Balance=${balance}`);
+            
+            if (Math.abs(balance) >= 0.01) {
+                event.preventDefault();
+                alert(`Transaction is not balanced! Difference: ${balance.toFixed(2)} ${companyCurrency}`);
+                return false;
+            }
+            
+            // Remove all rows
+            allRows.forEach(row => row.remove());
+            
+            // Re-add only valid rows with proper indexing
+            validRows.forEach((row, index) => {
+                // Update input names to use sequential indexing
+                const inputs = row.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name && name.includes('postingLines[')) {
+                        const newName = name.replace(/postingLines\[\d+\]/, `postingLines[${index}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+                
+                tbody.appendChild(row);
+            });
+            
+            // If no valid rows, prevent form submission
+            if (validRows.length === 0) {
+                event.preventDefault();
+                alert('Please add at least one complete posting line.');
+                return false;
+            }
+            
+            console.log('✅ Form data prepared successfully');
+            return true;
+        }
+    </script>
+</th:block>
+</body>
+</html> 

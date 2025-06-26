@@ -21,17 +21,11 @@ class WebMainController(
     fun dashboard(
         model: Model
     ): String {
-        val user = user()
-        val tenantId = TenantContextHolder.getTenantId()
-        if (tenantId == null && user.tenants.isNotEmpty()) {
-            return "redirect:/dashboard?tenantId=${user.tenants[0].id}";
-        } else if (TenantContextHolder.getTenantId() == null) {
-            return "redirect:/companies/create"
-        }
+        val springUser = springUser()
+        model.addAttribute("user", springUser)
 
-        model.addAttribute("user", user)
-
-        val companies = companyApi.findAllCompanyByUser(user)
+        val tenantId = TenantContextHolder.getTenantId()!!
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         model.addAttribute("companies", companies)
 
         val currentCompany = companies.find { it.tenantId == tenantId }
