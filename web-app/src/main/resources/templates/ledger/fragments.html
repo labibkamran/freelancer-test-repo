@@ -30,26 +30,23 @@
         // Clear form after successful submission
         if (document.querySelector('.alert-success')) {
             // Clear all input fields
-            document.querySelectorAll('#batchPostingForm input').forEach(input => {
+            document.querySelectorAll('#batchPostingForm input, #batchPostingForm select').forEach(input => {
                 if (input.type === 'date') {
                     input.value = new Date().toISOString().split('T')[0];
                 } else if (input.type === 'text' || input.type === 'number') {
                     input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    // Reset to company currency (assume NOK for now)
+                    input.value = 'NOK';
                 }
                 input.classList.remove('field-error');
             });
             
-            // Reset currency to default
-            document.getElementById('currency').value = 'NOK';
-            
-            // Clear description
-            document.getElementById('description').value = '';
-            
-            // Remove all posting rows and add fresh ones
-            document.getElementById('postingEntries').innerHTML = '';
+            // Remove all posting lines and add fresh ones
+            document.getElementById('postingLines').innerHTML = '';
             rowCounter = 0;
-            addPostingRow();
-            addPostingRow();
+            addPostingLine();
+            addPostingLine();
             
             // Update balance display
             updateBalance();

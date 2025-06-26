@@ -41,6 +41,13 @@ open class Posting : Serializable {
     @Column(name = "currency", nullable = false, length = 3)
     open lateinit var currency: String
 
+    @Column(name = "original_amount", precision = 15, scale = 2)
+    open var originalAmount: BigDecimal? = null
+
+    @Size(max = 3)
+    @Column(name = "original_currency", length = 3)
+    open var originalCurrency: String? = null
+
     @Column(name = "posting_date", nullable = false)
     open lateinit var postingDate: LocalDate
 

@@ -71,6 +71,8 @@ class PostingService(
             posting.postingDate = postingData.postingDate
             posting.description = postingData.description
             posting.tenantId = tenantId
+            posting.originalAmount = postingData.originalAmount
+            posting.originalCurrency = postingData.originalCurrency
             posting
         }
 
