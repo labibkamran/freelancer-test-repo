@@ -8,5 +8,7 @@ data class CreatePostingCommand(
     val amount: BigDecimal,
     val currency: String,
     val postingDate: LocalDate,
-    val description: String?
+    val description: String?,
+    val originalAmount: BigDecimal? = null,
+    val originalCurrency: String? = null
 )

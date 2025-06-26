@@ -6,26 +6,50 @@
         .posting-form {
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         
         .form-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
         }
         
-        .form-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr 2fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+        .balance-row {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .balance-row td {
+            padding: 0.5rem 0.4rem;
+            font-weight: 500;
+        }
+        
+        .balance-total {
+            text-align: right;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .balance-error {
+            color: #dc2626 !important;
+        }
+        
+        .balance-success {
+            color: #16a34a !important;
+        }
+        
+        .converted-amount {
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-style: italic;
+            margin-top: 2px;
         }
         
         .posting-table {
@@ -36,15 +60,15 @@
         
         .posting-table th {
             background: #f8f9fa;
-            padding: 0.75rem;
+            padding: 0.5rem;
             text-align: left;
             border: 1px solid #e9ecef;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
         }
         
         .posting-table td {
-            padding: 0.5rem;
+            padding: 0.4rem;
             border: 1px solid #e9ecef;
             vertical-align: middle;
         }
@@ -53,23 +77,36 @@
             background-color: #f8f9fa;
         }
         
-        .posting-row input,
-        .posting-row select {
+        .posting-line-row input,
+        .posting-line-row select {
             width: 100%;
             border: none;
             background: transparent;
-            padding: 0.25rem;
+            padding: 0.2rem;
+            font-size: 0.85rem;
         }
         
-        .posting-row input:focus,
-        .posting-row select:focus {
-            outline: 2px solid #3b82f6;
+        .posting-line-row input:focus,
+        .posting-line-row select:focus {
+            outline: 1px solid #3b82f6;
             outline-offset: -1px;
-            border-radius: 4px;
+            border-radius: 3px;
+        }
+        
+        .posting-line-row input:disabled {
+            background-color: #f5f5f5;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .currency-select {
+            font-size: 0.8rem;
+            font-weight: 500;
         }
         
         .amount-input {
             text-align: right;
+            font-size: 0.85rem;
         }
         
         .balance-display {
@@ -213,72 +250,45 @@
                   hx-swap="innerHTML"
                   hx-indicator="#loading-indicator"
                   id="batchPostingForm" 
-                  onsubmit="return validateAndPrepareForm(event)">
+                                      onsubmit="event.preventDefault(); validateAndPrepareForm(event).then(result => { if(result) event.target.submit(); })">
                 
-                <!-- Form Meta Information -->
-                <div class="form-meta">
-                    <div>
-                        <label for="postingDate">Date *</label>
-                        <wa-input type="date" id="postingDate" name="postingDate" required></wa-input>
-                        <span id="postingDate-error" class="error-message" style="display: none;"></span>
-                    </div>
-                    <div>
-                        <label for="currency">Currency *</label>
-                        <wa-select id="currency" name="currency" required>
-                            <wa-option value="NOK">NOK</wa-option>
-                            <wa-option value="USD">USD</wa-option>
-                            <wa-option value="EUR">EUR</wa-option>
-                        </wa-select>
-                        <span id="currency-error" class="error-message" style="display: none;"></span>
-                    </div>
-                    <div>
-                        <label for="description">Description</label>
-                        <wa-input id="description" name="description" placeholder="Journal entry description"></wa-input>
-                    </div>
-                </div>
-
-                <!-- Balance Display -->
-                <div class="balance-display" id="balanceDisplay">
-                    <div class="balance-item">
-                        <div class="balance-value" id="totalDebit">0.00</div>
-                        <div class="balance-label">Total Debit</div>
-                    </div>
-                    <div class="balance-item">
-                        <div class="balance-value" id="balanceStatus">⚖️</div>
-                        <div class="balance-label">Balance</div>
-                    </div>
-                    <div class="balance-item">
-                        <div class="balance-value" id="totalCredit">0.00</div>
-                        <div class="balance-label">Total Credit</div>
-                    </div>
-                </div>
-
-                <!-- Posting Entries Table -->
+                <!-- Individual Posting Lines Table -->
                 <table class="posting-table">
                     <thead>
                         <tr>
-                            <th style="width: 200px;">Account</th>
-                            <th style="width: 120px;">Debit</th>
-                            <th style="width: 120px;">Credit</th>
+                            <th style="width: 90px;">Date</th>
+                            <th style="width: 160px;">Debit Account</th>
+                            <th style="width: 160px;">Credit Account</th>
+                            <th style="width: 100px;">Amount</th>
+                            <th style="width: 70px;">Currency</th>
                             <th>Description</th>
-                            <th style="width: 80px;">Action</th>
+                            <th style="width: 60px;">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="postingEntries">
+                    <tbody id="postingLines">
                         <!-- Entries will be added dynamically -->
                     </tbody>
+                    <tfoot>
+                        <tr class="balance-row">
+                            <td></td>
+                            <td class="balance-total"><span id="totalDebit">0.00</span></td>
+                            <td class="balance-total"><span id="totalCredit">0.00</span></td>
+                            <td class="balance-total"><span id="balanceAmount">0.00</span></td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
                 </table>
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <wa-button type="button" variant="neutral" onclick="addPostingRow()">
+                    <wa-button type="button" variant="neutral" onclick="addPostingLine()">
                         <wa-icon name="plus"></wa-icon>
-                        Add Row
+                        Add Posting
                     </wa-button>
                     
                     <wa-button type="submit" variant="success" id="saveButton" disabled>
                         <wa-icon name="save"></wa-icon>
-                        Save Journal Entry
+                        Save Postings
                     </wa-button>
                 </div>
             </form>
@@ -293,60 +303,85 @@
     <script th:inline="javascript">
         // Accounts data for search
         const accounts = /*[[${accounts}]]*/ [];
+        const companyCurrency = /*[[${companyCurrency}]]*/ 'NOK';
+        const supportedCurrencies = /*[[${supportedCurrencies}]]*/ ['NOK', 'USD', 'EUR'];
         let rowCounter = 0;
         
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('postingDate').value = new Date().toISOString().split('T')[0];
-            addPostingRow();
-            addPostingRow();
+            addPostingLine();
+            addPostingLine();
         });
         
-        function addPostingRow() {
-            const tbody = document.getElementById('postingEntries');
+        function addPostingLine() {
+            const tbody = document.getElementById('postingLines');
             const row = document.createElement('tr');
-            row.className = 'posting-row';
-            row.id = 'row-' + rowCounter;
+            row.className = 'posting-line-row';
+            row.id = 'posting-line-row-' + rowCounter;
+            
+            const currencyOptions = supportedCurrencies.map(currency => 
+                `<option value="${currency}" ${currency === companyCurrency ? 'selected' : ''}>${currency}</option>`
+            ).join('');
             
             row.innerHTML = `
                 <td>
+                    <input type="date" 
+                           name="postingLines[${rowCounter}].postingDate" 
+                           value="${new Date().toISOString().split('T')[0]}"
+                           onchange="validatePostingLineFields(${rowCounter})"
+                           required>
+                </td>
+                <td>
                     <div class="account-search">
                         <input type="text" 
-                               name="entries[${rowCounter}].accountNumber" 
-                               placeholder="Search account..." 
+                               name="postingLines[${rowCounter}].debitAccount" 
+                               placeholder="Search debit account..." 
                                autocomplete="off"
-                               onkeyup="searchAccounts(this, ${rowCounter})"
-                               onfocus="searchAccounts(this, ${rowCounter})"
-                               onblur="validateRowFields(${rowCounter})"
-                               required>
-                        <div id="dropdown-${rowCounter}" class="account-dropdown"></div>
+                               onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
+                               onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
+                               onblur="validatePostingLineFields(${rowCounter})"
+                               oninput="toggleAccountSelection(${rowCounter}, 'debit')">
+                        <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="account-search">
+                        <input type="text" 
+                               name="postingLines[${rowCounter}].creditAccount" 
+                               placeholder="Search credit account..." 
+                               autocomplete="off"
+                               onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
+                               onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
+                               onblur="validatePostingLineFields(${rowCounter})"
+                               oninput="toggleAccountSelection(${rowCounter}, 'credit')">
+                        <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
                     </div>
                 </td>
                 <td>
                     <input type="number" 
                            step="0.01" 
-                           name="entries[${rowCounter}].debitAmount" 
-                           class="amount-input debit-input"
+                           name="postingLines[${rowCounter}].amount" 
+                           class="amount-input"
                            placeholder="0.00"
-                           onchange="validateAmounts(${rowCounter}); updateBalance()"
-                           onblur="validateRowFields(${rowCounter})">
+                           onchange="handleAmountChange(${rowCounter})"
+                           onblur="validatePostingLineFields(${rowCounter})"
+                           required>
+                    <div id="converted-amount-${rowCounter}" class="converted-amount" style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;"></div>
                 </td>
                 <td>
-                    <input type="number" 
-                           step="0.01" 
-                           name="entries[${rowCounter}].creditAmount" 
-                           class="amount-input credit-input"
-                           placeholder="0.00"
-                           onchange="validateAmounts(${rowCounter}); updateBalance()"
-                           onblur="validateRowFields(${rowCounter})">
+                    <select name="postingLines[${rowCounter}].currency" 
+                            class="currency-select"
+                            onchange="handleCurrencyChange(${rowCounter})">
+                        ${currencyOptions}
+                    </select>
                 </td>
                 <td>
                     <input type="text" 
-                           name="entries[${rowCounter}].description" 
-                           placeholder="Entry description">
+                           name="postingLines[${rowCounter}].description" 
+                           placeholder="Description">
                 </td>
                 <td>
-                    <wa-button type="button" size="small" variant="danger" onclick="removeRow(${rowCounter})">
+                    <wa-button type="button" size="small" variant="danger" onclick="removePostingLine(${rowCounter})">
                         <wa-icon name="trash"></wa-icon>
                     </wa-button>
                 </td>
@@ -357,59 +392,43 @@
             updateBalance();
         }
         
-        function removeRow(id) {
-            const rows = document.querySelectorAll('.posting-row');
+        function removePostingLine(id) {
+            const rows = document.querySelectorAll('.posting-line-row');
             if (rows.length > 1) {
-                document.getElementById('row-' + id).remove();
+                document.getElementById('posting-line-row-' + id).remove();
                 updateBalance();
             }
         }
         
-        function validateAmounts(rowId) {
-            const debitInput = document.querySelector(`input[name="entries[${rowId}].debitAmount"]`);
-            const creditInput = document.querySelector(`input[name="entries[${rowId}].creditAmount"]`);
-            
-            if (debitInput.value && creditInput.value) {
-                // Both filled - clear one
-                if (event.target === debitInput) {
-                    creditInput.value = '';
-                } else {
-                    debitInput.value = '';
-                }
-            }
-            
-            // Real-time validation
-            validateRowFields(rowId);
-        }
-        
-        function validateRowFields(rowId) {
-            const accountInput = document.querySelector(`input[name="entries[${rowId}].accountNumber"]`);
-            const debitInput = document.querySelector(`input[name="entries[${rowId}].debitAmount"]`);
-            const creditInput = document.querySelector(`input[name="entries[${rowId}].creditAmount"]`);
+        function validatePostingLineFields(rowId) {
+            const dateInput = document.querySelector(`input[name="postingLines[${rowId}].postingDate"]`);
+            const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
+            const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+            const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
             
             // Clear previous error states
-            [accountInput, debitInput, creditInput].forEach(input => {
+            [dateInput, debitInput, creditInput, amountInput].forEach(input => {
                 if (input) input.classList.remove('field-error');
             });
             
-            const hasAccount = accountInput && accountInput.value.trim() !== '';
-            const hasDebit = debitInput && debitInput.value && parseFloat(debitInput.value) > 0;
-            const hasCredit = creditInput && creditInput.value && parseFloat(creditInput.value) > 0;
+            const hasDate = dateInput && dateInput.value.trim() !== '';
+            const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+            const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+            const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
             
             // If any field has data, validate the entire row
-            if (hasAccount || hasDebit || hasCredit) {
-                if (!hasAccount) {
-                    accountInput.classList.add('field-error');
+            if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
+                if (!hasDate) {
+                    dateInput.classList.add('field-error');
                 }
                 
-                if (!hasDebit && !hasCredit) {
-                    if (debitInput) debitInput.classList.add('field-error');
-                    if (creditInput) creditInput.classList.add('field-error');
-                }
-                
-                if (hasDebit && hasCredit) {
+                if (!hasDebitAccount && !hasCreditAccount) {
                     debitInput.classList.add('field-error');
                     creditInput.classList.add('field-error');
+                }
+                
+                if (!hasAmount) {
+                    amountInput.classList.add('field-error');
                 }
             }
         }
@@ -417,42 +436,155 @@
         function updateBalance() {
             let totalDebit = 0;
             let totalCredit = 0;
+            let hasValidEntries = false;
             
-            document.querySelectorAll('.debit-input').forEach(input => {
-                if (input.value && !isNaN(input.value)) {
-                    totalDebit += parseFloat(input.value);
+            console.log('=== Updating Balance ===');
+            
+            // Calculate totals from individual posting lines using converted amounts
+            document.querySelectorAll('.posting-line-row').forEach((row, index) => {
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value && dateInput && dateInput.value) {
+                    const originalAmount = parseFloat(amountInput.value);
+                    const currency = currencySelect ? currencySelect.value : companyCurrency;
+                    
+                    // Use converted amount if available, otherwise use original amount
+                    const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
+                    const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : originalAmount;
+                    
+                    console.log(`Row ${index}: Original=${originalAmount} ${currency}, Converted=${convertedAmount} ${companyCurrency}`);
+                    
+                    if (!isNaN(convertedAmount) && convertedAmount > 0) {
+                        if (debitInput && debitInput.value.trim() !== '') {
+                            totalDebit += convertedAmount;
+                            hasValidEntries = true;
+                            console.log(`Added ${convertedAmount} to debit (account: ${debitInput.value})`);
+                        } else if (creditInput && creditInput.value.trim() !== '') {
+                            totalCredit += convertedAmount;
+                            hasValidEntries = true;
+                            console.log(`Added ${convertedAmount} to credit (account: ${creditInput.value})`);
+                        }
+                    }
                 }
             });
             
-            document.querySelectorAll('.credit-input').forEach(input => {
-                if (input.value && !isNaN(input.value)) {
-                    totalCredit += parseFloat(input.value);
-                }
-            });
+            const balance = totalDebit - totalCredit;
+            const isBalanced = Math.abs(balance) < 0.01;
             
-            document.getElementById('totalDebit').textContent = totalDebit.toFixed(2);
-            document.getElementById('totalCredit').textContent = totalCredit.toFixed(2);
+            console.log(`Total Debit: ${totalDebit.toFixed(2)} ${companyCurrency}`);
+            console.log(`Total Credit: ${totalCredit.toFixed(2)} ${companyCurrency}`);
+            console.log(`Balance: ${balance.toFixed(2)} ${companyCurrency} (Balanced: ${isBalanced})`);
             
-            const balanced = Math.abs(totalDebit - totalCredit) < 0.01;
-            const hasEntries = totalDebit > 0 || totalCredit > 0;
+            // Update display (show amounts in company currency)
+            document.getElementById('totalDebit').textContent = totalDebit.toFixed(2) + ' ' + companyCurrency;
+            document.getElementById('totalCredit').textContent = totalCredit.toFixed(2) + ' ' + companyCurrency;
+            document.getElementById('balanceAmount').textContent = balance.toFixed(2) + ' ' + companyCurrency;
             
-            const balanceStatus = document.getElementById('balanceStatus');
             const saveButton = document.getElementById('saveButton');
+            const totalDebitElement = document.getElementById('totalDebit');
+            const totalCreditElement = document.getElementById('totalCredit');
+            const balanceAmountElement = document.getElementById('balanceAmount');
             
-            if (balanced && hasEntries) {
-                balanceStatus.textContent = '✅';
-                balanceStatus.className = 'balance-value balance-matched';
+            if (isBalanced && hasValidEntries && totalDebit > 0) {
+                balanceAmountElement.className = 'balance-success';
+                totalDebitElement.className = 'balance-success';
+                totalCreditElement.className = 'balance-success';
                 saveButton.disabled = false;
+                console.log('✅ Form is balanced and ready to submit');
             } else {
-                balanceStatus.textContent = '❌';
-                balanceStatus.className = 'balance-value balance-unmatched';
+                balanceAmountElement.className = 'balance-error';
+                totalDebitElement.className = 'balance-success';
+                totalCreditElement.className = 'balance-success';
                 saveButton.disabled = true;
+                console.log('❌ Form is not balanced or has invalid entries');
             }
         }
         
-        function searchAccounts(input, rowId) {
+        // Handle amount changes with proper async/await
+        async function handleAmountChange(rowId) {
+            await updateConvertedAmount(rowId);
+            updateBalance();
+        }
+        
+        // Handle currency changes with proper async/await
+        async function handleCurrencyChange(rowId) {
+            await updateConvertedAmount(rowId);
+            updateBalance();
+        }
+        
+        // Update converted amount display
+        async function updateConvertedAmount(rowId) {
+            const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
+            const currencySelect = document.querySelector(`select[name="postingLines[${rowId}].currency"]`);
+            const convertedAmountDiv = document.getElementById(`converted-amount-${rowId}`);
+            
+            if (amountInput && currencySelect && convertedAmountDiv) {
+                const amount = parseFloat(amountInput.value);
+                const currency = currencySelect.value;
+                
+                console.log(`Converting amount ${amount} from ${currency} to ${companyCurrency} for row ${rowId}`);
+                
+                if (!isNaN(amount) && amount > 0 && currency !== companyCurrency) {
+                    try {
+                        const response = await fetch(`/dashboard/ledger/convert-amount?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const convertedAmount = parseFloat(data.convertedAmount);
+                            convertedAmountDiv.textContent = `≈ ${convertedAmount.toFixed(2)} ${companyCurrency}`;
+                            
+                            // Store the converted amount for balance calculation
+                            amountInput.setAttribute('data-converted-amount', convertedAmount.toString());
+                            console.log(`Converted ${amount} ${currency} to ${convertedAmount} ${companyCurrency}`);
+                        } else {
+                            console.error('Failed to convert currency, using original amount');
+                            convertedAmountDiv.textContent = `≈ ${amount.toFixed(2)} ${companyCurrency}`;
+                            amountInput.setAttribute('data-converted-amount', amount.toString());
+                        }
+                    } catch (error) {
+                        console.error('Error converting amount:', error);
+                        convertedAmountDiv.textContent = `≈ ${amount.toFixed(2)} ${companyCurrency}`;
+                        amountInput.setAttribute('data-converted-amount', amount.toString());
+                    }
+                } else if (!isNaN(amount) && amount > 0) {
+                    // Same currency, no conversion needed
+                    convertedAmountDiv.textContent = '';
+                    amountInput.setAttribute('data-converted-amount', amount.toString());
+                    console.log(`No conversion needed for ${amount} ${currency}`);
+                } else {
+                    // Invalid amount
+                    convertedAmountDiv.textContent = '';
+                    amountInput.removeAttribute('data-converted-amount');
+                    console.log(`Invalid amount: ${amount}`);
+                }
+            }
+        }
+        
+        function toggleAccountSelection(rowId, type) {
+            const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
+            const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+            
+            if (type === 'debit' && debitInput.value.trim() !== '') {
+                creditInput.value = '';
+                creditInput.disabled = true;
+            } else if (type === 'credit' && creditInput.value.trim() !== '') {
+                debitInput.value = '';
+                debitInput.disabled = true;
+            } else {
+                debitInput.disabled = false;
+                creditInput.disabled = false;
+            }
+            
+            validatePostingLineFields(rowId);
+            updateBalance();
+        }
+        
+        function searchAccounts(input, rowId, type) {
             const query = input.value.toLowerCase();
-            const dropdown = document.getElementById('dropdown-' + rowId);
+            const dropdown = document.getElementById(type + '-dropdown-' + rowId);
             
             if (query.length < 1) {
                 dropdown.style.display = 'none';
@@ -471,19 +603,22 @@
             }
             
             dropdown.innerHTML = filteredAccounts.map(account => `
-                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId})">
+                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId}, '${type}')">
                         <div style="font-weight: 500;">${account.noAccountNumber}</div>
-                        <div style="font-size: 0.875rem; color: #6b7280;">${account.accountName}</div>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${account.accountName}</div>
                 </div>
             `).join('');
             
             dropdown.style.display = 'block';
         }
         
-        function selectAccount(accountNumber, accountName, rowId) {
-            const input = document.querySelector(`input[name="entries[${rowId}].accountNumber"]`);
+        function selectAccount(accountNumber, accountName, rowId, type) {
+            const input = document.querySelector(`input[name="postingLines[${rowId}].${type}Account"]`);
             input.value = accountNumber;
-            document.getElementById('dropdown-' + rowId).style.display = 'none';
+            document.getElementById(type + '-dropdown-' + rowId).style.display = 'none';
+            
+            // Trigger toggle function to disable the other input
+            toggleAccountSelection(rowId, type);
         }
         
         // Hide dropdowns when clicking outside
@@ -517,62 +652,52 @@
         function validateFormFields() {
             let isValid = true;
             
-            // Validate posting date
-            const postingDate = document.getElementById('postingDate').value;
-            if (!validateField('postingDate', postingDate, 'Posting date is required')) {
-                isValid = false;
-            }
-            
-            // Validate currency
-            const currency = document.getElementById('currency').value;
-            if (!validateField('currency', currency, 'Currency is required')) {
-                isValid = false;
-            }
-            
-            // Validate entries
-            const rows = document.querySelectorAll('.posting-row');
+            // Validate posting lines
+            const rows = document.querySelectorAll('.posting-line-row');
             let hasValidEntries = false;
             
             rows.forEach((row, index) => {
-                const accountInput = row.querySelector('input[name*=".accountNumber"]');
-                const debitInput = row.querySelector('input[name*=".debitAmount"]');
-                const creditInput = row.querySelector('input[name*=".creditAmount"]');
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const amountInput = row.querySelector('input[name*=".amount"]');
                 
                 // Clear previous errors
-                [accountInput, debitInput, creditInput].forEach(input => {
+                [dateInput, debitInput, creditInput, amountInput].forEach(input => {
                     if (input) input.classList.remove('field-error');
                 });
                 
-                const hasAccount = accountInput && accountInput.value.trim() !== '';
-                const hasDebit = debitInput && debitInput.value && parseFloat(debitInput.value) > 0;
-                const hasCredit = creditInput && creditInput.value && parseFloat(creditInput.value) > 0;
+                const hasDate = dateInput && dateInput.value.trim() !== '';
+                const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+                const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+                const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
                 
-                if (hasAccount || hasDebit || hasCredit) {
-                    // This row has some data, validate it
-                    if (!hasAccount) {
-                        accountInput.classList.add('field-error');
+                if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
+                    // This row has some data, validate it completely
+                    if (!hasDate) {
+                        dateInput.classList.add('field-error');
                         isValid = false;
                     }
                     
-                    if (!hasDebit && !hasCredit) {
-                        if (debitInput) debitInput.classList.add('field-error');
-                        if (creditInput) creditInput.classList.add('field-error');
-                        isValid = false;
-                    }
-                    
-                    if (hasDebit && hasCredit) {
-                        // Both debit and credit filled
+                    if (!hasDebitAccount && !hasCreditAccount) {
                         debitInput.classList.add('field-error');
                         creditInput.classList.add('field-error');
                         isValid = false;
                     }
                     
-                    hasValidEntries = true;
+                    if (!hasAmount) {
+                        amountInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
+                        hasValidEntries = true;
+                    }
                 }
             });
             
             if (!hasValidEntries) {
-                showMessage('Please add at least one valid posting entry.', 'error');
+                showMessage('Please add at least one complete posting line.', 'error');
                 isValid = false;
             }
             
@@ -593,7 +718,7 @@
         }
         
         // Combined validation and form preparation
-        function validateAndPrepareForm(event) {
+        async function validateAndPrepareForm(event) {
             // First validate all fields
             if (!validateFormFields()) {
                 event.preventDefault();
@@ -601,39 +726,96 @@
             }
             
             // Then prepare form data
-            return prepareFormData(event);
+            return await prepareFormData(event);
         }
         
         // Prepare form data before submission
-        function prepareFormData(event) {
+        async function prepareFormData(event) {
+            console.log('=== Preparing Form Data ===');
+            
+            // First, make sure all conversions are up to date
+            const rows = Array.from(document.querySelectorAll('.posting-line-row'));
+            
+            // Update all conversions before validating
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const rowId = row.id.replace('posting-line-row-', '');
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value && currencySelect && currencySelect.value) {
+                    await updateConvertedAmount(rowId);
+                }
+            }
+            
+            // Now validate the balance
+            updateBalance();
+            
             // Remove empty rows and reindex
-            const tbody = document.getElementById('postingEntries');
-            const rows = Array.from(tbody.querySelectorAll('.posting-row'));
+            const tbody = document.getElementById('postingLines');
+            const allRows = Array.from(tbody.querySelectorAll('.posting-line-row'));
             
             // Filter out empty rows
-            const validRows = rows.filter(row => {
-                const accountInput = row.querySelector('input[name*=".accountNumber"]');
-                const debitInput = row.querySelector('input[name*=".debitAmount"]');
-                const creditInput = row.querySelector('input[name*=".creditAmount"]');
+            const validRows = allRows.filter(row => {
+                const dateInput = row.querySelector('input[name*=".postingDate"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const amountInput = row.querySelector('input[name*=".amount"]');
                 
-                const hasAccount = accountInput && accountInput.value.trim() !== '';
-                const hasAmount = (debitInput && debitInput.value && parseFloat(debitInput.value) > 0) ||
-                                (creditInput && creditInput.value && parseFloat(creditInput.value) > 0);
+                const hasDate = dateInput && dateInput.value.trim() !== '';
+                const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
+                const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+                const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
                 
-                return hasAccount && hasAmount;
+                return hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount;
             });
             
+            console.log(`Found ${validRows.length} valid rows out of ${allRows.length} total rows`);
+            
+            // Check balance before submission
+            let totalDebit = 0;
+            let totalCredit = 0;
+            
+            validRows.forEach((row, index) => {
+                const amountInput = row.querySelector('input[name*=".amount"]');
+                const debitInput = row.querySelector('input[name*=".debitAccount"]');
+                const creditInput = row.querySelector('input[name*=".creditAccount"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                
+                if (amountInput && amountInput.value) {
+                    const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
+                    const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : parseFloat(amountInput.value);
+                    
+                    console.log(`Row ${index}: Amount=${amountInput.value} ${currencySelect.value}, Converted=${convertedAmount} ${companyCurrency}`);
+                    
+                    if (debitInput && debitInput.value.trim() !== '') {
+                        totalDebit += convertedAmount;
+                    } else if (creditInput && creditInput.value.trim() !== '') {
+                        totalCredit += convertedAmount;
+                    }
+                }
+            });
+            
+            const balance = totalDebit - totalCredit;
+            console.log(`Final balance check: Debit=${totalDebit}, Credit=${totalCredit}, Balance=${balance}`);
+            
+            if (Math.abs(balance) >= 0.01) {
+                event.preventDefault();
+                alert(`Transaction is not balanced! Difference: ${balance.toFixed(2)} ${companyCurrency}`);
+                return false;
+            }
+            
             // Remove all rows
-            rows.forEach(row => row.remove());
+            allRows.forEach(row => row.remove());
             
             // Re-add only valid rows with proper indexing
             validRows.forEach((row, index) => {
                 // Update input names to use sequential indexing
-                const inputs = row.querySelectorAll('input');
+                const inputs = row.querySelectorAll('input, select');
                 inputs.forEach(input => {
                     const name = input.getAttribute('name');
-                    if (name && name.includes('entries[')) {
-                        const newName = name.replace(/entries\[\d+\]/, `entries[${index}]`);
+                    if (name && name.includes('postingLines[')) {
+                        const newName = name.replace(/postingLines\[\d+\]/, `postingLines[${index}]`);
                         input.setAttribute('name', newName);
                     }
                 });
@@ -644,10 +826,11 @@
             // If no valid rows, prevent form submission
             if (validRows.length === 0) {
                 event.preventDefault();
-                alert('Please add at least one valid posting entry.');
+                alert('Please add at least one complete posting line.');
                 return false;
             }
             
+            console.log('✅ Form data prepared successfully');
             return true;
         }
     </script>
