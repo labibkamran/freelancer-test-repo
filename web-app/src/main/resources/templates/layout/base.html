@@ -710,8 +710,8 @@
                             
                             <wa-menu>
                                 <wa-menu-item th:each="company : ${companies}" 
-                                             th:onclick="'switchCompany(' + ${company.id} + ')'"
-                                             th:class="${currentCompany != null and currentCompany.id == company.id} ? 'selected' : ''">
+                                             th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
+                                             th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
                                     <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
                                     <span th:text="${company.name}">Company Name</span>
                                 </wa-menu-item>
@@ -888,9 +888,9 @@
         
         // Company switching function
         function switchCompany(tenantId) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('tenantId', tenantId);
-            window.open(currentUrl.toString(), '_blank');
+            const dashboardUrl = new URL('/dashboard', window.location.origin);
+            dashboardUrl.searchParams.set('tenantId', tenantId);
+            window.open(dashboardUrl.toString(), '_blank');
         }
         
         // Get current tenant ID from URL
@@ -925,26 +925,7 @@
         }, 5000);
     </script>
 
-    <script th:inline="javascript">
-        // Get tenant ID from URL on page load for authenticated users
-        document.addEventListener('DOMContentLoaded', function() {
-            /*[# th:if="${user != null}"]*/
-            const user = /*[[${user}]]*/ null;
-            const tenantId = getCurrentTenantId();
-            
-            if (!tenantId) {
-                // User is logged in but no tenantId in URL
-                if (user && user.ctx && user.ctx.currentTenant) {
-                    // Redirect to page with user's current tenant
-                    const currentUrl = new URL(window.location.href);
-                    const currentTenantId = user.ctx.currentTenant.id || user.ctx.currentTenant;
-                    currentUrl.searchParams.set('tenantId', currentTenantId);
-                    window.location.href = currentUrl.toString();
-                }
-            }
-            /*[/]*/
-        });
-    </script>
+
     
     <!-- Custom scripts -->
     <th:block layout:fragment="scripts"></th:block>
