@@ -19,7 +19,7 @@
                             </span>
                         </h1>
                         <p class="text-muted mb-0">
-                            Welcome back, <span class="fw-bold" th:text="${user.email}">User</span>
+                            Welcome back, <span class="fw-bold" th:text="${user.username}">User</span>
                         </p>
                     </div>
                 </div>
@@ -29,27 +29,5 @@
     </div>
 </main>
 
-<th:block layout:fragment="scripts">
-    <script>
-        // Get tenant ID from URL on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const tenantId = getCurrentTenantId();
-            if (!tenantId) {
-                // If no tenantId in URL, add default one
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('tenantId', '23');
-                window.history.replaceState({}, '', currentUrl.toString());
-            }
-            
-            // TODO: Load actual dashboard data based on tenantId
-            console.log('Loading dashboard for tenant:', tenantId || '23');
-        });
-        
-        // TODO: Implement chart initialization when actual data is available
-        function initializeCharts() {
-            // Chart.js integration will go here
-        }
-    </script>
-</th:block>
 </body>
 </html> 

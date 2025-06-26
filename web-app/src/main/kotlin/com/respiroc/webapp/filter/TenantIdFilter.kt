@@ -6,21 +6,23 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
-import org.springframework.web.server.ResponseStatusException
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**"),
+    private val paths: List<String> = listOf("/dashboard/**", "/ledger/**", "/companies/**"),
+    private val excludePaths: List<String> = listOf("/companies/create", "/tenant/**", "/error/**"),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {
 
     private val matcher = AntPathMatcher()
 
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
-        paths.none { matcher.match(it, request.requestURI) }
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        val uri = request.requestURI
+        return paths.none { matcher.match(it, uri) } || 
+               excludePaths.any { matcher.match(it, uri) }
+    }
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -28,24 +30,38 @@ class TenantIdFilter(
         chain: FilterChain
     ) {
         val tenantId = request.getParameter(paramName)
+        val springUser = getCurrentSpringUser()
 
         // Wrap the request so the parameter disappears for the rest of the app
-        val wrappedRequest = object : HttpServletRequestWrapper(request) {
-            override fun getParameter(name: String?): String? =
-                if (name == paramName) null else super.getParameter(name)
+        val wrappedRequest = createWrappedRequest(request)
 
-            override fun getParameterValues(name: String?): Array<String>? =
-                if (name == paramName) null else super.getParameterValues(name)
-
-            override fun getParameterMap(): MutableMap<String, Array<String>> =
-                super.getParameterMap().toMutableMap().apply { remove(paramName) }
-        }
-
-        if (!tenantId.isNullOrBlank() && isTenantAccessibleByUser(tenantId)) {
-            setCurrentTenant(tenantId)
-        } else if (!tenantId.isNullOrBlank()) {
-            // TODO: Use custom error for better visibility
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot access this resource")
+        when {
+            !tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser) -> {
+                setCurrentTenant(tenantId, springUser)
+            }
+            !tenantId.isNullOrBlank() && !isTenantExists(tenantId, springUser) -> {
+                response.sendRedirect("/error/tenant-not-found")
+                return
+            }
+            !tenantId.isNullOrBlank() && !isTenantAccessible(tenantId, springUser) -> {
+                response.sendRedirect("/error/tenant-access-denied")
+                return
+            }
+            tenantId.isNullOrBlank() -> {
+                // Handle no tenant case - redirect based on user's companies
+                val companies = try {
+                    springUser.ctx.tenants
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                
+                if (companies.isEmpty()) {
+                    response.sendRedirect("/companies/create")
+                } else {
+                    response.sendRedirect("/tenant/select")
+                }
+                return
+            }
         }
 
         try {
@@ -55,14 +71,45 @@ class TenantIdFilter(
         }
     }
 
-    private fun isTenantAccessibleByUser(tenantId: String): Boolean {
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
-        return springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+    private fun getCurrentSpringUser(): SpringUser {
+        return SecurityContextHolder.getContext().authentication.principal as SpringUser
     }
 
-    private fun setCurrentTenant(tenantId: String) {
-        TenantContextHolder.setTenantId(tenantId.toLong())
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
-        springUser.ctx.currentTenant = springUser.ctx.tenants.filter { it.id == tenantId.toLong() }.first()
+    private fun createWrappedRequest(request: HttpServletRequest): HttpServletRequestWrapper {
+        return object : HttpServletRequestWrapper(request) {
+            override fun getParameter(name: String?): String? =
+                if (name == paramName) null else super.getParameter(name)
+
+            override fun getParameterValues(name: String?): Array<String>? =
+                if (name == paramName) null else super.getParameterValues(name)
+
+            override fun getParameterMap(): MutableMap<String, Array<String>> =
+                super.getParameterMap().toMutableMap().apply { remove(paramName) }
+        }
+    }
+
+    private fun isTenantExists(tenantId: String, springUser: SpringUser): Boolean {
+        return try {
+            springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
+    private fun isTenantAccessible(tenantId: String, springUser: SpringUser): Boolean {
+        return try {
+            springUser.ctx.tenants.any { it.id == tenantId.toLong() }
+        } catch (e: NumberFormatException) {
+            false
+        }
+    }
+
+    private fun setCurrentTenant(tenantId: String, springUser: SpringUser) {
+        val tenantIdLong = tenantId.toLong()
+        val tenant = springUser.ctx.tenants.find { it.id == tenantIdLong }
+            ?: return // This shouldn't happen due to prior checks
+
+        TenantContextHolder.setTenantId(tenantIdLong)
+        springUser.ctx.currentTenant = tenant
     }
 }
