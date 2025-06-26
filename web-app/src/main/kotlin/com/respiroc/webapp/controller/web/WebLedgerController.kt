@@ -36,10 +36,6 @@ class WebLedgerController(
 
         model.addAttribute("title", "General Ledger")
         
-        // Get all postings for current tenant
-        val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-        model.addAttribute("postings", postings)
-        
         // Get all accounts for dropdown
         val accounts = accountApi.findAllAccounts()
         model.addAttribute("accounts", accounts)
@@ -83,53 +79,6 @@ class WebLedgerController(
         model: Model
     ): String {
         return handleBatchPostingSubmission(createBatchPostingRequest, bindingResult, null, model, true)
-    }
-
-    @GetMapping("/postings-table")
-    fun getPostingsTable(model: Model): String {
-        val springUser = springUser()
-        
-        val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-        model.addAttribute("postings", postings)
-        
-        val accounts = accountApi.findAllAccounts()
-        model.addAttribute("accounts", accounts)
-        
-        return "ledger/fragments :: postings-table"
-    }
-
-    @GetMapping("/postings/by-account/{accountNumber}")
-    @ResponseBody
-    fun getPostingsByAccount(@PathVariable accountNumber: String): List<Any> {
-        val user = user()
-        val postings = postingApi.findPostingsByAccountNumber(accountNumber, user)
-        
-        return postings.map { posting ->
-            mapOf(
-                "id" to posting.id,
-                "accountNumber" to posting.accountNumber,
-                "amount" to posting.amount,
-                "currency" to posting.currency,
-                "postingDate" to posting.postingDate.toString(),
-                "description" to posting.description,
-                "createdAt" to posting.createdAt.toString()
-            )
-        }
-    }
-
-    @GetMapping("/accounts/balance/{accountNumber}")
-    @ResponseBody
-    fun getAccountBalance(@PathVariable accountNumber: String): Map<String, Any> {
-        val user = user()
-        val balance = postingApi.getAccountBalance(accountNumber, user)
-        val account = accountApi.findAccountByNumber(accountNumber)
-        
-        return mapOf(
-            "accountNumber" to accountNumber,
-            "balance" to balance,
-            "accountName" to (account?.accountName ?: "Unknown Account"),
-            "accountType" to (account?.accountType?.name ?: "Unknown")
-        )
     }
 
     // -------------------------------
@@ -192,8 +141,6 @@ class WebLedgerController(
                 return "ledger/fragments :: messages"
             } else {
                 model.addAttribute("title", "General Ledger")
-                val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-                model.addAttribute("postings", postings)
                 val accounts = accountApi.findAllAccounts()
                 model.addAttribute("accounts", accounts)
                 return "ledger/index"
@@ -210,8 +157,6 @@ class WebLedgerController(
                     return "ledger/fragments :: messages"
                 } else {
                     model.addAttribute("title", "General Ledger")
-                    val postings = postingApi.findAllPostingsByUser(springUser.ctx)
-                    model.addAttribute("postings", postings)
                     val accounts = accountApi.findAllAccounts()
                     model.addAttribute("accounts", accounts)
                     return "ledger/index"

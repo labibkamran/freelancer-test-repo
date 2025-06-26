@@ -140,42 +140,7 @@
             position: relative;
         }
         
-        .postings-table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .table-header {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-            font-weight: 600;
-        }
-        
-        .table-row {
-            padding: 1rem;
-            border-bottom: 1px solid #f1f3f4;
-            display: grid;
-            grid-template-columns: 100px 1fr 120px 100px 120px 150px auto;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .table-row:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .amount-positive {
-            color: #16a34a;
-            font-weight: 600;
-        }
-        
-        .amount-negative {
-            color: #dc2626;
-            font-weight: 600;
-        }
+
         
         .htmx-indicator {
             opacity: 0;
@@ -319,52 +284,7 @@
             </form>
         </div>
 
-        <!-- Postings Table -->
-        <!--<div class="postings-table" id="postings-table">
-            <div class="table-header">
-                <div class="table-row" style="font-weight: 600;">
-                    <div>Date</div>
-                    <div>Account</div>
-                    <div>Amount</div>
-                    <div>Currency</div>
-                    <div>Balance</div>
-                    <div>Description</div>
-                    <div>Actions</div>
-                </div>
-            </div>
-            
-            <div th:if="${#lists.isEmpty(postings)}" style="padding: 3rem; text-align: center; color: #6b7280;">
-                <wa-icon name="inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></wa-icon>
-                <p>No postings yet. Create your first journal entry above!</p>
-            </div>
 
-            <div th:each="posting : ${postings}" class="table-row">
-                <div th:text="${#temporals.format(posting.postingDate, 'dd.MM.yyyy')}"></div>
-                <div>
-                    <div style="font-weight: 500;" th:text="${posting.accountNumber}"></div>
-                    <div style="font-size: 0.875rem; color: #6b7280;" 
-                         th:text="${accounts.?[noAccountNumber == __${posting.accountNumber}__][0]?.accountName ?: 'Unknown Account'}"></div>
-                </div>
-                <div th:class="${posting.amount.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'amount-positive' : 'amount-negative'}"
-                     th:text="${#numbers.formatDecimal(posting.amount, 1, 2)}"></div>
-                <div th:text="${posting.currency}"></div>
-                <div>
-                    <wa-button size="small" variant="neutral" 
-                               th:onclick="'showBalance(\'' + ${posting.accountNumber} + '\')'">
-                        <wa-icon name="calculator"></wa-icon>
-                        View
-                    </wa-button>
-                </div>
-                <div th:text="${posting.description ?: '-'}"></div>
-                <div>
-                    <wa-button size="small" variant="neutral"
-                               th:onclick="'showAccountPostings(\'' + ${posting.accountNumber} + '\')'">
-                        <wa-icon name="list"></wa-icon>
-                        History
-                    </wa-button>
-                </div>
-            </div>
-        </div>-->
     </div>
 </main>
 
@@ -575,24 +495,7 @@
             }
         });
         
-        // Show account balance (existing functionality)
-        function showBalance(accountNumber) {
-            if (!accountNumber) return;
-            
-            fetch(`/dashboard/ledger/accounts/balance/${accountNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    alert(`Account: ${data.accountNumber} - ${data.accountName}\nBalance: ${Number(data.balance).toLocaleString('no-NO', {minimumFractionDigits: 2, maximumFractionDigits: 2})} NOK`);
-                })
-                .catch(error => {
-                    console.error('Error fetching balance:', error);
-                });
-        }
-        
-        // Show account posting history (existing functionality)
-        function showAccountPostings(accountNumber) {
-            alert(`Showing posting history for account ${accountNumber}`);
-        }
+
         
         // Frontend validation functions
         function validateField(fieldId, value, errorMessage) {
