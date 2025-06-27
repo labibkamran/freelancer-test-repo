@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.http.ResponseEntity
 import jakarta.validation.Valid
-import org.springframework.web.servlet.ModelAndView
 import java.time.LocalDate
 import java.math.BigDecimal
 
 @Controller
-@RequestMapping(value = ["/voucher", "/vouchers"])
+@RequestMapping(value = ["/voucher"])
 class VoucherWebController(
     private val postingApi: PostingInternalApi,
     private val accountApi: AccountInternalApi,
@@ -37,11 +36,10 @@ class VoucherWebController(
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
         val springUser = springUser()
-        model.addAttribute("user", springUser)
-
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        model.addAttribute("companies", companies)
 
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
         model.addAttribute("title", "General Ledger")
         
         // Get all accounts for dropdown

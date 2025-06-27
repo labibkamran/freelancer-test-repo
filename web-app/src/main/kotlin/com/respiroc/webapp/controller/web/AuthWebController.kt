@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.user.api.UserInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
@@ -15,8 +14,7 @@ import jakarta.servlet.http.Cookie
 @Controller
 @RequestMapping("/auth")
 class AuthWebController(
-    private val userApi: UserInternalApi,
-    private val companyApi: CompanyInternalApi
+    private val userApi: UserInternalApi
 ) : BaseController() {
 
     private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
@@ -26,13 +24,7 @@ class AuthWebController(
         // If user is already authenticated, redirect appropriately
         try {
             val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            
-            return if (companies.isEmpty()) {
-                "redirect:/company/create"
-            } else {
-                "redirect:/company/select"
-            }
+            return "redirect:/dashboard"
         } catch (_: Exception) {
             // User not authenticated, continue to login page
         }
@@ -60,15 +52,7 @@ class AuthWebController(
             jwtCookie.maxAge = JWT_TOKEN_PERIOD
             response.addCookie(jwtCookie)
             
-            // Redirect based on user's companies
-            val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            
-            return if (companies.isEmpty()) {
-                "redirect:/company/create"
-            } else {
-                "redirect:/company/select"
-            }
+            return "redirect:/dashboard"
         } catch (_: Exception) {
             redirectAttributes.addFlashAttribute("error", "Invalid email or password")
             return "redirect:/auth/login"
@@ -80,13 +64,8 @@ class AuthWebController(
         // If user is already authenticated, redirect appropriately
         try {
             val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            
-            return if (companies.isEmpty()) {
-                "redirect:/company/create"
-            } else {
-                "redirect:/company/select"
-            }
+
+            return "redirect:/dashboard"
         } catch (_: Exception) {
             // User not authenticated, continue to signup page
         }

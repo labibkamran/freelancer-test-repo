@@ -12,7 +12,12 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
     private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**"),
-    private val excludePaths: List<String> = listOf("/company/create", "/company/select", "/company/switch", "/company/search", "/companies/search", "/error/**"),
+    private val excludePaths: List<String> = listOf(
+        "/company/create",
+        "/company/select",
+        "/company/search",
+        "/error/**"
+    ),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {
 
@@ -20,8 +25,8 @@ class TenantIdFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val uri = request.requestURI
-        return paths.none { matcher.match(it, uri) } || 
-               excludePaths.any { matcher.match(it, uri) }
+        return paths.none { matcher.match(it, uri) } ||
+                excludePaths.any { matcher.match(it, uri) }
     }
 
     override fun doFilterInternal(
@@ -35,33 +40,24 @@ class TenantIdFilter(
         // Wrap the request so the parameter disappears for the rest of the app
         val wrappedRequest = createWrappedRequest(request)
 
-        when {
-            !tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser) -> {
-                setCurrentTenant(tenantId, springUser)
+        if (!tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser)) {
+            setCurrentTenant(tenantId, springUser)
+        } else if (!tenantId.isNullOrBlank()) {
+            response.sendRedirect("/error/tenant-access-denied")
+            return
+        } else {
+            val tenants = try {
+                springUser.ctx.tenants
+            } catch (e: Exception) {
+                emptyList()
             }
-            !tenantId.isNullOrBlank() && !isTenantExists(tenantId, springUser) -> {
-                response.sendRedirect("/error/tenant-not-found")
-                return
+
+            if (tenants.isEmpty()) {
+                response.sendRedirect("/company/create")
+            } else {
+                response.sendRedirect("/company/select")
             }
-            !tenantId.isNullOrBlank() && !isTenantAccessible(tenantId, springUser) -> {
-                response.sendRedirect("/error/tenant-access-denied")
-                return
-            }
-            tenantId.isNullOrBlank() -> {
-                // Handle no tenant case - redirect based on user's companies
-                val companies = try {
-                    springUser.ctx.tenants
-                } catch (e: Exception) {
-                    emptyList()
-                }
-                
-                if (companies.isEmpty()) {
-                    response.sendRedirect("/company/create")
-                } else {
-                    response.sendRedirect("/company/select")
-                }
-                return
-            }
+            return
         }
 
         try {
@@ -85,14 +81,6 @@ class TenantIdFilter(
 
             override fun getParameterMap(): MutableMap<String, Array<String>> =
                 super.getParameterMap().toMutableMap().apply { remove(paramName) }
-        }
-    }
-
-    private fun isTenantExists(tenantId: String, springUser: SpringUser): Boolean {
-        return try {
-            springUser.ctx.tenants.any { it.id == tenantId.toLong() }
-        } catch (e: NumberFormatException) {
-            false
         }
     }
 
