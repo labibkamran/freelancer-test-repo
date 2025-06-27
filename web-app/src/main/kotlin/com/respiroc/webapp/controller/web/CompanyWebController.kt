@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import jakarta.validation.Valid
 
 @Controller
-@RequestMapping(value = ["/company", "/companies"])
+@RequestMapping(value = ["/company"])
 class CompanyWebController(
     private val companyApi: CompanyInternalApi,
     private val companyLookupApi: CompanyLookupInternalApi
@@ -137,12 +137,5 @@ class CompanyWebController(
         model.addAttribute("title", "Select Company")
 
         return "company/select"
-    }
-
-    @GetMapping("/switch")
-    fun switchTenant(@RequestParam tenantId: Long): String {
-        // Simply redirect to dashboard with the new tenantId
-        // The TenantIdFilter will handle the validation
-        return "redirect:/dashboard?tenantId=$tenantId"
     }
 }
