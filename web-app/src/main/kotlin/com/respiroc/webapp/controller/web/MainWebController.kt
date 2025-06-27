@@ -16,14 +16,13 @@ class MainWebController(
     fun home(): String {
         return try {
             val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
             
-            if (companies.isEmpty()) {
+            if (springUser.ctx.tenants.isEmpty()) {
                 "redirect:/company/create"
             } else {
                 "redirect:/company/select"
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // User not authenticated
             "redirect:/auth/login"
         }
