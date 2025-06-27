@@ -11,8 +11,8 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**", "/ledger/**", "/companies/**"),
-    private val excludePaths: List<String> = listOf("/companies/create", "/tenant/**", "/error/**"),
+    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**"),
+    private val excludePaths: List<String> = listOf("/company/create", "/company/select", "/company/switch", "/company/search", "/companies/search", "/error/**"),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {
 
@@ -56,9 +56,9 @@ class TenantIdFilter(
                 }
                 
                 if (companies.isEmpty()) {
-                    response.sendRedirect("/companies/create")
+                    response.sendRedirect("/company/create")
                 } else {
-                    response.sendRedirect("/tenant/select")
+                    response.sendRedirect("/company/select")
                 }
                 return
             }
