@@ -244,7 +244,7 @@
                 <small class="text-muted">Debits must equal credits</small>
             </div>
             
-            <form th:attr="hx-post='/dashboard/ledger/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
+            <form th:attr="hx-post='/voucher/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
                   hx-target="#form-messages" 
                   hx-swap="innerHTML"
                   hx-indicator="#loading-indicator"
@@ -528,7 +528,7 @@
                 
                 if (!isNaN(amount) && amount > 0 && currency !== companyCurrency) {
                     try {
-                        const response = await fetch(`/dashboard/ledger/convert-amount?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
+                        const response = await fetch(`/voucher/convert-amount?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
                         if (response.ok) {
                             const data = await response.json();
                             const convertedAmount = parseFloat(data.convertedAmount);

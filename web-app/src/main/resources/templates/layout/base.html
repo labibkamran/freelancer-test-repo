@@ -544,58 +544,23 @@
                 <!-- Dashboard -->
                 <li class="menu-item">
                     <a href="/dashboard" class="menu-link" onclick="setActiveMenu(this)">
-                        <span class="menu-icon">📊</span>
-                        <span class="menu-text">Dashboard</span>
+                        <span class="menu-icon">🏠</span>
+                        <span class="menu-text">Home</span>
                     </a>
                 </li>
-                
+
                 <!-- Vouchers (Accounting Documents) -->
-                <li class="menu-item">
+                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
                     <button class="menu-link" onclick="toggleSubmenu(this)">
                         <span class="menu-icon">📋</span>
                         <span class="menu-text">Vouchers</span>
                         <span class="menu-arrow">▶</span>
                     </button>
                     <ul class="submenu">
-                        <li><a href="#" class="menu-link">📝 Create Voucher</a></li>
-                        <li><a href="#" class="menu-link">📄 View All Vouchers</a></li>
-                        <li><a href="#" class="menu-link">🔍 Search Vouchers</a></li>
-                        <li><a href="#" class="menu-link">📊 Voucher Reports</a></li>
+                        <li><a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}" class="menu-link">📝 Create Advanced Voucher</a></li>
                     </ul>
                 </li>
-                
-                <!-- Bank Management -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">🏦</span>
-                        <span class="menu-text">Bank</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">💳 Bank Accounts</a></li>
-                        <li><a href="#" class="menu-link">📊 Bank Transactions</a></li>
-                        <li><a href="#" class="menu-link">🔄 Bank Reconciliation</a></li>
-                        <li><a href="#" class="menu-link">📈 Bank Reports</a></li>
-                        <li><a href="#" class="menu-link">💱 Currency Exchange</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Invoices -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">📄</span>
-                        <span class="menu-text">Invoices</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">➕ Create Invoice</a></li>
-                        <li><a href="#" class="menu-link">📋 Sales Invoices</a></li>
-                        <li><a href="#" class="menu-link">📦 Purchase Invoices</a></li>
-                        <li><a href="#" class="menu-link">💰 Payment Tracking</a></li>
-                        <li><a href="#" class="menu-link">📊 Invoice Reports</a></li>
-                    </ul>
-                </li>
-                
+
                 <!-- Chart of Accounts -->
                 <li class="menu-item">
                     <button class="menu-link" onclick="toggleSubmenu(this)">
@@ -604,75 +569,7 @@
                         <span class="menu-arrow">▶</span>
                     </button>
                     <ul class="submenu">
-                        <li><a href="#" class="menu-link">📈 Chart of Accounts</a></li>
-                        <li><a href="#" class="menu-link">➕ Add Account</a></li>
-                        <li><a href="#" class="menu-link">📋 Account Ledger</a></li>
                         <li><a href="#" class="menu-link">⚖️ Trial Balance</a></li>
-                        <li><a href="#" class="menu-link">📊 Account Reports</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Customers & Suppliers -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">👥</span>
-                        <span class="menu-text">Contacts</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">👤 Customers</a></li>
-                        <li><a href="#" class="menu-link">🏢 Suppliers</a></li>
-                        <li><a href="#" class="menu-link">➕ Add Contact</a></li>
-                        <li><a href="#" class="menu-link">📊 Contact Reports</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Inventory -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">📦</span>
-                        <span class="menu-text">Inventory</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">📋 Items & Products</a></li>
-                        <li><a href="#" class="menu-link">📊 Stock Levels</a></li>
-                        <li><a href="#" class="menu-link">🔄 Stock Movements</a></li>
-                        <li><a href="#" class="menu-link">📈 Inventory Reports</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Financial Reports -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">📈</span>
-                        <span class="menu-text">Reports</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">💰 Profit & Loss</a></li>
-                        <li><a href="#" class="menu-link">📊 Balance Sheet</a></li>
-                        <li><a href="#" class="menu-link">💸 Cash Flow</a></li>
-                        <li><a href="#" class="menu-link">📋 General Ledger</a></li>
-                        <li><a href="#" class="menu-link">🗓️ Monthly Reports</a></li>
-                        <li><a href="#" class="menu-link">📅 Yearly Reports</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Settings -->
-                <li class="menu-item">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">⚙️</span>
-                        <span class="menu-text">Settings</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">🏢 Company Settings</a></li>
-                        <li><a href="#" class="menu-link">👤 User Management</a></li>
-                        <li><a href="#" class="menu-link">🔧 System Settings</a></li>
-                        <li><a href="#" class="menu-link">💱 Currency Settings</a></li>
-                        <li><a href="#" class="menu-link">🎨 Customization</a></li>
-                        <li><a href="#" class="menu-link">📊 Backup & Restore</a></li>
                     </ul>
                 </li>
             </ul>

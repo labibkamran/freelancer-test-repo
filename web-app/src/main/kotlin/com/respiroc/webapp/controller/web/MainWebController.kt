@@ -8,13 +8,25 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
-class WebMainController(
+class MainWebController(
     private val companyApi: CompanyInternalApi
 ) : BaseController() {
 
     @GetMapping("/")
     fun home(): String {
-        return "redirect:/auth/login"
+        return try {
+            val springUser = springUser()
+            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+            
+            if (companies.isEmpty()) {
+                "redirect:/company/create"
+            } else {
+                "redirect:/company/select"
+            }
+        } catch (e: Exception) {
+            // User not authenticated
+            "redirect:/auth/login"
+        }
     }
 
     @GetMapping("/dashboard")

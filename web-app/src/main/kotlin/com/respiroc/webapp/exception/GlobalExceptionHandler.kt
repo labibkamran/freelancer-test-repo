@@ -39,9 +39,9 @@ class GlobalExceptionHandler(
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         
         return if (companies.isEmpty()) {
-            "redirect:/companies/create"
+            "redirect:/company/create"
         } else {
-            "redirect:/tenant/select"
+            "redirect:/company/select"
         }
     }
 
