@@ -550,14 +550,14 @@
                 </li>
 
                 <!-- Vouchers (Accounting Documents) -->
-                <li class="menu-item">
+                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
                     <button class="menu-link" onclick="toggleSubmenu(this)">
                         <span class="menu-icon">📋</span>
                         <span class="menu-text">Vouchers</span>
                         <span class="menu-arrow">▶</span>
                     </button>
                     <ul class="submenu">
-                        <li><a href="#" class="menu-link">📝 Create Advanced Voucher</a></li>
+                        <li><a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}" class="menu-link">📝 Create Advanced Voucher</a></li>
                     </ul>
                 </li>
 
