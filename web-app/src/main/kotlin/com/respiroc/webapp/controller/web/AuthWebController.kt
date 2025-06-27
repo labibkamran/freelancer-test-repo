@@ -1,5 +1,6 @@
 package com.respiroc.webapp.controller.web
 
+import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.user.api.UserInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
@@ -13,19 +14,24 @@ import jakarta.servlet.http.Cookie
 
 @Controller
 @RequestMapping("/auth")
-class WebAuthController(
-    private val userApi: UserInternalApi
+class AuthWebController(
+    private val userApi: UserInternalApi,
+    private val companyApi: CompanyInternalApi
 ) : BaseController() {
 
     private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
 
     @GetMapping("/login")
     fun loginPage(model: Model): String {
-        // If user is already authenticated, redirect to dashboard
+        // If user is already authenticated, redirect appropriately
         try {
-            val currentUser = user()
-            if (currentUser != null) {
-                return "redirect:/dashboard"
+            val springUser = springUser()
+            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+            
+            return if (companies.isEmpty()) {
+                "redirect:/company/create"
+            } else {
+                "redirect:/company/select"
             }
         } catch (_: Exception) {
             // User not authenticated, continue to login page
@@ -54,7 +60,15 @@ class WebAuthController(
             jwtCookie.maxAge = JWT_TOKEN_PERIOD
             response.addCookie(jwtCookie)
             
-            return "redirect:/dashboard"
+            // Redirect based on user's companies
+            val springUser = springUser()
+            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+            
+            return if (companies.isEmpty()) {
+                "redirect:/company/create"
+            } else {
+                "redirect:/company/select"
+            }
         } catch (_: Exception) {
             redirectAttributes.addFlashAttribute("error", "Invalid email or password")
             return "redirect:/auth/login"
@@ -63,11 +77,15 @@ class WebAuthController(
 
     @GetMapping("/signup")
     fun signupPage(model: Model): String {
-        // If user is already authenticated, redirect to dashboard
+        // If user is already authenticated, redirect appropriately
         try {
-            val currentUser = user()
-            if (currentUser != null) {
-                return "redirect:/dashboard"
+            val springUser = springUser()
+            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+            
+            return if (companies.isEmpty()) {
+                "redirect:/company/create"
+            } else {
+                "redirect:/company/select"
             }
         } catch (_: Exception) {
             // User not authenticated, continue to signup page

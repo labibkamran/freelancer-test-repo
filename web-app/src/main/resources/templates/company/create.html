@@ -72,6 +72,8 @@
         </div>
 
         <div>
+            <!-- Alert Area for HTMX responses -->
+            <div id="alert-container" style="margin-bottom: 1rem;"></div>
 
             <wa-card style="margin-bottom: 1rem;">
                 <div slot="header">
@@ -80,25 +82,35 @@
                     </h5>
                 </div>
                 <div style="padding: 2rem;">
-                    <form id="createCompanyForm">
+                    <form id="createCompanyForm" 
+                          th:object="${createCompanyRequest}"
+                          hx-post="/companies/create"
+                          hx-target="#alert-container"
+                          hx-swap="innerHTML">
+                        
                         <!-- Company Name Field with Search -->
                         <div class="form-group">
-                            <label for="companyName" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                            <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                                 Company Name *
                             </label>
                             <wa-input
-                                    id="companyName"
-                                    name="companyName"
+                                    id="name"
+                                    name="name"
+                                    th:field="*{name}"
                                     placeholder="Enter company name or search registry..."
                                     size="medium"
                                     required
-                                    autocomplete="off">
+                                    autocomplete="off"
+                                    hx-get="/companies/search"
+                                    hx-trigger="input changed delay:200ms"
+                                    hx-target="#name-dropdown"
+                                    hx-swap="outerHTML"
+                                    hx-include="[name='countryCode']">
                             </wa-input>
-                            <wa-spinner id="nameSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
-                            <div id="nameDropdown" class="search-dropdown"></div>
+                            <div id="name-dropdown"></div>
                         </div>
 
-                        <!-- Organization Number Field with Search -->
+                        <!-- Organization Number Field -->
                         <div class="form-group">
                             <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                                 Organization Number *
@@ -106,13 +118,12 @@
                             <wa-input
                                     id="organizationNumber"
                                     name="organizationNumber"
+                                    th:field="*{organizationNumber}"
                                     placeholder="Enter organization number..."
                                     size="medium"
                                     required
                                     autocomplete="off">
                             </wa-input>
-                            <wa-spinner id="orgSpinner" class="loading-spinner" style="display: none;"></wa-spinner>
-                            <div id="orgDropdown" class="search-dropdown"></div>
                         </div>
 
                         <!-- Country Code Field -->
@@ -120,7 +131,7 @@
                             <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                                 Country *
                             </label>
-                            <wa-select id="countryCode" name="countryCode" value="NO" required>
+                            <wa-select id="countryCode" name="countryCode" th:field="*{countryCode}" required>
                                 <wa-option value="NO">🇳🇴 Norway</wa-option>
                             </wa-select>
                             <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
@@ -151,7 +162,6 @@
                     <h6>Smart Search Features:</h6>
                     <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.6;">
                         <li>Type in the <strong>Company Name</strong> field to search for companies</li>
-                        <li>Enter an <strong>Organization Number</strong> to find exact matches</li>
                         <li>Click on any suggestion to auto-fill the form</li>
                         <li>If not found, you can manually enter the details</li>
                     </ul>
@@ -173,287 +183,91 @@
 
 <th:block layout:fragment="scripts">
     <script>
-        // Debounce function
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Global search controllers
-        let nameSearchController = null;
-        let orgSearchController = null;
-
-        // Company name search
-        const companyNameInput = document.getElementById('companyName');
-        const nameDropdown = document.getElementById('nameDropdown');
-        const nameSpinner = document.getElementById('nameSpinner');
-
-        const debouncedNameSearch = debounce(async (query) => {
-            if (query.length < 2) {
-                hideDropdown(nameDropdown);
-                return;
-            }
-
-            // Cancel previous request
-            if (nameSearchController) {
-                nameSearchController.abort();
-            }
-            nameSearchController = new AbortController();
-
-            showSpinner(nameSpinner);
+        // Function to select company from search results
+        function selectCompany(name, orgNumber) {
+            const nameInput = document.getElementById('name');
+            const orgInput = document.getElementById('organizationNumber');
+            const countrySelect = document.getElementById('countryCode');
             
-            try {
-                const response = await fetch(`/api/company-lookup/search?query=${encodeURIComponent(query)}&countryCode=NO`, {
-                    signal: nameSearchController.signal
-                });
-                
-                if (!response.ok) throw new Error('Search failed');
-                
-                const data = await response.json();
-                displayNameSearchResults(data.companies.slice(0, 10)); // Limit to 10 results
-                
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Name search error:', error);
-                    hideDropdown(nameDropdown);
-                }
-            } finally {
-                hideSpinner(nameSpinner);
+            // Set values directly without triggering events that cause new searches
+            nameInput.value = name;
+            if (orgNumber) {
+                orgInput.value = orgNumber;
             }
-        }, 300);
-
-        // Organization number search
-        const organizationNumberInput = document.getElementById('organizationNumber');
-        const orgDropdown = document.getElementById('orgDropdown');
-        const orgSpinner = document.getElementById('orgSpinner');
-
-        const debouncedOrgSearch = debounce(async (query) => {
-            if (query.length < 3) {
-                hideDropdown(orgDropdown);
-                return;
-            }
-
-            // Cancel previous request
-            if (orgSearchController) {
-                orgSearchController.abort();
-            }
-            orgSearchController = new AbortController();
-
-            showSpinner(orgSpinner);
             
-            try {
-                const response = await fetch(`/api/company-lookup/search?query=${encodeURIComponent(query)}&countryCode=NO`, {
-                    signal: orgSearchController.signal
-                });
-                
-                if (!response.ok) throw new Error('Search failed');
-                
-                const data = await response.json();
-                // For org number search, show exact matches or close matches
-                const matches = data.companies.filter(company => 
-                    company.registrationNumber && 
-                    company.registrationNumber.includes(query)
-                );
-                displayOrgSearchResults(matches.slice(0, 5)); // Limit to 5 for org search
-                
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Org search error:', error);
-                    hideDropdown(orgDropdown);
-                }
-            } finally {
-                hideSpinner(orgSpinner);
-            }
-        }, 300);
-
-        // Event listeners
-        companyNameInput.addEventListener('input', (e) => {
-            debouncedNameSearch(e.target.value.trim());
-        });
-
-        organizationNumberInput.addEventListener('input', (e) => {
-            debouncedOrgSearch(e.target.value.trim());
-        });
-
-        // Hide dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!nameDropdown.contains(e.target) && !companyNameInput.contains(e.target)) {
-                hideDropdown(nameDropdown);
-            }
-            if (!orgDropdown.contains(e.target) && !organizationNumberInput.contains(e.target)) {
-                hideDropdown(orgDropdown);
-            }
-        });
-
-        // Display search results functions
-        function displayNameSearchResults(companies) {
-            if (!companies || companies.length === 0) {
-                hideDropdown(nameDropdown);
-                return;
-            }
-
-            const html = companies.map(company => `
-                <div class="search-item" onclick="selectCompanyFromNameSearch('${escapeHtml(company.name)}', '${escapeHtml(company.registrationNumber || '')}')">
-                    <div class="search-item-name">${escapeHtml(company.name)}</div>
-                    <div class="search-item-details">
-                        ${company.registrationNumber ? `Org. Nr: ${escapeHtml(company.registrationNumber)}` : ''}
-                        ${company.address ? ` • ${escapeHtml(company.address)}` : ''}
-                    </div>
-                </div>
-            `).join('');
-
-            nameDropdown.innerHTML = html;
-            showDropdown(nameDropdown);
+            // Set country code to Norway
+            countrySelect.value = 'NO';
+            
+            // Hide the dropdown immediately
+            document.getElementById('name-dropdown').innerHTML = '';
+            
+            // Remove focus to prevent any focus-related issues
+            nameInput.blur();
+            orgInput.blur();
+            
+            // Mark fields as touched/valid for any form validation
+            nameInput.setAttribute('data-selected', 'true');
+            orgInput.setAttribute('data-selected', 'true');
         }
 
-        function displayOrgSearchResults(companies) {
-            if (!companies || companies.length === 0) {
-                hideDropdown(orgDropdown);
-                return;
-            }
-
-            const html = companies.map(company => `
-                <div class="search-item" onclick="selectCompanyFromOrgSearch('${escapeHtml(company.name)}', '${escapeHtml(company.registrationNumber || '')}')">
-                    <div class="search-item-name">${escapeHtml(company.registrationNumber || '')}</div>
-                    <div class="search-item-details">
-                        ${escapeHtml(company.name)}
-                        ${company.address ? ` • ${escapeHtml(company.address)}` : ''}
-                    </div>
-                </div>
-            `).join('');
-
-            orgDropdown.innerHTML = html;
-            showDropdown(orgDropdown);
-        }
-
-        // Selection functions
-        function selectCompanyFromNameSearch(name, orgNumber) {
-            companyNameInput.value = name;
-            if (orgNumber) {
-                organizationNumberInput.value = orgNumber;
-            }
-            hideDropdown(nameDropdown);
-            hideDropdown(orgDropdown);
-        }
-
-        function selectCompanyFromOrgSearch(name, orgNumber) {
-            if (orgNumber) {
-                organizationNumberInput.value = orgNumber;
-            }
-            companyNameInput.value = name;
-            hideDropdown(nameDropdown);
-            hideDropdown(orgDropdown);
-        }
-
-        // Utility functions
-        function showSpinner(spinner) {
-            spinner.style.display = 'block';
-        }
-
-        function hideSpinner(spinner) {
-            spinner.style.display = 'none';
-        }
-
-        function showDropdown(dropdown) {
-            dropdown.style.display = 'block';
-        }
-
-        function hideDropdown(dropdown) {
-            dropdown.style.display = 'none';
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
+        // Function to clear form
         function clearForm() {
             document.getElementById('createCompanyForm').reset();
-            hideDropdown(nameDropdown);
-            hideDropdown(orgDropdown);
+            document.getElementById('name-dropdown').innerHTML = '';
+            document.getElementById('alert-container').innerHTML = '';
+            
+            // Remove selection attributes
+            document.getElementById('name').removeAttribute('data-selected');
+            document.getElementById('organizationNumber').removeAttribute('data-selected');
         }
 
-        // Form submission
-        document.getElementById('createCompanyForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const submitButton = document.getElementById('submitButton');
-            
-            const requestData = {
-                name: formData.get('companyName').trim(),
-                organizationNumber: formData.get('organizationNumber').trim(),
-                countryCode: formData.get('countryCode')
-            };
-
-            // Validation
-            if (!requestData.name || !requestData.organizationNumber) {
-                alert('Please fill in all required fields.');
-                return;
+                // Show loading state on form submission
+        document.getElementById('createCompanyForm').addEventListener('htmx:beforeRequest', function(e) {
+            // Only handle actual form submission, not search requests
+            if (e.detail.elt.tagName === 'FORM') {
+                const submitButton = document.getElementById('submitButton');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
             }
+        });
 
-            // Show loading state
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
-
-            try {
-                const response = await fetch('/api/companies', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to create company');
-                }
-
-                const company = await response.json();
-                
-                // Show success message
-                const successAlert = document.createElement('wa-alert');
-                successAlert.setAttribute('variant', 'success');
-                successAlert.setAttribute('open', '');
-                successAlert.innerHTML = `
-                    <wa-icon slot="icon" name="check-circle"></wa-icon>
-                    <strong>Success!</strong> Company "${company.name}" has been created successfully!
-                    <br><small>Redirecting to dashboard...</small>
-                `;
-                
-                e.target.parentNode.insertBefore(successAlert, e.target);
-                
-                // Redirect to dashboard after delay
-                setTimeout(() => {
-                    window.location.href = `/dashboard?tenantId=${company.tenantId}`;
-                }, 2000);
-
-            } catch (error) {
-                console.error('Error creating company:', error);
-                
-                const errorAlert = document.createElement('wa-alert');
-                errorAlert.setAttribute('variant', 'danger');
-                errorAlert.setAttribute('open', '');
-                errorAlert.innerHTML = `
-                    <wa-icon slot="icon" name="exclamation-triangle"></wa-icon>
-                    <strong>Error!</strong> Failed to create company: ${error.message}
-                `;
-                
-                e.target.parentNode.insertBefore(errorAlert, e.target);
-                
-                // Reset button
+        // Reset button state after response
+        document.getElementById('createCompanyForm').addEventListener('htmx:afterRequest', function(e) {
+            // Only handle actual form submission, not search requests
+            if (e.detail.elt.tagName === 'FORM') {
+                const submitButton = document.getElementById('submitButton');
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon> Create Company';
+            }
+        });
+
+        // Handle validation state changes
+        document.getElementById('createCompanyForm').addEventListener('htmx:afterSwap', function(e) {
+            // Re-enable submit button after any content changes
+            const submitButton = document.getElementById('submitButton');
+            if (submitButton.disabled && submitButton.innerHTML.includes('Creating Company')) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon> Create Company';
+            }
+        });
+
+        // Hide dropdown when clicking outside or on search results
+        document.addEventListener('click', function(e) {
+            const nameInput = document.getElementById('name');
+            const nameDropdown = document.getElementById('name-dropdown');
+            
+            // Check if click is on a search result item
+            const isSearchItem = e.target.closest('.search-item');
+            
+            if (isSearchItem) {
+                // If clicking on search item, let the selectCompany function handle it
+                // and hide dropdown after a short delay to ensure selection completes
+                setTimeout(() => {
+                    nameDropdown.innerHTML = '';
+                }, 100);
+            } else if (!nameInput.contains(e.target) && !nameDropdown.contains(e.target)) {
+                // If clicking outside, hide dropdown immediately
+                nameDropdown.innerHTML = '';
             }
         });
     </script>
