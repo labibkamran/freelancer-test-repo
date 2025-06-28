@@ -7,15 +7,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 interface PostingInternalApi {
-    fun createPosting(
-        accountNumber: String,
-        amount: BigDecimal,
-        currency: String,
-        postingDate: LocalDate,
-        description: String?,
-        user: UserContext
-    ): Posting
-
     fun createBatchPostings(
         postings: List<CreatePostingCommand>,
         user: UserContext
