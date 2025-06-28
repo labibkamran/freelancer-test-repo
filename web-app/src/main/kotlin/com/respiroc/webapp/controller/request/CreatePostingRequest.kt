@@ -84,8 +84,23 @@ data class PostingLine(
             currency = currency,
             type = getAccountType(),
             description = description,
-            vatCode = vatCode
+            vatCode = extractActualVatCode(vatCode)
         )
+    }
+    
+    private fun extractActualVatCode(vatCodeValue: String?): String? {
+        if (vatCodeValue.isNullOrBlank()) return null
+        
+        val trimmed = vatCodeValue.trim()
+        
+        // If it contains parentheses, extract code before the first space/parenthesis
+        // Examples: "1 (25%)" -> "1", "VAT1 (12%)" -> "VAT1", "2" -> "2"
+        return if (trimmed.contains("(")) {
+            trimmed.substringBefore("(").trim().takeIf { it.isNotBlank() }
+        } else {
+            // If no parentheses, use the whole value as is (already clean code)
+            trimmed.takeIf { it.isNotBlank() }
+        }
     }
 }
 

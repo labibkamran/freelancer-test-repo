@@ -25,49 +25,13 @@ class PostingService(
         postings: List<CreatePostingCommand>,
         user: UserContext
     ): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
-        postings.forEach { postingData ->
-            if (accountApi.findAccountByNumber(postingData.accountNumber) == null) {
-                throw IllegalArgumentException("No account found with account number = ${postingData.accountNumber}")
-            }
-            
-            // Validate VAT code if provided
-            if (postingData.vatCode != null) {
-                if (!vatApi.vatCodeExists(postingData.vatCode)) {
-                    throw IllegalArgumentException("Invalid VAT code: ${postingData.vatCode}")
-                }
-            }
-        }
-
-        val totalAmount = postings.sumOf { it.amount }
-        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
-            throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
-        }
-
+        val tenantId = requireTenantContext()
+        
+        validatePostingCommands(postings)
+        validateBalance(postings)
+        
         val createdPostings = postings.map { postingData ->
-            val posting = Posting()
-            posting.accountNumber = postingData.accountNumber
-            posting.amount = postingData.amount
-            posting.currency = postingData.currency
-            posting.postingDate = postingData.postingDate
-            posting.description = postingData.description
-            posting.tenantId = tenantId
-            posting.originalAmount = postingData.originalAmount
-            posting.originalCurrency = postingData.originalCurrency
-            
-            // Handle VAT fields
-            if (postingData.vatCode != null) {
-                val vatCode = vatApi.findVatCodeByCode(postingData.vatCode)
-                if (vatCode != null) {
-                    posting.vatCode = vatCode.code
-                    posting.vatRate = vatCode.rate
-                    posting.vatAmount = vatApi.calculateVatAmount(postingData.amount.abs(), vatCode)
-                }
-            }
-            
-            posting
+            createPostingEntity(postingData, tenantId)
         }
 
         return postingRepository.saveAll(createdPostings)
@@ -75,17 +39,13 @@ class PostingService(
 
     @Transactional(readOnly = true)
     override fun findAllPostingsByUser(user: UserContext): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByTenantIdOrderByPostingDateDescCreatedAtDesc(tenantId)
     }
 
     @Transactional(readOnly = true)
     override fun findPostingsByAccountNumber(accountNumber: String, user: UserContext): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByAccountNumberAndTenantIdOrderByPostingDateDescCreatedAtDesc(
             accountNumber, tenantId
         )
@@ -97,9 +57,7 @@ class PostingService(
         endDate: LocalDate,
         user: UserContext
     ): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByPostingDateBetweenAndTenantIdOrderByPostingDateDescCreatedAtDesc(
             startDate, endDate, tenantId
         )
@@ -107,9 +65,69 @@ class PostingService(
 
     @Transactional(readOnly = true)
     override fun getAccountBalance(accountNumber: String, user: UserContext): BigDecimal {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.getAccountBalance(accountNumber, tenantId)
+    }
+    
+    // -------------------------------
+    // Private Helper Methods
+    // -------------------------------
+    
+    private fun requireTenantContext(): Long {
+        return TenantContextHolder.getTenantId()
+            ?: throw IllegalStateException("No tenant context available")
+    }
+    
+    private fun validatePostingCommands(postings: List<CreatePostingCommand>) {
+        postings.forEach { postingData ->
+            validateAccount(postingData.accountNumber)
+            validateVatCode(postingData.vatCode)
+        }
+    }
+    
+    private fun validateAccount(accountNumber: String) {
+        if (accountApi.findAccountByNumber(accountNumber) == null) {
+            throw IllegalArgumentException("No account found with account number = $accountNumber")
+        }
+    }
+    
+    private fun validateVatCode(vatCode: String?) {
+        if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
+            throw IllegalArgumentException("Invalid VAT code: $vatCode")
+        }
+    }
+    
+    private fun validateBalance(postings: List<CreatePostingCommand>) {
+        val totalAmount = postings.sumOf { it.amount }
+        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
+            throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
+        }
+    }
+    
+    private fun createPostingEntity(postingData: CreatePostingCommand, tenantId: Long): Posting {
+        val posting = Posting()
+        posting.accountNumber = postingData.accountNumber
+        posting.amount = postingData.amount
+        posting.currency = postingData.currency
+        posting.postingDate = postingData.postingDate
+        posting.description = postingData.description
+        posting.tenantId = tenantId
+        posting.originalAmount = postingData.originalAmount
+        posting.originalCurrency = postingData.originalCurrency
+        
+        applyVatInformation(posting, postingData)
+        
+        return posting
+    }
+    
+    private fun applyVatInformation(posting: Posting, postingData: CreatePostingCommand) {
+        if (postingData.vatCode != null) {
+            val vatCode = vatApi.findVatCodeByCode(postingData.vatCode)
+            if (vatCode != null) {
+                posting.vatCode = vatCode.code
+                posting.vatRate = vatCode.rate
+                posting.vatAmount = vatApi.calculateVatAmount(postingData.amount.abs(), vatCode)
+            }
+        }
     }
 }
