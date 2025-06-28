@@ -3,6 +3,7 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreatePostingRequest
@@ -25,7 +26,8 @@ class VoucherWebController(
     private val postingApi: PostingInternalApi,
     private val accountApi: AccountInternalApi,
     private val companyApi: CompanyInternalApi,
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val vatApi: VatInternalApi
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -45,6 +47,10 @@ class VoucherWebController(
         // Get all accounts for dropdown
         val accounts = accountApi.findAllAccounts()
         model.addAttribute("accounts", accounts)
+        
+        // Get all VAT codes for dropdown
+        val vatCodes = vatApi.findAllVatCodes()
+        model.addAttribute("vatCodes", vatCodes)
         
         // Get company currency based on country (assume NO for now)
         val companyCurrency = currencyService.getCompanyCurrency("NO")
@@ -109,6 +115,28 @@ class VoucherWebController(
             "rate" to if (fromCurrency == targetCurrency) BigDecimal.ONE 
                      else currencyService.convertCurrency(BigDecimal.ONE, fromCurrency, targetCurrency)
         )
+        
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/vat-codes")
+    @ResponseBody
+    fun getVatCodes(@RequestParam(required = false) query: String?): ResponseEntity<List<Map<String, Any>>> {
+        val vatCodes = if (query.isNullOrBlank()) {
+            vatApi.findAllVatCodes()
+        } else {
+            vatApi.searchVatCodesByDescription(query)
+        }
+        
+        val response = vatCodes.map { vatCode ->
+            mapOf(
+                "code" to vatCode.code,
+                "description" to vatCode.description,
+                "rate" to vatCode.rate,
+                "vatType" to vatCode.vatType.name,
+                "vatCategory" to vatCode.vatCategory.name
+            )
+        }
         
         return ResponseEntity.ok(response)
     }
@@ -187,6 +215,8 @@ class VoucherWebController(
                 model.addAttribute("title", "General Ledger")
                 val accounts = accountApi.findAllAccounts()
                 model.addAttribute("accounts", accounts)
+                val vatCodes = vatApi.findAllVatCodes()
+                model.addAttribute("vatCodes", vatCodes)
                 return "voucher/index"
             }
         }
@@ -202,6 +232,8 @@ class VoucherWebController(
                     model.addAttribute("title", "General Ledger")
                     val accounts = accountApi.findAllAccounts()
                     model.addAttribute("accounts", accounts)
+                    val vatCodes = vatApi.findAllVatCodes()
+                    model.addAttribute("vatCodes", vatCodes)
                     return "voucher/index"
                 }
             }
@@ -239,7 +271,8 @@ class VoucherWebController(
                     postingDate = postingDate,
                     description = entry.description,
                     originalAmount = if (originalCurrency != companyCurrency) originalAmount else null,
-                    originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null
+                    originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
+                    vatCode = entry.vatCode
                 )
             }
 
