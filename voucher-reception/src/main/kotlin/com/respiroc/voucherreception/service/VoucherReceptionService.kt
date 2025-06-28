@@ -5,15 +5,13 @@ import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.voucherreception.api.VoucherReceptionInternalApi
 import com.respiroc.voucherreception.api.command.CreateVoucherDocumentCommand
 import com.respiroc.voucherreception.model.VoucherDocument
-import com.respiroc.voucherreception.model.VoucherDocumentStatus
 import com.respiroc.voucherreception.repository.VoucherDocumentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDateTime
-import java.util.*
+import java.time.Instant
 
 @Service
 @Transactional
@@ -30,16 +28,15 @@ class VoucherReceptionService(
         senderEmail: String?
     ): VoucherDocument {
         // Find company by slug (Worker calls don't have tenant context)
-        val allCompanies = companyInternalApi.findAllCompanies()
-        val company = allCompanies.find { getSlugFromCompanyName(it.name) == companySlug }
+        val company = companyInternalApi.findCompanyBySlug(companySlug)
             ?: throw IllegalArgumentException("Company not found with slug: $companySlug")
         
         // Set tenant context for this request
         TenantContextHolder.setTenantId(company.tenant.id!!)
         
-        // Check file size limit (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            throw IllegalArgumentException("File size exceeds 5MB limit: ${file.size} bytes")
+        // Check file size limit (25MB)
+        if (file.size > 25 * 1024 * 1024) {
+            throw IllegalArgumentException("File size exceeds 25MB limit: ${file.size} bytes")
         }
         
         // Create document record with file data
@@ -65,16 +62,15 @@ class VoucherReceptionService(
         senderEmail: String?
     ): VoucherDocument {
         // Find company by slug (Worker calls don't have tenant context)
-        val allCompanies = companyInternalApi.findAllCompanies()
-        val company = allCompanies.find { getSlugFromCompanyName(it.name) == companySlug }
+        val company = companyInternalApi.findCompanyBySlug(companySlug)
             ?: throw IllegalArgumentException("Company not found with slug: $companySlug")
         
         // Set tenant context for this request
         TenantContextHolder.setTenantId(company.tenant.id!!)
         
         // File size is already checked by the worker, but double-check here
-        if (fileSize > 5 * 1024 * 1024) {
-            throw IllegalArgumentException("File size exceeds 5MB limit: $fileSize bytes")
+        if (fileSize > 25 * 1024 * 1024) {
+            throw IllegalArgumentException("File size exceeds 25MB limit: $fileSize bytes")
         }
         
         // Create document record with file data
@@ -97,17 +93,15 @@ class VoucherReceptionService(
         
         val tenant = company.tenant
         
-        val document = VoucherDocument(
-            company = company,
-            tenant = tenant,
-            filename = command.filename,
-            fileData = command.fileData,
-            mimeType = command.mimeType,
-            fileSize = command.fileSize,
-            senderEmail = command.senderEmail,
-            receivedAt = LocalDateTime.now(),
-            status = VoucherDocumentStatus.PENDING
-        )
+        val document = VoucherDocument()
+        document.company = company
+        document.tenant = tenant
+        document.filename = command.filename
+        document.fileData = command.fileData
+        document.mimeType = command.mimeType
+        document.fileSize = command.fileSize
+        document.senderEmail = command.senderEmail
+        document.receivedAt = Instant.now()
         
         return voucherDocumentRepository.save(document)
     }
@@ -116,16 +110,9 @@ class VoucherReceptionService(
         return voucherDocumentRepository.findByCompanyIdAndTenantId(companyId, tenantId)
     }
     
-    override fun getDocumentsByStatus(
-        companyId: Long,
-        tenantId: Long,
-        status: VoucherDocumentStatus
-    ): List<VoucherDocument> {
-        return voucherDocumentRepository.findByCompanyIdAndTenantIdAndStatus(companyId, tenantId, status)
-    }
     
     override fun getPendingDocumentsByTenant(tenantId: Long): List<VoucherDocument> {
-        return voucherDocumentRepository.findByTenantIdAndStatus(tenantId, VoucherDocumentStatus.PENDING)
+        return voucherDocumentRepository.findByTenantIdAndAttachedVoucherIdIsNull(tenantId)
     }
     
     override fun getDocument(documentId: Long, tenantId: Long): VoucherDocument? {
@@ -136,27 +123,16 @@ class VoucherReceptionService(
         val document = getDocument(documentId, tenantId)
             ?: throw IllegalArgumentException("Document not found: $documentId")
         
-        val updatedDocument = document.copy(
-            attachedVoucherId = voucherId,
-            status = VoucherDocumentStatus.ATTACHED,
-            updatedAt = LocalDateTime.now()
-        )
+        document.attachedVoucherId = voucherId
         
-        return voucherDocumentRepository.save(updatedDocument)
+        return voucherDocumentRepository.save(document)
     }
     
     override fun deleteDocument(documentId: Long, tenantId: Long): Boolean {
         val document = getDocument(documentId, tenantId) ?: return false
         
-        // Mark as deleted instead of hard delete
-        val deletedDocument = document.copy(
-            status = VoucherDocumentStatus.DELETED,
-            updatedAt = LocalDateTime.now()
-        )
-        
-        voucherDocumentRepository.save(deletedDocument)
-        
-        // File data is stored in database, no physical file to delete
+        // Actually delete the document
+        voucherDocumentRepository.delete(document)
         
         return true
     }
@@ -165,12 +141,7 @@ class VoucherReceptionService(
         val company = companyInternalApi.findCompanyById(companyId)
             ?: throw IllegalArgumentException("Company not found: $companyId")
         
-        return getSlugFromCompanyName(company.name)
-    }
-    
-    
-    private fun getSlugFromCompanyName(name: String): String {
-        return name.lowercase()
+        return company.name.lowercase()
             .replace(Regex("[^a-z0-9\\s-]"), "")
             .replace(Regex("\\s+"), "-")
             .trim('-')

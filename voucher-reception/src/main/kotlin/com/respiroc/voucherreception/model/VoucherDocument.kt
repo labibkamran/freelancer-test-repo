@@ -3,60 +3,58 @@ package com.respiroc.voucherreception.model
 import com.respiroc.company.domain.model.Company
 import com.respiroc.tenant.domain.model.Tenant
 import jakarta.persistence.*
-import java.time.LocalDateTime
-import java.util.*
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
+import java.time.Instant
 
 @Entity
 @Table(name = "voucher_documents")
-data class VoucherDocument(
+class VoucherDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
-    val company: Company,
+    lateinit var company: Company
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
-    val tenant: Tenant,
+    lateinit var tenant: Tenant
     
     @Column(nullable = false)
-    val filename: String,
+    lateinit var filename: String
     
     @Lob
     @Column(name = "file_data")
-    val fileData: ByteArray? = null,
+    var fileData: ByteArray? = null
     
     @Column(name = "mime_type")
-    val mimeType: String? = null,
+    var mimeType: String? = null
     
     @Column(name = "file_size")
-    val fileSize: Long? = null,
+    var fileSize: Long? = null
     
     @Column(name = "sender_email")
-    val senderEmail: String? = null,
+    var senderEmail: String? = null
     
     @Column(name = "received_at", nullable = false)
-    val receivedAt: LocalDateTime = LocalDateTime.now(),
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    val status: VoucherDocumentStatus = VoucherDocumentStatus.PENDING,
+    var receivedAt: Instant = Instant.now()
     
     @Column(name = "attached_voucher_id")
-    val attachedVoucherId: Long? = null,
+    var attachedVoucherId: Long? = null
     
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    var createdAt: Instant? = null
     
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    val updatedAt: LocalDateTime? = null
-)
-
-enum class VoucherDocumentStatus {
-    PENDING,
-    ATTACHED,
-    DELETED,
-    FAILED
+    var updatedAt: Instant? = null
+    
+    val isPending: Boolean
+        get() = attachedVoucherId == null
+        
+    val isAttached: Boolean
+        get() = attachedVoucherId != null
 }
