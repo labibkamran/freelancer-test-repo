@@ -2,6 +2,7 @@ package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.command.CreatePostingCommand
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
@@ -16,34 +17,9 @@ import java.time.LocalDate
 @Transactional
 class PostingService(
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi
+    private val accountApi: AccountInternalApi,
+    private val vatApi: VatInternalApi
 ) : PostingInternalApi {
-
-    override fun createPosting(
-        accountNumber: String,
-        amount: BigDecimal,
-        currency: String,
-        postingDate: LocalDate,
-        description: String?,
-        user: UserContext
-    ): Posting {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
-        if (accountApi.findAccountByNumber(accountNumber) == null) {
-            throw IllegalArgumentException("No account found with account number = $accountNumber")
-        }
-
-        val posting = Posting()
-        posting.accountNumber = accountNumber
-        posting.amount = amount
-        posting.currency = currency
-        posting.postingDate = postingDate
-        posting.description = description
-        posting.tenantId = tenantId
-
-        return postingRepository.save(posting)
-    }
 
     override fun createBatchPostings(
         postings: List<CreatePostingCommand>,
@@ -55,6 +31,13 @@ class PostingService(
         postings.forEach { postingData ->
             if (accountApi.findAccountByNumber(postingData.accountNumber) == null) {
                 throw IllegalArgumentException("No account found with account number = ${postingData.accountNumber}")
+            }
+            
+            // Validate VAT code if provided
+            if (postingData.vatCode != null) {
+                if (!vatApi.vatCodeExists(postingData.vatCode)) {
+                    throw IllegalArgumentException("Invalid VAT code: ${postingData.vatCode}")
+                }
             }
         }
 
@@ -73,6 +56,17 @@ class PostingService(
             posting.tenantId = tenantId
             posting.originalAmount = postingData.originalAmount
             posting.originalCurrency = postingData.originalCurrency
+            
+            // Handle VAT fields
+            if (postingData.vatCode != null) {
+                val vatCode = vatApi.findVatCodeByCode(postingData.vatCode)
+                if (vatCode != null) {
+                    posting.vatCode = vatCode.code
+                    posting.vatRate = vatCode.rate
+                    posting.vatAmount = vatApi.calculateVatAmount(postingData.amount.abs(), vatCode)
+                }
+            }
+            
             posting
         }
 
