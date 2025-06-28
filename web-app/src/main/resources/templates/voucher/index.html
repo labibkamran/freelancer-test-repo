@@ -203,6 +203,26 @@
             margin-top: 0.25rem;
             display: block;
         }
+        
+        .vat-field {
+            font-size: 0.75rem !important;
+            color: #6b7280 !important;
+            background: #f8f9fa !important;
+            border: 1px solid #e9ecef !important;
+            border-radius: 3px;
+            padding: 2px 4px !important;
+        }
+        
+        .vat-field:focus {
+            outline: 1px solid #3b82f6 !important;
+            outline-offset: -1px;
+            border-color: #3b82f6 !important;
+        }
+        
+        .vat-field:disabled {
+            background-color: #f5f5f5 !important;
+            color: #9ca3af !important;
+        }
     </style>
 </head>
 
@@ -301,6 +321,7 @@
     <script th:inline="javascript">
         // Accounts data for search
         const accounts = /*[[${accounts}]]*/ [];
+        const vatCodes = /*[[${vatCodes}]]*/ [];
         const companyCurrency = /*[[${companyCurrency}]]*/ 'NOK';
         const supportedCurrencies = /*[[${supportedCurrencies}]]*/ ['NOK', 'USD', 'EUR'];
         let rowCounter = 0;
@@ -330,29 +351,55 @@
                            required>
                 </td>
                 <td>
-                    <div class="account-search">
-                        <input type="text" 
-                               name="postingLines[${rowCounter}].debitAccount" 
-                               placeholder="Search debit account..." 
-                               autocomplete="off"
-                               onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
-                               onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
-                               onblur="validatePostingLineFields(${rowCounter})"
-                               oninput="toggleAccountSelection(${rowCounter}, 'debit')">
-                        <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <div class="account-search">
+                            <input type="text" 
+                                   name="postingLines[${rowCounter}].debitAccount" 
+                                   placeholder="Search debit account..." 
+                                   autocomplete="off"
+                                   onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
+                                   onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
+                                   onblur="validatePostingLineFields(${rowCounter})"
+                                   oninput="toggleAccountSelection(${rowCounter}, 'debit')"
+                                   style="font-size: 0.8rem;">
+                            <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                        </div>
+                        <div class="vat-search" style="position: relative;">
+                            <input type="text" 
+                                   name="postingLines[${rowCounter}].debitVatCode" 
+                                   placeholder="VAT code..." 
+                                   autocomplete="off"
+                                   onkeyup="searchVatCodes(this, ${rowCounter}, 'debit')"
+                                   onfocus="searchVatCodes(this, ${rowCounter}, 'debit')"
+                                   class="vat-field">
+                            <div id="debit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
+                        </div>
                     </div>
                 </td>
                 <td>
-                    <div class="account-search">
-                        <input type="text" 
-                               name="postingLines[${rowCounter}].creditAccount" 
-                               placeholder="Search credit account..." 
-                               autocomplete="off"
-                               onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
-                               onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
-                               onblur="validatePostingLineFields(${rowCounter})"
-                               oninput="toggleAccountSelection(${rowCounter}, 'credit')">
-                        <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <div class="account-search">
+                            <input type="text" 
+                                   name="postingLines[${rowCounter}].creditAccount" 
+                                   placeholder="Search credit account..." 
+                                   autocomplete="off"
+                                   onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
+                                   onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
+                                   onblur="validatePostingLineFields(${rowCounter})"
+                                   oninput="toggleAccountSelection(${rowCounter}, 'credit')"
+                                   style="font-size: 0.8rem;">
+                            <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
+                        </div>
+                        <div class="vat-search" style="position: relative;">
+                            <input type="text" 
+                                   name="postingLines[${rowCounter}].creditVatCode" 
+                                   placeholder="VAT code..." 
+                                   autocomplete="off"
+                                   onkeyup="searchVatCodes(this, ${rowCounter}, 'credit')"
+                                   onfocus="searchVatCodes(this, ${rowCounter}, 'credit')"
+                                   class="vat-field">
+                            <div id="credit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
+                        </div>
                     </div>
                 </td>
                 <td>
@@ -564,16 +611,26 @@
         function toggleAccountSelection(rowId, type) {
             const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
             const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+            const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
+            const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
             
             if (type === 'debit' && debitInput.value.trim() !== '') {
                 creditInput.value = '';
                 creditInput.disabled = true;
+                creditVatInput.value = '';
+                creditVatInput.disabled = true;
+                debitVatInput.disabled = false;
             } else if (type === 'credit' && creditInput.value.trim() !== '') {
                 debitInput.value = '';
                 debitInput.disabled = true;
+                debitVatInput.value = '';
+                debitVatInput.disabled = true;
+                creditVatInput.disabled = false;
             } else {
                 debitInput.disabled = false;
                 creditInput.disabled = false;
+                debitVatInput.disabled = false;
+                creditVatInput.disabled = false;
             }
             
             validatePostingLineFields(rowId);
@@ -619,9 +676,44 @@
             toggleAccountSelection(rowId, type);
         }
         
+        function searchVatCodes(input, rowId, type) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            const filteredVatCodes = vatCodes.filter(vatCode => 
+                vatCode.code.toLowerCase().includes(query) ||
+                vatCode.description.toLowerCase().includes(query)
+            );
+            
+            if (filteredVatCodes.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            dropdown.innerHTML = filteredVatCodes.map(vatCode => `
+                <div class="account-item" onclick="selectVatCode('${vatCode.code}', '${vatCode.description}', ${rowId}, '${type}')">
+                        <div style="font-weight: 500; font-size: 0.8rem;">${vatCode.code} - ${vatCode.rate}%</div>
+                        <div style="font-size: 0.7rem; color: #6b7280;">${vatCode.description}</div>
+                </div>
+            `).join('');
+            
+            dropdown.style.display = 'block';
+        }
+        
+        function selectVatCode(vatCode, description, rowId, type) {
+            const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
+            input.value = vatCode;
+            document.getElementById(type + '-vat-dropdown-' + rowId).style.display = 'none';
+        }
+        
         // Hide dropdowns when clicking outside
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.account-search')) {
+            if (!e.target.closest('.account-search') && !e.target.closest('.vat-search')) {
                 document.querySelectorAll('.account-dropdown').forEach(dropdown => {
                     dropdown.style.display = 'none';
                 });
