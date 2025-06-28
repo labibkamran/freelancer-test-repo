@@ -1,23 +1,34 @@
 /**
  * REAI Email Voucher Reception Worker
  * Processes incoming emails and forwards document attachments to REAI API
- * Files larger than 5MB are ignored
+ * Files larger than 25MB are ignored
  */
 
 import PostalMime from 'postal-mime';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
 
 interface Env {
 	API_TOKEN: string;
 	VOUCHER_API_BASE: string;
 }
 
+// Use the official ForwardableEmailMessage interface from Cloudflare
+interface ForwardableEmailMessage {
+	readonly from: string;
+	readonly to: string;
+	readonly headers: Headers;
+	readonly raw: ReadableStream<Uint8Array>;
+	readonly rawSize: number;
+	
+	setReject(reason: string): void;
+	forward(rcptTo: string, headers?: Headers): Promise<void>;
+	reply(message: EmailMessage): Promise<void>;
+}
+
 interface EmailMessage {
-	from: string;
-	to: string;
-	headers: Headers;
-	raw: ReadableStream<Uint8Array>;
+	readonly from: string;
+	readonly to: string;
 }
 
 interface DocumentPayload {
@@ -29,15 +40,23 @@ interface DocumentPayload {
 }
 
 export default {
-	async email(message: EmailMessage, env: Env, ctx: ExecutionContext): Promise<void> {
+	async email(message: ForwardableEmailMessage, env: Env, _ctx: ExecutionContext): Promise<void> {
 		try {
-			// Parse email content
+			// Check if message is too large (early exit)
+			if (message.rawSize > MAX_FILE_SIZE * 2) {
+				console.log(`Email too large: ${message.rawSize} bytes`);
+				return;
+			}
+			
+			// Parse email content using PostalMime with base64 encoding for attachments
 			const rawEmail = await new Response(message.raw).arrayBuffer();
-			const email = await PostalMime.parse(rawEmail);
+			const email = await PostalMime.parse(rawEmail, {
+				attachmentEncoding: 'base64' // This returns attachments as base64 strings directly
+			});
 			
 			// Extract company slug from recipient email (e.g., acme@ea.reai.no -> acme)
 			const recipientEmail = message.to;
-			const companySlug = recipientEmail.split('@')[0];
+			const companySlug = recipientEmail.split('@')[0].toLowerCase();
 			
 			if (!companySlug) {
 				console.error('Could not extract company slug from recipient:', recipientEmail);
@@ -49,23 +68,26 @@ export default {
 			console.log(`Processing ${attachments.length} attachments for company: ${companySlug}`);
 			
 			for (const attachment of attachments) {
-				if (attachment.size > MAX_FILE_SIZE) {
-					console.log(`Skipping attachment ${attachment.filename}: size ${attachment.size} exceeds 5MB limit`);
-					continue;
-				}
-				
 				if (!attachment.content) {
 					console.log(`Skipping attachment ${attachment.filename}: no content`);
 					continue;
 				}
 				
-				// Convert content to base64
-				const fileData = btoa(String.fromCharCode(...new Uint8Array(attachment.content)));
+				// With attachmentEncoding: 'base64', content is already a base64 string
+				const fileData = attachment.content as string;
+				
+				// Calculate size from base64 string (rough estimate: base64 is ~33% larger than original)
+				const estimatedSize = Math.floor((fileData.length * 3) / 4);
+				
+				if (estimatedSize > MAX_FILE_SIZE) {
+					console.log(`Skipping attachment ${attachment.filename}: estimated size ${estimatedSize} exceeds 25MB limit`);
+					continue;
+				}
 				
 				const payload: DocumentPayload = {
 					filename: attachment.filename || 'unnamed_file',
 					mimeType: attachment.mimeType || 'application/octet-stream',
-					fileSize: attachment.size,
+					fileSize: estimatedSize,
 					fileData: fileData,
 					senderEmail: message.from
 				};
@@ -95,7 +117,6 @@ async function sendToReaiApi(companySlug: string, payload: DocumentPayload, env:
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${env.API_TOKEN}`,
 				'X-Company-Slug': companySlug,
 			},
 			body: JSON.stringify(payload),

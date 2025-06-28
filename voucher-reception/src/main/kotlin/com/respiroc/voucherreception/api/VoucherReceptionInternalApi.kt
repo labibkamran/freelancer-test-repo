@@ -2,7 +2,6 @@ package com.respiroc.voucherreception.api
 
 import com.respiroc.voucherreception.api.command.CreateVoucherDocumentCommand
 import com.respiroc.voucherreception.model.VoucherDocument
-import com.respiroc.voucherreception.model.VoucherDocumentStatus
 import org.springframework.web.multipart.MultipartFile
 interface VoucherReceptionInternalApi {
     
@@ -24,12 +23,6 @@ interface VoucherReceptionInternalApi {
     fun receiveDocumentCommand(command: CreateVoucherDocumentCommand): VoucherDocument
     
     fun getDocumentsByCompany(companyId: Long, tenantId: Long): List<VoucherDocument>
-    
-    fun getDocumentsByStatus(
-        companyId: Long, 
-        tenantId: Long, 
-        status: VoucherDocumentStatus
-    ): List<VoucherDocument>
     
     fun getPendingDocumentsByTenant(tenantId: Long): List<VoucherDocument>
     
