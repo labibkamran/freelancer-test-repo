@@ -31,7 +31,8 @@ data class PostingEntry(
     val amount: BigDecimal? = null,
     val currency: String = "NOK",
     val type: String = "debit", // "debit" or "credit"
-    val description: String? = null
+    val description: String? = null,
+    val vatCode: String? = null
 ) {
     fun validate(): Boolean {
         return accountNumber.isNotBlank() && amount != null && amount > BigDecimal.ZERO && 
@@ -54,7 +55,9 @@ data class PostingLine(
     val amount: BigDecimal? = null,
     val currency: String = "NOK",
     val postingDate: LocalDate? = null,
-    val description: String? = null
+    val description: String? = null,
+    val debitVatCode: String? = null,
+    val creditVatCode: String? = null
 ) {
     fun validate(): Boolean {
         val hasDebitAccount = debitAccount.isNotBlank()
@@ -74,12 +77,14 @@ data class PostingLine(
     }
     
     fun toPostingEntry(): PostingEntry {
+        val vatCode = if (debitAccount.isNotBlank()) debitVatCode else creditVatCode
         return PostingEntry(
             accountNumber = getAccountNumber(),
             amount = amount!!,
             currency = currency,
             type = getAccountType(),
-            description = description
+            description = description,
+            vatCode = vatCode
         )
     }
 }
