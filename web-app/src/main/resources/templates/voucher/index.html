@@ -206,22 +206,36 @@
         
         .vat-field {
             font-size: 0.75rem !important;
-            color: #6b7280 !important;
+            color: #374151 !important;
             background: #f8f9fa !important;
             border: 1px solid #e9ecef !important;
             border-radius: 3px;
             padding: 2px 4px !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
         
         .vat-field:focus {
             outline: 1px solid #3b82f6 !important;
             outline-offset: -1px;
             border-color: #3b82f6 !important;
+            background: white !important;
+        }
+        
+        .vat-field:hover {
+            background: #e9ecef !important;
+            border-color: #ced4da !important;
         }
         
         .vat-field:disabled {
             background-color: #f5f5f5 !important;
             color: #9ca3af !important;
+            cursor: not-allowed;
+        }
+        
+        .vat-field::placeholder {
+            color: #9ca3af !important;
+            font-style: italic;
         }
     </style>
 </head>
@@ -367,10 +381,12 @@
                         <div class="vat-search" style="position: relative;">
                             <input type="text" 
                                    name="postingLines[${rowCounter}].debitVatCode" 
-                                   placeholder="VAT code..." 
+                                   placeholder="Type or click to select VAT..." 
                                    autocomplete="off"
-                                   onkeyup="searchVatCodes(this, ${rowCounter}, 'debit')"
-                                   onfocus="searchVatCodes(this, ${rowCounter}, 'debit')"
+                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'debit')"
+                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'debit')"
+                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'debit')"
+                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'debit')"
                                    class="vat-field">
                             <div id="debit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
                         </div>
@@ -393,10 +409,12 @@
                         <div class="vat-search" style="position: relative;">
                             <input type="text" 
                                    name="postingLines[${rowCounter}].creditVatCode" 
-                                   placeholder="VAT code..." 
+                                   placeholder="Type or click to select VAT..." 
                                    autocomplete="off"
-                                   onkeyup="searchVatCodes(this, ${rowCounter}, 'credit')"
-                                   onfocus="searchVatCodes(this, ${rowCounter}, 'credit')"
+                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'credit')"
+                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'credit')"
+                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'credit')"
+                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'credit')"
                                    class="vat-field">
                             <div id="credit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
                         </div>
@@ -680,25 +698,35 @@
             const query = input.value.toLowerCase();
             const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
             
-            if (query.length < 1) {
-                dropdown.style.display = 'none';
-                return;
+            // Show all VAT codes when field is focused or query is empty
+            let filteredVatCodes;
+            if (query.length === 0) {
+                filteredVatCodes = vatCodes;
+            } else {
+                filteredVatCodes = vatCodes.filter(vatCode => 
+                    vatCode.code.toLowerCase().includes(query) ||
+                    vatCode.description.toLowerCase().includes(query) ||
+                    vatCode.rate.toString().includes(query) ||
+                    vatCode.vatType.toLowerCase().includes(query) ||
+                    vatCode.vatCategory.toLowerCase().includes(query)
+                );
             }
             
-            const filteredVatCodes = vatCodes.filter(vatCode => 
-                vatCode.code.toLowerCase().includes(query) ||
-                vatCode.description.toLowerCase().includes(query)
-            );
-            
             if (filteredVatCodes.length === 0) {
-                dropdown.style.display = 'none';
+                dropdown.innerHTML = `
+                    <div class="account-item" style="color: #9ca3af; font-style: italic;">
+                        <div style="font-size: 0.8rem;">No VAT codes found</div>
+                    </div>
+                `;
+                dropdown.style.display = 'block';
                 return;
             }
             
             dropdown.innerHTML = filteredVatCodes.map(vatCode => `
                 <div class="account-item" onclick="selectVatCode('${vatCode.code}', '${vatCode.description}', ${rowId}, '${type}')">
-                        <div style="font-weight: 500; font-size: 0.8rem;">${vatCode.code} - ${vatCode.rate}%</div>
+                        <div style="font-weight: 500; font-size: 0.8rem;">${vatCode.code} - ${vatCode.rate}% (${vatCode.vatCategory})</div>
                         <div style="font-size: 0.7rem; color: #6b7280;">${vatCode.description}</div>
+                        <div style="font-size: 0.65rem; color: #9ca3af;">${vatCode.vatType}</div>
                 </div>
             `).join('');
             
@@ -707,8 +735,57 @@
         
         function selectVatCode(vatCode, description, rowId, type) {
             const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
-            input.value = vatCode;
+            const vatCodeObj = vatCodes.find(vc => vc.code === vatCode);
+            
+            // Display the code with rate for better UX
+            if (vatCodeObj) {
+                input.value = `${vatCode} (${vatCodeObj.rate}%)`;
+                input.setAttribute('data-vat-code', vatCode); // Store actual code for form submission
+            } else {
+                input.value = vatCode;
+                input.setAttribute('data-vat-code', vatCode);
+            }
+            
             document.getElementById(type + '-vat-dropdown-' + rowId).style.display = 'none';
+        }
+        
+        function showAllVatCodes(input, rowId, type) {
+            // Clear the search and show all codes
+            input.value = '';
+            searchVatCodes(input, rowId, type);
+        }
+        
+        // Enhanced VAT field handlers
+        function handleVatFieldClick(input, rowId, type) {
+            // If field is empty or contains display value, show all VAT codes
+            if (!input.value || input.value.includes('(') || input.value.includes('%')) {
+                input.value = '';
+                input.removeAttribute('data-vat-code');
+                searchVatCodes(input, rowId, type);
+            }
+        }
+        
+        function handleVatFieldFocus(input, rowId, type) {
+            // Show dropdown when focused
+            if (!input.value) {
+                searchVatCodes(input, rowId, type);
+            }
+        }
+        
+        function handleVatFieldKeyup(input, rowId, type) {
+            // Clear data attribute when user types
+            input.removeAttribute('data-vat-code');
+            searchVatCodes(input, rowId, type);
+        }
+        
+        function handleVatFieldBlur(input, rowId, type) {
+            // Delay hiding dropdown to allow click on items
+            setTimeout(() => {
+                const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }, 150);
         }
         
         // Hide dropdowns when clicking outside
@@ -907,6 +984,20 @@
                     if (name && name.includes('postingLines[')) {
                         const newName = name.replace(/postingLines\[\d+\]/, `postingLines[${index}]`);
                         input.setAttribute('name', newName);
+                        
+                        // Handle VAT code fields - ensure we send the actual code, not display value
+                        if (name.includes('VatCode')) {
+                            const actualCode = input.getAttribute('data-vat-code');
+                            if (actualCode) {
+                                input.value = actualCode;
+                            } else if (input.value && input.value.includes('(')) {
+                                // Extract code from display value like "1 (25%)"
+                                const codeMatch = input.value.match(/^(\w+)\s*\(/);
+                                if (codeMatch) {
+                                    input.value = codeMatch[1];
+                                }
+                            }
+                        }
                     }
                 });
                 

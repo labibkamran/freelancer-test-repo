@@ -35,6 +35,8 @@
                     input.value = new Date().toISOString().split('T')[0];
                 } else if (input.type === 'text' || input.type === 'number') {
                     input.value = '';
+                    // Clear VAT code data attributes
+                    input.removeAttribute('data-vat-code');
                 } else if (input.tagName === 'SELECT') {
                     // Reset to company currency (assume NOK for now)
                     input.value = 'NOK';
