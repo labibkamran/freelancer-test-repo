@@ -31,7 +31,8 @@ data class PostingEntry(
     val amount: BigDecimal? = null,
     val currency: String = "NOK",
     val type: String = "debit", // "debit" or "credit"
-    val description: String? = null
+    val description: String? = null,
+    val vatCode: String? = null
 ) {
     fun validate(): Boolean {
         return accountNumber.isNotBlank() && amount != null && amount > BigDecimal.ZERO && 
@@ -54,7 +55,9 @@ data class PostingLine(
     val amount: BigDecimal? = null,
     val currency: String = "NOK",
     val postingDate: LocalDate? = null,
-    val description: String? = null
+    val description: String? = null,
+    val debitVatCode: String? = null,
+    val creditVatCode: String? = null
 ) {
     fun validate(): Boolean {
         val hasDebitAccount = debitAccount.isNotBlank()
@@ -74,13 +77,30 @@ data class PostingLine(
     }
     
     fun toPostingEntry(): PostingEntry {
+        val vatCode = if (debitAccount.isNotBlank()) debitVatCode else creditVatCode
         return PostingEntry(
             accountNumber = getAccountNumber(),
             amount = amount!!,
             currency = currency,
             type = getAccountType(),
-            description = description
+            description = description,
+            vatCode = extractActualVatCode(vatCode)
         )
+    }
+    
+    private fun extractActualVatCode(vatCodeValue: String?): String? {
+        if (vatCodeValue.isNullOrBlank()) return null
+        
+        val trimmed = vatCodeValue.trim()
+        
+        // If it contains parentheses, extract code before the first space/parenthesis
+        // Examples: "1 (25%)" -> "1", "VAT1 (12%)" -> "VAT1", "2" -> "2"
+        return if (trimmed.contains("(")) {
+            trimmed.substringBefore("(").trim().takeIf { it.isNotBlank() }
+        } else {
+            // If no parentheses, use the whole value as is (already clean code)
+            trimmed.takeIf { it.isNotBlank() }
+        }
     }
 }
 

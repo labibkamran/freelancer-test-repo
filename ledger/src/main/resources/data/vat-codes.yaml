@@ -1,0 +1,102 @@
+vatCodes:
+  # Standard Rate (25%) - High Rate VAT
+  - code: "1"
+    description: "Purchases of goods and services with compensation for VAT (standard rate)"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  - code: "14"
+    description: "Compensation for value added tax paid upon import (standard rate)"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  - code: "81"
+    description: "Purchases of goods from abroad with compensation for VAT (standard rate)"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  - code: "86"
+    description: "Purchases of services from abroad with compensation for VAT (standard rate)"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  - code: "91"
+    description: "Purchases of emission allowances and gold with compensation for VAT (standard rate)"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  # Medium Rate (15%) - Medium Rate VAT
+  - code: "11"
+    description: "Purchases of goods and services with compensation for VAT (medium rate)"
+    rate: 15.0
+    vatType: "INPUT_VAT"
+    vatCategory: "MEDIUM"
+
+  - code: "15"
+    description: "Compensation for value added tax paid upon import (medium rate)"
+    rate: 15.0
+    vatType: "INPUT_VAT"
+    vatCategory: "MEDIUM"
+
+  - code: "83"
+    description: "Purchases of goods from abroad with compensation for VAT (medium rate)"
+    rate: 15.0
+    vatType: "INPUT_VAT"
+    vatCategory: "MEDIUM"
+
+  # Low Rate (12%) - Low Rate VAT
+  - code: "13"
+    description: "Purchases of goods and services with compensation for VAT (low rate)"
+    rate: 12.0
+    vatType: "INPUT_VAT"
+    vatCategory: "LOW"
+
+  - code: "88"
+    description: "Purchases of services from abroad with compensation for VAT (low rate)"
+    rate: 12.0
+    vatType: "INPUT_VAT"
+    vatCategory: "LOW"
+
+  # Output VAT codes for sales
+  - code: "3"
+    description: "Sales with VAT at standard rate"
+    rate: 25.0
+    vatType: "OUTPUT_VAT"
+    vatCategory: "STANDARD"
+
+  - code: "31"
+    description: "Sales with VAT at medium rate"
+    rate: 15.0
+    vatType: "OUTPUT_VAT"
+    vatCategory: "MEDIUM"
+
+  - code: "33"
+    description: "Sales with VAT at low rate"
+    rate: 12.0
+    vatType: "OUTPUT_VAT"
+    vatCategory: "LOW"
+
+  # VAT-free codes
+  - code: "5"
+    description: "Sales exempt from VAT"
+    rate: 0.0
+    vatType: "EXEMPT"
+    vatCategory: "EXEMPT"
+
+  - code: "6"
+    description: "Sales outside the scope of VAT"
+    rate: 0.0
+    vatType: "OUTSIDE_SCOPE"
+    vatCategory: "EXEMPT"
+
+  # Reverse charge VAT
+  - code: "52"
+    description: "Purchase of services from abroad subject to reverse charge VAT"
+    rate: 25.0
+    vatType: "REVERSE_CHARGE"
+    vatCategory: "STANDARD" 
