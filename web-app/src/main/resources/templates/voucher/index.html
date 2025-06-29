@@ -593,7 +593,7 @@
                 
                 if (!isNaN(amount) && amount > 0 && currency !== companyCurrency) {
                     try {
-                        const response = await fetch(`/voucher/convert-amount?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
+                        const response = await fetch(`/api/currency/convert?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
                         if (response.ok) {
                             const data = await response.json();
                             const convertedAmount = parseFloat(data.convertedAmount);
