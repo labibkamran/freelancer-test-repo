@@ -14,7 +14,6 @@ import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import org.springframework.http.ResponseEntity
 import jakarta.validation.Valid
 import java.time.LocalDate
 import java.math.BigDecimal
@@ -39,66 +38,7 @@ class VoucherWebController(
         return "voucher/index"
     }
 
-    @GetMapping("/currency-rates")
-    @ResponseBody
-    fun getCurrencyRates(@RequestParam currencies: List<String>): ResponseEntity<Map<String, BigDecimal>> {
-        val companyCurrency = currencyService.getCompanyCurrency("NO")
-        val rates = currencies.associate { currency ->
-            currency to if (currency == companyCurrency) BigDecimal.ONE 
-                        else currencyService.convertCurrency(BigDecimal.ONE, currency, companyCurrency)
-        }
-        return ResponseEntity.ok(rates)
-    }
 
-    @GetMapping("/convert-amount")
-    @ResponseBody
-    fun convertAmount(
-        @RequestParam amount: BigDecimal,
-        @RequestParam fromCurrency: String,
-        @RequestParam(required = false) toCurrency: String?
-    ): ResponseEntity<Map<String, Any>> {
-        val companyCurrency = currencyService.getCompanyCurrency("NO")
-        val targetCurrency = toCurrency ?: companyCurrency
-        
-        val convertedAmount = if (fromCurrency == targetCurrency) {
-            amount
-        } else {
-            currencyService.convertCurrency(amount, fromCurrency, targetCurrency)
-        }
-        
-        val response = mapOf(
-            "originalAmount" to amount,
-            "originalCurrency" to fromCurrency,
-            "convertedAmount" to convertedAmount,
-            "convertedCurrency" to targetCurrency,
-            "rate" to if (fromCurrency == targetCurrency) BigDecimal.ONE 
-                     else currencyService.convertCurrency(BigDecimal.ONE, fromCurrency, targetCurrency)
-        )
-        
-        return ResponseEntity.ok(response)
-    }
-
-    @GetMapping("/vat-codes")
-    @ResponseBody
-    fun getVatCodes(@RequestParam(required = false) query: String?): ResponseEntity<List<Map<String, Any>>> {
-        val vatCodes = if (query.isNullOrBlank()) {
-            vatApi.findAllVatCodes()
-        } else {
-            vatApi.searchVatCodesByDescription(query)
-        }
-        
-        val response = vatCodes.map { vatCode ->
-            mapOf(
-                "code" to vatCode.code,
-                "description" to vatCode.description,
-                "rate" to vatCode.rate,
-                "vatType" to vatCode.vatType.name,
-                "vatCategory" to vatCode.vatCategory.name
-            )
-        }
-        
-        return ResponseEntity.ok(response)
-    }
 
     @PostMapping("/batch-postings")
     fun createBatchPostings(
