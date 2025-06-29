@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <style>
+        .trial-balance-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .filters-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .filters-form {
+            display: flex;
+            align-items: end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .filter-input {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            min-width: 140px;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .filter-button {
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .filter-button:hover {
+            background: #2563eb;
+        }
+        
+        .trial-balance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .trial-balance-table th {
+            background: #f8f9fa;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .trial-balance-table th.amount-header {
+            text-align: right;
+        }
+        
+        .trial-balance-table td {
+            padding: 0.875rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .trial-balance-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .amount-cell {
+            text-align: right;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: 500;
+        }
+        
+        .account-number {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: 500;
+            color: #6b7280;
+        }
+        
+        .account-name {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .total-row {
+            background: #f0f9ff;
+            border-top: 2px solid #3b82f6;
+        }
+        
+        .total-row td {
+            font-weight: 600;
+            color: #1e40af;
+            padding: 1rem 0.75rem;
+        }
+        
+        .positive-amount {
+            color: #16a34a;
+        }
+        
+        .negative-amount {
+            color: #dc2626;
+        }
+        
+        .zero-amount {
+            color: #6b7280;
+        }
+        
+        .period-display {
+            background: #f0f9ff;
+            padding: 1rem 1.5rem;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 1rem;
+        }
+        
+        .period-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.25rem;
+        }
+        
+        .period-subtitle {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .loading-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .filters-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-input {
+                min-width: auto;
+            }
+            
+            .trial-balance-table {
+                font-size: 0.75rem;
+            }
+            
+            .trial-balance-table th,
+            .trial-balance-table td {
+                padding: 0.5rem 0.375rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container" style="max-width: 1400px; margin-top: 2rem;">
+        
+        <!-- Trial Balance Container -->
+        <div class="trial-balance-container">
+            
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <form class="filters-form" 
+                      th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}" 
+                      hx-target="#content-area"
+                      hx-indicator="#loading-indicator"
+                      hx-swap="innerHTML"
+                      th:if="${user != null and user.ctx.currentTenant != null}">
+                    
+                    <div class="filter-group">
+                        <label class="filter-label" for="startDate">Start Date</label>
+                        <wa-input type="date"
+                               size="small"
+                               id="startDate" 
+                               name="startDate"
+                               th:value="${startDate}"></wa-input>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label" for="endDate">End Date</label>
+                        <wa-input type="date"
+                               size="small"
+                               id="endDate" 
+                               name="endDate"
+                               th:value="${endDate}"></wa-input>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <wa-button type="submit" size="small" variant="primary">
+                            <wa-icon name="filter" slot="prefix"></wa-icon>
+                            Apply
+                        </wa-button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Error Message Fragment -->
+            <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
+                <wa-icon name="exclamation-triangle"></wa-icon>
+                <span th:text="${errorMessage}">Error occurred</span>
+            </div>
+            
+            <!-- Company Selection Required -->
+            <div th:if="${user == null or user.ctx.currentTenant == null}" class="empty-state">
+                <div class="empty-state-icon">
+                    <wa-icon name="building"></wa-icon>
+                </div>
+                <h3>Company Selection Required</h3>
+                <p>Please select a company before viewing the trial balance.</p>
+                <a href="/tenant/select" class="btn btn-primary">Select Company</a>
+            </div>
+            
+            <!-- Trial Balance Content -->
+            <div id="content-area">
+                <div th:fragment="tableContent">
+                    <div th:unless="${trialBalanceData.entries.empty}">
+                        <div style="overflow-x: auto;">
+                            <table class="trial-balance-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%;">Account</th>
+                                        <th style="width: 35%;">Account Name</th>
+                                        <th class="amount-header" style="width: 16.67%;">Opening Balance</th>
+                                        <th class="amount-header" style="width: 16.67%;">Difference</th>
+                                        <th class="amount-header" style="width: 16.67%;">Closing Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="entry : ${trialBalanceData.entries}">
+                                        <td>
+                                            <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                        </td>
+                                        <td>
+                                            <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <span th:class="${entry.closingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.closingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.closingBalance, 1, 2)}">949,240.23</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="2"><strong>Total</strong></td>
+                                        <td class="amount-cell">
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div th:if="${trialBalanceData.entries.empty}" class="empty-state">
+                        <div class="empty-state-icon">
+                            <wa-icon name="table"></wa-icon>
+                        </div>
+                        <h3>No Data Available</h3>
+                        <p>No posting data found for the selected period.</p>
+                        <p>Try adjusting the date range or create some postings first.</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+</body>
+</html> 
