@@ -4,6 +4,8 @@ import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.command.CreatePostingCommand
+import com.respiroc.ledger.api.result.TrialBalanceEntry
+import com.respiroc.ledger.api.result.TrialBalanceResult
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.tenant.infrastructure.context.TenantContextHolder
@@ -38,35 +40,43 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun findAllPostingsByUser(user: UserContext): List<Posting> {
+    override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate, user: UserContext): TrialBalanceResult {
         val tenantId = requireTenantContext()
-        return postingRepository.findByTenantIdOrderByPostingDateDescCreatedAtDesc(tenantId)
-    }
-
-    @Transactional(readOnly = true)
-    override fun findPostingsByAccountNumber(accountNumber: String, user: UserContext): List<Posting> {
-        val tenantId = requireTenantContext()
-        return postingRepository.findByAccountNumberAndTenantIdOrderByPostingDateDescCreatedAtDesc(
-            accountNumber, tenantId
+        val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
+        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+        
+        val trialBalanceEntries = accountNumbers.mapNotNull { accountNumber ->
+            val account = accounts[accountNumber]
+            if (account != null) {
+                val openingBalance = postingRepository.getAccountBalanceBeforeDate(accountNumber, tenantId, startDate)
+                val movement = postingRepository.getAccountMovementInPeriod(accountNumber, tenantId, startDate, endDate)
+                val closingBalance = openingBalance + movement
+                
+                // Only include accounts that have activity or balance
+                if (openingBalance.compareTo(BigDecimal.ZERO) != 0 || 
+                    movement.compareTo(BigDecimal.ZERO) != 0 || 
+                    closingBalance.compareTo(BigDecimal.ZERO) != 0) {
+                    TrialBalanceEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        openingBalance = openingBalance,
+                        difference = movement,
+                        closingBalance = closingBalance
+                    )
+                } else null
+            } else null
+        }
+        
+        val totalOpeningBalance = trialBalanceEntries.sumOf { it.openingBalance }
+        val totalDifference = trialBalanceEntries.sumOf { it.difference }
+        val totalClosingBalance = trialBalanceEntries.sumOf { it.closingBalance }
+        
+        return TrialBalanceResult(
+            entries = trialBalanceEntries,
+            totalOpeningBalance = totalOpeningBalance,
+            totalDifference = totalDifference,
+            totalClosingBalance = totalClosingBalance
         )
-    }
-
-    @Transactional(readOnly = true)
-    override fun findPostingsByDateRange(
-        startDate: LocalDate,
-        endDate: LocalDate,
-        user: UserContext
-    ): List<Posting> {
-        val tenantId = requireTenantContext()
-        return postingRepository.findByPostingDateBetweenAndTenantIdOrderByPostingDateDescCreatedAtDesc(
-            startDate, endDate, tenantId
-        )
-    }
-
-    @Transactional(readOnly = true)
-    override fun getAccountBalance(accountNumber: String, user: UserContext): BigDecimal {
-        val tenantId = requireTenantContext()
-        return postingRepository.getAccountBalance(accountNumber, tenantId)
     }
     
     // -------------------------------

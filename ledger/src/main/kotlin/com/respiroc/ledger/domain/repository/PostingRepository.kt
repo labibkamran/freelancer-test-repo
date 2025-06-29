@@ -11,19 +11,15 @@ import java.time.LocalDate
 @Repository
 interface PostingRepository : CustomJpaRepository<Posting, Long> {
     
-    fun findByTenantIdOrderByPostingDateDescCreatedAtDesc(tenantId: Long): List<Posting>
-    
-    fun findByAccountNumberAndTenantIdOrderByPostingDateDescCreatedAtDesc(
-        accountNumber: String, 
-        tenantId: Long
-    ): List<Posting>
-    
-    fun findByPostingDateBetweenAndTenantIdOrderByPostingDateDescCreatedAtDesc(
-        startDate: LocalDate,
-        endDate: LocalDate,
-        tenantId: Long
-    ): List<Posting>
-    
     @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Posting p WHERE p.accountNumber = :accountNumber AND p.tenantId = :tenantId")
     fun getAccountBalance(@Param("accountNumber") accountNumber: String, @Param("tenantId") tenantId: Long): BigDecimal
+    
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Posting p WHERE p.accountNumber = :accountNumber AND p.tenantId = :tenantId AND p.postingDate < :beforeDate")
+    fun getAccountBalanceBeforeDate(@Param("accountNumber") accountNumber: String, @Param("tenantId") tenantId: Long, @Param("beforeDate") beforeDate: LocalDate): BigDecimal
+    
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Posting p WHERE p.accountNumber = :accountNumber AND p.tenantId = :tenantId AND p.postingDate BETWEEN :startDate AND :endDate")
+    fun getAccountMovementInPeriod(@Param("accountNumber") accountNumber: String, @Param("tenantId") tenantId: Long, @Param("startDate") startDate: LocalDate, @Param("endDate") endDate: LocalDate): BigDecimal
+    
+    @Query("SELECT DISTINCT p.accountNumber FROM Posting p WHERE p.tenantId = :tenantId ORDER BY p.accountNumber")
+    fun findDistinctAccountNumbersByTenant(@Param("tenantId") tenantId: Long): List<String>
 }
