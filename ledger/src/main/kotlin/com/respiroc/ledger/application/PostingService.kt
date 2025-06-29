@@ -2,6 +2,7 @@ package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.command.CreatePostingCommand
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
@@ -16,64 +17,21 @@ import java.time.LocalDate
 @Transactional
 class PostingService(
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi
+    private val accountApi: AccountInternalApi,
+    private val vatApi: VatInternalApi
 ) : PostingInternalApi {
-
-    override fun createPosting(
-        accountNumber: String,
-        amount: BigDecimal,
-        currency: String,
-        postingDate: LocalDate,
-        description: String?,
-        user: UserContext
-    ): Posting {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
-        if (accountApi.findAccountByNumber(accountNumber) == null) {
-            throw IllegalArgumentException("No account found with account number = $accountNumber")
-        }
-
-        val posting = Posting()
-        posting.accountNumber = accountNumber
-        posting.amount = amount
-        posting.currency = currency
-        posting.postingDate = postingDate
-        posting.description = description
-        posting.tenantId = tenantId
-
-        return postingRepository.save(posting)
-    }
 
     override fun createBatchPostings(
         postings: List<CreatePostingCommand>,
         user: UserContext
     ): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
-        postings.forEach { postingData ->
-            if (accountApi.findAccountByNumber(postingData.accountNumber) == null) {
-                throw IllegalArgumentException("No account found with account number = ${postingData.accountNumber}")
-            }
-        }
-
-        val totalAmount = postings.sumOf { it.amount }
-        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
-            throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
-        }
-
+        val tenantId = requireTenantContext()
+        
+        validatePostingCommands(postings)
+        validateBalance(postings)
+        
         val createdPostings = postings.map { postingData ->
-            val posting = Posting()
-            posting.accountNumber = postingData.accountNumber
-            posting.amount = postingData.amount
-            posting.currency = postingData.currency
-            posting.postingDate = postingData.postingDate
-            posting.description = postingData.description
-            posting.tenantId = tenantId
-            posting.originalAmount = postingData.originalAmount
-            posting.originalCurrency = postingData.originalCurrency
-            posting
+            createPostingEntity(postingData, tenantId)
         }
 
         return postingRepository.saveAll(createdPostings)
@@ -81,17 +39,13 @@ class PostingService(
 
     @Transactional(readOnly = true)
     override fun findAllPostingsByUser(user: UserContext): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByTenantIdOrderByPostingDateDescCreatedAtDesc(tenantId)
     }
 
     @Transactional(readOnly = true)
     override fun findPostingsByAccountNumber(accountNumber: String, user: UserContext): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByAccountNumberAndTenantIdOrderByPostingDateDescCreatedAtDesc(
             accountNumber, tenantId
         )
@@ -103,9 +57,7 @@ class PostingService(
         endDate: LocalDate,
         user: UserContext
     ): List<Posting> {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.findByPostingDateBetweenAndTenantIdOrderByPostingDateDescCreatedAtDesc(
             startDate, endDate, tenantId
         )
@@ -113,9 +65,69 @@ class PostingService(
 
     @Transactional(readOnly = true)
     override fun getAccountBalance(accountNumber: String, user: UserContext): BigDecimal {
-        val tenantId = TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-
+        val tenantId = requireTenantContext()
         return postingRepository.getAccountBalance(accountNumber, tenantId)
+    }
+    
+    // -------------------------------
+    // Private Helper Methods
+    // -------------------------------
+    
+    private fun requireTenantContext(): Long {
+        return TenantContextHolder.getTenantId()
+            ?: throw IllegalStateException("No tenant context available")
+    }
+    
+    private fun validatePostingCommands(postings: List<CreatePostingCommand>) {
+        postings.forEach { postingData ->
+            validateAccount(postingData.accountNumber)
+            validateVatCode(postingData.vatCode)
+        }
+    }
+    
+    private fun validateAccount(accountNumber: String) {
+        if (accountApi.findAccountByNumber(accountNumber) == null) {
+            throw IllegalArgumentException("No account found with account number = $accountNumber")
+        }
+    }
+    
+    private fun validateVatCode(vatCode: String?) {
+        if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
+            throw IllegalArgumentException("Invalid VAT code: $vatCode")
+        }
+    }
+    
+    private fun validateBalance(postings: List<CreatePostingCommand>) {
+        val totalAmount = postings.sumOf { it.amount }
+        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
+            throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
+        }
+    }
+    
+    private fun createPostingEntity(postingData: CreatePostingCommand, tenantId: Long): Posting {
+        val posting = Posting()
+        posting.accountNumber = postingData.accountNumber
+        posting.amount = postingData.amount
+        posting.currency = postingData.currency
+        posting.postingDate = postingData.postingDate
+        posting.description = postingData.description
+        posting.tenantId = tenantId
+        posting.originalAmount = postingData.originalAmount
+        posting.originalCurrency = postingData.originalCurrency
+        
+        applyVatInformation(posting, postingData)
+        
+        return posting
+    }
+    
+    private fun applyVatInformation(posting: Posting, postingData: CreatePostingCommand) {
+        if (postingData.vatCode != null) {
+            val vatCode = vatApi.findVatCodeByCode(postingData.vatCode)
+            if (vatCode != null) {
+                posting.vatCode = vatCode.code
+                posting.vatRate = vatCode.rate
+                posting.vatAmount = vatApi.calculateVatAmount(postingData.amount.abs(), vatCode)
+            }
+        }
     }
 }
