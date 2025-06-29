@@ -98,7 +98,7 @@ class WebSecurityConfig {
                 if (StringUtils.isEmpty(token)) {
                     val cookies = request.cookies
                     if (cookies != null) {
-                        val jwtCookie = cookies.find { it.name == "jwt_token" }
+                        val jwtCookie = cookies.find { it.name == "token" }
                         if (jwtCookie != null && StringUtils.isNotEmpty(jwtCookie.value)) {
                             token = jwtCookie.value
                         }

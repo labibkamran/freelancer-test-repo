@@ -147,7 +147,7 @@ class UserService(
         userSession.user = user
         userSession.token = token
         userSession.tokenIssueAt = Instant.now()
-        userSession.tokenExpireAt = Instant.now().plus(30, ChronoUnit.DAYS)
+        userSession.tokenExpireAt = Instant.now().plus(1, ChronoUnit.DAYS)
         userSessionRepository.save(userSession)
 
         user.lastLoginAt = Instant.now()
