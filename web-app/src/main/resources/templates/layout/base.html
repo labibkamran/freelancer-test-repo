@@ -562,14 +562,14 @@
                 </li>
 
                 <!-- Chart of Accounts -->
-                <li class="menu-item">
+                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
                     <button class="menu-link" onclick="toggleSubmenu(this)">
                         <span class="menu-icon">📊</span>
                         <span class="menu-text">Accounts</span>
                         <span class="menu-arrow">▶</span>
                     </button>
-                    <ul class="submenu">
-                        <li><a href="#" class="menu-link">⚖️ Trial Balance</a></li>
+                                            <ul class="submenu">
+                            <li><a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"class="menu-link">⚖️ Trial Balance</a></li>
                     </ul>
                 </li>
             </ul>
