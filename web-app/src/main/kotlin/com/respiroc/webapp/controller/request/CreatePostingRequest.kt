@@ -25,21 +25,7 @@ data class CreatePostingRequest(
     val description: String?
 )
 
-// Single posting entry representing one side of a transaction
-data class PostingEntry(
-    val accountNumber: String = "",
-    val amount: BigDecimal? = null,
-    val currency: String = "NOK",
-    val type: String = "debit", // "debit" or "credit"
-    val description: String? = null,
-    val vatCode: String? = null
-) {
-    fun getSignedAmount(): BigDecimal {
-        return if (type == "credit") amount?.negate() ?: BigDecimal.ZERO else amount ?: BigDecimal.ZERO
-    }
-}
-
-// Single posting line - either debit or credit account, not both
+// Single posting line - represents either debit or credit in a journal entry
 data class PostingLine(
     val debitAccount: String = "",
     val creditAccount: String = "",
@@ -58,16 +44,14 @@ data class PostingLine(
         return if (debitAccount.isNotBlank()) "debit" else "credit"
     }
     
-    fun toPostingEntry(): PostingEntry {
-        val vatCode = if (debitAccount.isNotBlank()) debitVatCode else creditVatCode
-        return PostingEntry(
-            accountNumber = getAccountNumber(),
-            amount = amount!!,
-            currency = currency,
-            type = getAccountType(),
-            description = description,
-            vatCode = extractActualVatCode(vatCode)
-        )
+    fun getSignedAmount(): BigDecimal {
+        val amt = amount ?: BigDecimal.ZERO
+        return if (getAccountType() == "credit") amt.negate() else amt
+    }
+    
+    fun getVatCode(): String? {
+        val vatCodeValue = if (debitAccount.isNotBlank()) debitVatCode else creditVatCode
+        return extractActualVatCode(vatCodeValue)
     }
     
     private fun extractActualVatCode(vatCodeValue: String?): String? {
@@ -84,22 +68,11 @@ data class PostingLine(
 }
 
 data class CreateBatchPostingRequest(
-    val postingLines: List<PostingLine?> = emptyList(),
-    val entries: List<PostingEntry?> = emptyList()
+    val postingLines: List<PostingLine?> = emptyList()
 ) {
-    fun getAllPostingEntries(): List<PostingEntry> {
-        // Only use postingLines since that's what the form uses
-        // Using both postingLines and entries can cause duplicate entries
-        val fromPostingLines = postingLines.filterNotNull()
+    fun getValidPostingLines(): List<PostingLine> {
+        return postingLines.filterNotNull()
             .filter { it.amount != null && it.amount > BigDecimal.ZERO }
-            .map { it.toPostingEntry() }
-            
-        // Only add entries if postingLines is empty (for API usage)
-        return if (fromPostingLines.isNotEmpty()) {
-            fromPostingLines
-        } else {
-            entries.filterNotNull()
-                .filter { it.amount != null && it.amount > BigDecimal.ZERO }
-        }
+            .filter { it.getAccountNumber().isNotBlank() }
     }
 } 

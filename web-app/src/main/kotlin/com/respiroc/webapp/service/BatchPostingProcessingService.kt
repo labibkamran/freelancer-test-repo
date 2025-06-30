@@ -5,7 +5,7 @@ import com.respiroc.ledger.api.command.CreatePostingCommand
 import com.respiroc.util.context.UserContext
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateBatchPostingRequest
-import com.respiroc.webapp.controller.request.PostingEntry
+import com.respiroc.webapp.controller.request.PostingLine
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -22,11 +22,11 @@ class BatchPostingProcessingService(
     ): BatchPostingResult {
         return try {
             val companyCurrency = currencyService.getCompanyCurrency("NO") // TODO: Replace with actual country code
-            val allPostingEntries = request.getAllPostingEntries()
-            val postingCommands = convertToPostingCommands(request, allPostingEntries, companyCurrency)
-            
+            val validPostingLines = request.getValidPostingLines()
+            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrency)
+
             postingApi.createBatchPostings(postingCommands, userContext)
-            
+
             BatchPostingResult.success("Journal entry saved successfully!")
         } catch (e: Exception) {
             BatchPostingResult.failure("Failed to save journal entry: ${e.message}")
@@ -34,47 +34,32 @@ class BatchPostingProcessingService(
     }
 
     private fun convertToPostingCommands(
-        request: CreateBatchPostingRequest,
-        allPostingEntries: List<PostingEntry>,
+        postingLines: List<PostingLine>,
         companyCurrency: String
     ): List<CreatePostingCommand> {
-        return allPostingEntries.map { entry ->
-            val originalAmount = entry.amount!!
-            val originalCurrency = entry.currency
-            val postingDate = findPostingDateForEntry(request, entry)
-            
+        return postingLines.map { line ->
+            val originalAmount = line.amount!!
+            val originalCurrency = line.currency
+
             CreatePostingCommand(
-                accountNumber = entry.accountNumber,
-                amount = calculateConvertedSignedAmount(entry, originalCurrency, companyCurrency),
+                accountNumber = line.getAccountNumber(),
+                amount = calculateConvertedSignedAmount(line, originalCurrency, companyCurrency),
                 currency = companyCurrency,
-                postingDate = postingDate,
-                description = entry.description,
+                postingDate = line.postingDate ?: LocalDate.now(),
+                description = line.description,
                 originalAmount = if (originalCurrency != companyCurrency) originalAmount else null,
                 originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-                vatCode = entry.vatCode
+                vatCode = line.getVatCode()
             )
         }
     }
 
-    private fun findPostingDateForEntry(
-        request: CreateBatchPostingRequest,
-        entry: PostingEntry
-    ): LocalDate {
-        val postingLines = request.postingLines.filterNotNull()
-        val matchingPostingLine = postingLines.find { line ->
-            line.getAccountNumber() == entry.accountNumber &&
-                    line.amount == entry.amount &&
-                    line.getAccountType() == entry.type
-        }
-        return matchingPostingLine?.postingDate ?: LocalDate.now()
-    }
-
     private fun calculateConvertedSignedAmount(
-        entry: PostingEntry,
+        line: PostingLine,
         originalCurrency: String,
         companyCurrency: String
     ): BigDecimal {
-        val signedAmount = entry.getSignedAmount()
+        val signedAmount = line.getSignedAmount()
         return if (originalCurrency == companyCurrency) {
             signedAmount
         } else {

@@ -92,10 +92,7 @@ class VoucherWebController(
         )
 
         model.addAttribute(
-            "createBatchPostingRequest", CreateBatchPostingRequest(
-                postingLines = listOf(),
-                entries = listOf()
-            )
+            "createBatchPostingRequest", CreateBatchPostingRequest(postingLines = listOf())
         )
     }
 
