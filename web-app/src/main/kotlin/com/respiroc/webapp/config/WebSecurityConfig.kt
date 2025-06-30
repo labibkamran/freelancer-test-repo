@@ -40,15 +40,12 @@ class WebSecurityConfig {
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/auth/login").permitAll()
                     .requestMatchers("/auth/signup").permitAll()
-                    .requestMatchers("/api/auth/login").permitAll()
-                    .requestMatchers("/api/auth/signup").permitAll()
                     .requestMatchers("/api/company-lookup/**").permitAll()
                     .requestMatchers("/test/**").permitAll()
                     .requestMatchers("/error/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             }
             .cors { }
@@ -63,6 +60,13 @@ class WebSecurityConfig {
                 TenantIdFilter(),
                 BearerTokenAuthenticationFilter::class.java
             )
+            .exceptionHandling {
+                it.authenticationEntryPoint { request, response, authException ->
+                    response.sendRedirect(
+                        "/auth/login"
+                    )
+                }
+            }
             .build()
     }
 
