@@ -331,7 +331,6 @@
 </main>
 
 <th:block layout:fragment="scripts">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script th:inline="javascript">
         // Accounts data for search
         const accounts = /*[[${accounts}]]*/ [];
@@ -501,8 +500,6 @@
             let totalCredit = 0;
             let hasValidEntries = false;
             
-            console.log('=== Updating Balance ===');
-            
             // Calculate totals from individual posting lines using converted amounts
             document.querySelectorAll('.posting-line-row').forEach((row, index) => {
                 const amountInput = row.querySelector('input[name*=".amount"]');
@@ -518,18 +515,14 @@
                     // Use converted amount if available, otherwise use original amount
                     const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
                     const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : originalAmount;
-                    
-                    console.log(`Row ${index}: Original=${originalAmount} ${currency}, Converted=${convertedAmount} ${companyCurrency}`);
-                    
+
                     if (!isNaN(convertedAmount) && convertedAmount > 0) {
                         if (debitInput && debitInput.value.trim() !== '') {
                             totalDebit += convertedAmount;
                             hasValidEntries = true;
-                            console.log(`Added ${convertedAmount} to debit (account: ${debitInput.value})`);
                         } else if (creditInput && creditInput.value.trim() !== '') {
                             totalCredit += convertedAmount;
                             hasValidEntries = true;
-                            console.log(`Added ${convertedAmount} to credit (account: ${creditInput.value})`);
                         }
                     }
                 }
@@ -537,11 +530,7 @@
             
             const balance = totalDebit - totalCredit;
             const isBalanced = Math.abs(balance) < 0.01;
-            
-            console.log(`Total Debit: ${totalDebit.toFixed(2)} ${companyCurrency}`);
-            console.log(`Total Credit: ${totalCredit.toFixed(2)} ${companyCurrency}`);
-            console.log(`Balance: ${balance.toFixed(2)} ${companyCurrency} (Balanced: ${isBalanced})`);
-            
+
             // Update display (show amounts in company currency)
             document.getElementById('totalDebit').textContent = totalDebit.toFixed(2) + ' ' + companyCurrency;
             document.getElementById('totalCredit').textContent = totalCredit.toFixed(2) + ' ' + companyCurrency;
@@ -557,13 +546,11 @@
                 totalDebitElement.className = 'balance-success';
                 totalCreditElement.className = 'balance-success';
                 saveButton.disabled = false;
-                console.log('✅ Form is balanced and ready to submit');
             } else {
                 balanceAmountElement.className = 'balance-error';
                 totalDebitElement.className = 'balance-success';
                 totalCreditElement.className = 'balance-success';
                 saveButton.disabled = true;
-                console.log('❌ Form is not balanced or has invalid entries');
             }
         }
         
@@ -588,9 +575,7 @@
             if (amountInput && currencySelect && convertedAmountDiv) {
                 const amount = parseFloat(amountInput.value);
                 const currency = currencySelect.value;
-                
-                console.log(`Converting amount ${amount} from ${currency} to ${companyCurrency} for row ${rowId}`);
-                
+
                 if (!isNaN(amount) && amount > 0 && currency !== companyCurrency) {
                     try {
                         const response = await fetch(`/api/currency/convert?amount=${amount}&fromCurrency=${currency}&toCurrency=${companyCurrency}`);
@@ -601,7 +586,6 @@
                             
                             // Store the converted amount for balance calculation
                             amountInput.setAttribute('data-converted-amount', convertedAmount.toString());
-                            console.log(`Converted ${amount} ${currency} to ${convertedAmount} ${companyCurrency}`);
                         } else {
                             console.error('Failed to convert currency, using original amount');
                             convertedAmountDiv.textContent = `≈ ${amount.toFixed(2)} ${companyCurrency}`;
@@ -616,12 +600,10 @@
                     // Same currency, no conversion needed
                     convertedAmountDiv.textContent = '';
                     amountInput.setAttribute('data-converted-amount', amount.toString());
-                    console.log(`No conversion needed for ${amount} ${currency}`);
                 } else {
                     // Invalid amount
                     convertedAmountDiv.textContent = '';
                     amountInput.removeAttribute('data-converted-amount');
-                    console.log(`Invalid amount: ${amount}`);
                 }
             }
         }
@@ -898,8 +880,7 @@
         
         // Prepare form data before submission
         async function prepareFormData(event) {
-            console.log('=== Preparing Form Data ===');
-            
+
             // First, make sure all conversions are up to date
             const rows = Array.from(document.querySelectorAll('.posting-line-row'));
             
@@ -936,9 +917,7 @@
                 
                 return hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount;
             });
-            
-            console.log(`Found ${validRows.length} valid rows out of ${allRows.length} total rows`);
-            
+
             // Check balance before submission
             let totalDebit = 0;
             let totalCredit = 0;
@@ -953,8 +932,6 @@
                     const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
                     const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : parseFloat(amountInput.value);
                     
-                    console.log(`Row ${index}: Amount=${amountInput.value} ${currencySelect.value}, Converted=${convertedAmount} ${companyCurrency}`);
-                    
                     if (debitInput && debitInput.value.trim() !== '') {
                         totalDebit += convertedAmount;
                     } else if (creditInput && creditInput.value.trim() !== '') {
@@ -964,8 +941,7 @@
             });
             
             const balance = totalDebit - totalCredit;
-            console.log(`Final balance check: Debit=${totalDebit}, Credit=${totalCredit}, Balance=${balance}`);
-            
+
             if (Math.abs(balance) >= 0.01) {
                 event.preventDefault();
                 alert(`Transaction is not balanced! Difference: ${balance.toFixed(2)} ${companyCurrency}`);
@@ -1011,7 +987,6 @@
                 return false;
             }
             
-            console.log('✅ Form data prepared successfully');
             return true;
         }
     </script>
