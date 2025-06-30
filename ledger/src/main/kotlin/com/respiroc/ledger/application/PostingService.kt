@@ -6,6 +6,9 @@ import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.command.CreatePostingCommand
 import com.respiroc.ledger.api.result.TrialBalanceEntry
 import com.respiroc.ledger.api.result.TrialBalanceResult
+import com.respiroc.ledger.domain.exception.AccountNotFoundException
+import com.respiroc.ledger.domain.exception.InvalidVatCodeException
+import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.tenant.infrastructure.context.TenantContextHolder
@@ -97,20 +100,22 @@ class PostingService(
     
     private fun validateAccount(accountNumber: String) {
         if (accountApi.findAccountByNumber(accountNumber) == null) {
-            throw IllegalArgumentException("No account found with account number = $accountNumber")
+            throw AccountNotFoundException(accountNumber)
         }
     }
     
     private fun validateVatCode(vatCode: String?) {
         if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
-            throw IllegalArgumentException("Invalid VAT code: $vatCode")
+            throw InvalidVatCodeException(vatCode)
         }
     }
     
     private fun validateBalance(postings: List<CreatePostingCommand>) {
         val totalAmount = postings.sumOf { it.amount }
-        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
-            throw IllegalArgumentException("Postings must balance: total amount is $totalAmount")
+        // Round to 2 decimal places for balance validation (currency conversion can introduce extra decimals)
+        val roundedAmount = totalAmount.setScale(2, java.math.RoundingMode.HALF_UP)
+        if (roundedAmount.compareTo(BigDecimal.ZERO) != 0) {
+            throw PostingsNotBalancedException(roundedAmount)
         }
     }
     
