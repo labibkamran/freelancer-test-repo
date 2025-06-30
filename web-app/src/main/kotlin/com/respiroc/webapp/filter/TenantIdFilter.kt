@@ -16,6 +16,7 @@ class TenantIdFilter(
         "/company/create",
         "/company/select",
         "/company/search",
+        "/errors/**",
         "/error/**"
     ),
     private val paramName: String = "tenantId"
@@ -34,6 +35,13 @@ class TenantIdFilter(
         response: HttpServletResponse,
         chain: FilterChain
     ) {
+
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication == null || !authentication.isAuthenticated) {
+            chain.doFilter(request, response)
+            return
+        }
+
         val tenantId = request.getParameter(paramName)
         val springUser = getCurrentSpringUser()
 
