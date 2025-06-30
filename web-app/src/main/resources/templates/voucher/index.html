@@ -279,11 +279,12 @@
             </div>
             
             <form th:attr="hx-post='/voucher/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
+                  method="post"
                   hx-target="#form-messages" 
                   hx-swap="innerHTML"
                   hx-indicator="#loading-indicator"
                   id="batchPostingForm" 
-                                      onsubmit="event.preventDefault(); validateAndPrepareForm(event).then(result => { if(result) event.target.submit(); })">
+                  onsubmit="event.preventDefault(); return validateAndPrepareForm(event);">
                 
                 <!-- Individual Posting Lines Table -->
                 <table class="posting-table">
@@ -870,7 +871,6 @@
         async function validateAndPrepareForm(event) {
             // First validate all fields
             if (!validateFormFields()) {
-                event.preventDefault();
                 return false;
             }
             
@@ -943,7 +943,6 @@
             const balance = totalDebit - totalCredit;
 
             if (Math.abs(balance) >= 0.01) {
-                event.preventDefault();
                 alert(`Transaction is not balanced! Difference: ${balance.toFixed(2)} ${companyCurrency}`);
                 return false;
             }
@@ -982,7 +981,6 @@
             
             // If no valid rows, prevent form submission
             if (validRows.length === 0) {
-                event.preventDefault();
                 alert('Please add at least one complete posting line.');
                 return false;
             }
