@@ -3,6 +3,7 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
+import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
@@ -29,16 +30,17 @@ class VoucherWebController(
 ) : BaseController() {
 
     @GetMapping(value = [])
-    fun voucher(): String = "redirect:/new-advanced-voucher"
+    fun voucher(): String {
+        return "redirect:/voucher/new-advanced-voucher?tenantId=${TenantContextHolder.getTenantId()}"
+    }
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
+        TenantContextHolder.getTenantId()
         val springUser = springUser()
         setupModelAttributes(model, springUser)
         return "voucher/index"
     }
-
-
 
     @PostMapping("/batch-postings")
     fun createBatchPostings(
@@ -49,7 +51,7 @@ class VoucherWebController(
     ): String {
         return handleBatchPostingSubmission(createBatchPostingRequest, bindingResult, redirectAttributes, model, false)
     }
-    
+
     @PostMapping("/batch-postings", headers = ["HX-Request"])
     fun createBatchPostingsHtmx(
         @Valid @ModelAttribute createBatchPostingRequest: CreateBatchPostingRequest,
@@ -77,20 +79,24 @@ class VoucherWebController(
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("companyCurrency", companyCurrency)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
-        
+
         // Form objects
-        model.addAttribute("createPostingRequest", CreatePostingRequest(
-            accountNumber = "",
-            amount = BigDecimal.ZERO,
-            currency = companyCurrency,
-            postingDate = LocalDate.now(),
-            description = null
-        ))
-        
-        model.addAttribute("createBatchPostingRequest", CreateBatchPostingRequest(
-            postingLines = listOf(),
-            entries = listOf()
-        ))
+        model.addAttribute(
+            "createPostingRequest", CreatePostingRequest(
+                accountNumber = "",
+                amount = BigDecimal.ZERO,
+                currency = companyCurrency,
+                postingDate = LocalDate.now(),
+                description = null
+            )
+        )
+
+        model.addAttribute(
+            "createBatchPostingRequest", CreateBatchPostingRequest(
+                postingLines = listOf(),
+                entries = listOf()
+            )
+        )
     }
 
     private fun handleBatchPostingSubmission(
@@ -129,6 +135,8 @@ class VoucherWebController(
             model.addAttribute("errorMessage", errorMessages)
             "voucher/fragments :: messages"
         } else {
+            val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
+            model.addAttribute("errorMessage", errorMessages)
             setupModelAttributes(model, springUser())
             "voucher/index"
         }
@@ -145,7 +153,7 @@ class VoucherWebController(
             "voucher/fragments :: messages-and-refresh"
         } else {
             redirectAttributes?.addFlashAttribute("successMessage", message)
-            "redirect:/voucher/"
+            "redirect:/voucher/new-advanced-voucher?tenantId=${TenantContextHolder.getTenantId()}"
         }
     }
 
