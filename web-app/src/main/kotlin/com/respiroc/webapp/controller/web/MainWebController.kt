@@ -33,17 +33,11 @@ class MainWebController(
         model: Model
     ): String {
         val springUser = springUser()
-        model.addAttribute("user", springUser)
-
         val tenantId = TenantContextHolder.getTenantId()!!
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        model.addAttribute("companies", companies)
-
         val currentCompany = companies.find { it.tenantId == tenantId }
-        model.addAttribute("currentCompany", currentCompany)
-
         val companyName = currentCompany?.name ?: "Default Company"
-        model.addAttribute("title", "$companyName - Dashboard")
+        addCommonAttributes(model, companyApi, "$companyName - Dashboard")
 
         return "dashboard/index"
     }

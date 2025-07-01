@@ -70,7 +70,7 @@ class VoucherWebController(
             entries = listOf()
         )
         model.addAttribute("createBatchPostingRequest", batchRequest)
-
+        addCommonAttributes(model, companyApi, "General Ledger")
         return "voucher/index"
     }
 
@@ -184,7 +184,7 @@ class VoucherWebController(
                 model.addAttribute("errorMessage", errorMessages)
                 return "voucher/fragments :: messages"
             } else {
-                model.addAttribute("title", "General Ledger")
+                addCommonAttributes(model, "General Ledger")
                 val accounts = accountApi.findAllAccounts()
                 model.addAttribute("accounts", accounts)
                 return "voucher/index"
@@ -199,7 +199,7 @@ class VoucherWebController(
                     model.addAttribute("errorMessage", "Account ${entry.accountNumber} not found")
                     return "voucher/fragments :: messages"
                 } else {
-                    model.addAttribute("title", "General Ledger")
+                    addCommonAttributes(model, "General Ledger")
                     val accounts = accountApi.findAllAccounts()
                     model.addAttribute("accounts", accounts)
                     return "voucher/index"

@@ -21,15 +21,11 @@ class CompanyWebController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        val springUser = springUser()
-        model.addAttribute("user", springUser)
-
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        model.addAttribute("companies", companies)
-
-        model.addAttribute("title", "Create Company")
-        model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-
+        addCommonAttributes(model, companyApi, "Create Company")
+        model.addAttribute(
+            "createCompanyRequest",
+            CreateCompanyRequest("", "", "NO")
+        )
         return "company/create"
     }
 
@@ -41,11 +37,7 @@ class CompanyWebController(
         model: Model
     ): String {
         if (bindingResult.hasErrors()) {
-            val springUser = springUser()
-            model.addAttribute("user", springUser)
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Create Company")
+            addCommonAttributes(model, companyApi, "Create Company")
             model.addAttribute("error", "Please fill in all required fields correctly.")
             return "company/create"
         }
@@ -64,11 +56,7 @@ class CompanyWebController(
             return "redirect:/dashboard?tenantId=${company.tenantId}"
             
         } catch (e: Exception) {
-            val springUser = springUser()
-            model.addAttribute("user", springUser)
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Create Company")
+            addCommonAttributes(model, companyApi, "Create Company")
             model.addAttribute("error", "Failed to create company: ${e.message}")
             return "company/create"
         }
@@ -129,13 +117,7 @@ class CompanyWebController(
 
     @GetMapping("/select")
     fun selectTenant(model: Model): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Select Company")
-
+        addCommonAttributes(model, companyApi, "Select Company")
         return "company/select"
     }
 }

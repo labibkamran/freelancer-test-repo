@@ -16,14 +16,10 @@ class ErrorPageController(
     @GetMapping("/tenant-not-found")
     fun tenantNotFound(model: Model): String {
         try {
-            val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            
-            model.addAttribute("user", springUser)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Tenant Not Found")
+            addCommonAttributes(model, companyApi, "Tenant Not Found")
             model.addAttribute("errorMessage", "The requested company was not found")
         } catch (e: Exception) {
+            addCommonAttributes(model, "Tenant Not Found")
             model.addAttribute("user", null)
             model.addAttribute("companies", emptyList<Any>())
             model.addAttribute("title", "Tenant Not Found")
@@ -36,14 +32,10 @@ class ErrorPageController(
     @GetMapping("/tenant-access-denied")
     fun tenantAccessDenied(model: Model): String {
         try {
-            val springUser = springUser()
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            
-            model.addAttribute("user", springUser)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Access Denied")
+            addCommonAttributes(model, companyApi, "Access Denied")
             model.addAttribute("errorMessage", "You don't have access to this company")
         } catch (e: Exception) {
+            addCommonAttributes(model, "Access Denied")
             model.addAttribute("user", null)
             model.addAttribute("companies", emptyList<Any>())
             model.addAttribute("title", "Access Denied")
