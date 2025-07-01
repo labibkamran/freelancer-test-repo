@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,85 +9,84 @@
 </head>
 
 <body>
-<main layout:fragment="content">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="card">
-                <div class="card-body">
-                    <!-- Header -->
-                    <div class="text-center mb-4">
-                        <div class="mb-3" style="font-size: 3rem;">
-                            🧮
-                        </div>
-                        <h3 class="fw-bold mb-2">Login to Your Account</h3>
-                        <p class="text-muted">Please enter your credentials</p>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="card">
+            <div class="card-body">
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <div class="mb-3" style="font-size: 3rem;">
+                        🧮
                     </div>
-
-                    <!-- Alerts -->
-                    <div th:if="${error}" class="alert alert-danger" role="alert">
-                        <span th:text="${error}"></span>
-                    </div>
-
-                    <div th:if="${success}" class="alert alert-success" role="alert">
-                        <span th:text="${success}"></span>
-                    </div>
-
-                    <!-- Login Form -->
-                    <form method="post" action="/auth/login">
-                        <!-- Remember Me as hidden field (always true) -->
-                        <input type="hidden" name="remember" value="true">
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">
-                                📧 Email
-                            </label>
-                            <input type="email" 
-                                   class="form-control form-control-lg" 
-                                   id="email" 
-                                   name="email" 
-                                   placeholder="example@domain.com"
-                                   required
-                                   autocomplete="email">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password" class="form-label">
-                                🔒 Password
-                            </label>
-                            <input type="password" 
-                                   class="form-control form-control-lg" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="Enter your password"
-                                   required
-                                   autocomplete="current-password">
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                            🚀 Login
-                        </button>
-
-                        <!-- Sign Up Link -->
-                        <div class="text-center">
-                            <span class="text-muted">Don't have an account?</span>
-                            <a href="/auth/signup" style="text-decoration: none; font-weight: bold; color: var(--primary-color);">
-                                Sign Up
-                            </a>
-                        </div>
-                    </form>
+                    <h3 class="fw-bold mb-2">Login to Your Account</h3>
+                    <p class="text-muted">Please enter your credentials</p>
                 </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="text-center mt-4">
-                <p class="text-muted small">
-                    🔐 Your information is safe and secure
-                </p>
+                <!-- Alerts -->
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <span th:text="${error}"></span>
+                </div>
+
+                <div th:if="${success}" class="alert alert-success" role="alert">
+                    <span th:text="${success}"></span>
+                </div>
+
+                <!-- Login Form -->
+                <form method="post" action="/auth/login">
+                    <!-- Remember Me as hidden field (always true) -->
+                    <input type="hidden" name="remember" value="true">
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            📧 Email
+                        </label>
+                        <input type="email"
+                               class="form-control form-control-lg"
+                               id="email"
+                               name="email"
+                               placeholder="example@domain.com"
+                               required
+                               autocomplete="email">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            🔒 Password
+                        </label>
+                        <input type="password"
+                               class="form-control form-control-lg"
+                               id="password"
+                               name="password"
+                               placeholder="Enter your password"
+                               required
+                               autocomplete="current-password">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        🚀 Login
+                    </button>
+
+                    <!-- Sign Up Link -->
+                    <div class="text-center">
+                        <span class="text-muted">Don't have an account?</span>
+                        <a href="/auth/signup"
+                           style="text-decoration: none; font-weight: bold; color: var(--primary-color);">
+                            Sign Up
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-4">
+            <p class="text-muted small">
+                🔐 Your information is safe and secure
+            </p>
+        </div>
     </div>
-</main>
+</div>
 
 <script th:src="@{/assets/login/login.js}"></script>
 </body>
