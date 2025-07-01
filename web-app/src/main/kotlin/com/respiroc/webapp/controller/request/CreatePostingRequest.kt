@@ -3,7 +3,6 @@ package com.respiroc.webapp.controller.request
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import jakarta.validation.Valid
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -31,7 +30,7 @@ data class PostingLine(
     val creditAccount: String = "",
     val amount: BigDecimal? = null,
     val currency: String = "NOK",
-    val postingDate: LocalDate? = null,
+    val postingDate: LocalDate = LocalDate.now(),
     val description: String? = null,
     val debitVatCode: String? = null,
     val creditVatCode: String? = null

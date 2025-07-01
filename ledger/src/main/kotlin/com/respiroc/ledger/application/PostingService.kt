@@ -129,20 +129,8 @@ class PostingService(
         posting.tenantId = tenantId
         posting.originalAmount = postingData.originalAmount
         posting.originalCurrency = postingData.originalCurrency
-        
-        applyVatInformation(posting, postingData)
+        posting.vatCode = postingData.vatCode
         
         return posting
-    }
-    
-    private fun applyVatInformation(posting: Posting, postingData: CreatePostingCommand) {
-        if (postingData.vatCode != null) {
-            val vatCode = vatApi.findVatCodeByCode(postingData.vatCode)
-            if (vatCode != null) {
-                posting.vatCode = vatCode.code
-                posting.vatRate = vatCode.rate
-                posting.vatAmount = vatApi.calculateVatAmount(postingData.amount.abs(), vatCode)
-            }
-        }
     }
 }
