@@ -21,7 +21,6 @@
                 ✕
             </button>
         </div>
-        
         <nav>
             <ul class="sidebar-menu">
                 <!-- Dashboard -->
@@ -55,10 +54,23 @@
                         <li><a href="#" class="menu-link">⚖️ Trial Balance</a></li>
                     </ul>
                 </li>
+
+                <!-- Chart of Accounts -->
+                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
+                    <button class="menu-link" onclick="toggleSubmenu(this)">
+                        <span class="menu-icon">👥</span>
+                        <span class="menu-text">Customer</span>
+                        <span class="menu-arrow">▶</span>
+                    </button>
+                    <ul class="submenu">
+                        <li><a th:href="'/customer?tenantId=' + ${user.ctx.currentTenant.id}" class="menu-link">📋 Customers/Suppliers</a></li>
+                        <li><a th:href="'/customer/new?tenantId=' + ${user.ctx.currentTenant.id}" class="menu-link">🆕 New Customer/Supplier</a></li>
+                    </ul>
+                </li>
             </ul>
         </nav>
     </aside>
-    
+
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
@@ -74,12 +86,12 @@
                         <button class="mobile-menu-toggle sidebar-toggle" onclick="openSidebar()" style="background: none; border: none; color: white; font-size: 1.25rem; margin-right: 1rem;">
                             ☰
                         </button>
-                        
+
                         <!-- Desktop Sidebar Toggle -->
                         <button class="desktop-sidebar-toggle sidebar-toggle" onclick="toggleSidebar()" style="background: none; border: none; color: white; font-size: 1.25rem; margin-right: 1rem; display: none;">
                             ☰
                         </button>
-                        
+
                         <!-- Company Selector Dropdown -->
                         <wa-dropdown placement="bottom-start" hoist>
                             <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
@@ -87,17 +99,17 @@
                                 <span th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">Select Company</span>
                                 <wa-icon name="chevron-down" style="margin-left: 0.5rem;"></wa-icon>
                             </wa-button>
-                            
+
                             <wa-menu>
-                                <wa-menu-item th:each="company : ${companies}" 
+                                <wa-menu-item th:each="company : ${companies}"
                                              th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
                                              th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
                                     <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
                                     <span th:text="${company.name}">Company Name</span>
                                 </wa-menu-item>
-                                
+
                                 <wa-divider></wa-divider>
-                                
+
                                 <wa-menu-item onclick="window.open('/companies/create', '_blank')">
                                     <wa-icon name="plus"></wa-icon>
                                     <span>Create New Company</span>
@@ -105,7 +117,7 @@
                             </wa-menu>
                         </wa-dropdown>
                     </div>
-                    
+
                     <!-- Right Side: User Account Dropdown -->
                     <div class="d-flex align-items-center">
                         <wa-dropdown placement="bottom-end">
@@ -136,7 +148,7 @@
             </div>
         </footer>
     </div>
-    
+
     <!-- Auth Content Wrapper - Only for non-authenticated users -->
     <div class="auth-wrapper" th:if="${user == null}">
         <!-- Main Content -->
