@@ -34,48 +34,7 @@ class CompanyWebController(
     }
 
     @PostMapping("/create")
-    fun createCompanySubmit(
-        @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
-        bindingResult: BindingResult,
-        redirectAttributes: RedirectAttributes,
-        model: Model
-    ): String {
-        if (bindingResult.hasErrors()) {
-            val springUser = springUser()
-            model.addAttribute("user", springUser)
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Create Company")
-            model.addAttribute("error", "Please fill in all required fields correctly.")
-            return "company/create"
-        }
-
-        try {
-            val springUser = springUser()
-            val command = CreateCompanyCommand(
-                name = createCompanyRequest.name,
-                organizationNumber = createCompanyRequest.organizationNumber,
-                countryCode = createCompanyRequest.countryCode
-            )
-            
-            val company = companyApi.createNewCompany(command, springUser.ctx)
-            
-            redirectAttributes.addFlashAttribute("success", "Company '${company.name}' has been created successfully!")
-            return "redirect:/dashboard?tenantId=${company.tenantId}"
-            
-        } catch (e: Exception) {
-            val springUser = springUser()
-            model.addAttribute("user", springUser)
-            val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-            model.addAttribute("companies", companies)
-            model.addAttribute("title", "Create Company")
-            model.addAttribute("error", "Failed to create company: ${e.message}")
-            return "company/create"
-        }
-    }
-
-    @PostMapping("/create", headers = ["HX-Request"])
-    fun createCompanyHtmx(
+    fun createCompany(
         @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
         bindingResult: BindingResult,
         model: Model
