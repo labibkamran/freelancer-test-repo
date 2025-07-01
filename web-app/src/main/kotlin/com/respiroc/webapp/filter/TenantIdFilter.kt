@@ -11,7 +11,7 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**"),
+    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/customer/**"),
     private val excludePaths: List<String> = listOf(
         "/company/create",
         "/company/select",
