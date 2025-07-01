@@ -28,7 +28,7 @@ class AuthWebController(
         } catch (_: Exception) {
             // User not authenticated, continue to login page
         }
-        model.addAttribute("title", "Login")
+        addCommonAttributes(model, "Login")
         return "auth/login"
     }
 
@@ -69,7 +69,7 @@ class AuthWebController(
         } catch (_: Exception) {
             // User not authenticated, continue to signup page
         }
-        model.addAttribute("title", "Sign Up")
+        addCommonAttributes(model, "Sign Up")
         return "auth/signup"
     }
 
