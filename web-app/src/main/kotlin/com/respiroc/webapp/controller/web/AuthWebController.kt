@@ -4,12 +4,15 @@ import com.respiroc.user.api.UserInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import jakarta.servlet.http.HttpServletResponse
-import jakarta.servlet.http.Cookie
 
 @Controller
 @RequestMapping("/auth")
@@ -17,7 +20,7 @@ class AuthWebController(
     private val userApi: UserInternalApi
 ) : BaseController() {
 
-    private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
+    private val JWT_TOKEN_PERIOD: Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
 
     @GetMapping("/login")
     fun loginPage(model: Model): String {
@@ -43,7 +46,7 @@ class AuthWebController(
                 email = loginRequest.email,
                 password = loginRequest.password
             )
-            
+
             // Set JWT token in HTTP-only cookie
             val jwtCookie = Cookie("jwt_token", result.token)
             jwtCookie.isHttpOnly = true
@@ -51,7 +54,7 @@ class AuthWebController(
             jwtCookie.path = "/"
             jwtCookie.maxAge = JWT_TOKEN_PERIOD
             response.addCookie(jwtCookie)
-            
+
             return "redirect:/dashboard"
         } catch (_: Exception) {
             redirectAttributes.addFlashAttribute("error", "Invalid email or password")
@@ -83,7 +86,6 @@ class AuthWebController(
                 signupRequest.email,
                 signupRequest.password
             )
-            
             redirectAttributes.addFlashAttribute("success", "Registration successful. Please login")
             return "redirect:/auth/login"
         } catch (e: Exception) {
@@ -101,7 +103,7 @@ class AuthWebController(
         jwtCookie.path = "/"
         jwtCookie.maxAge = 0 // Expire immediately
         response.addCookie(jwtCookie)
-        
+
         return "redirect:/auth/login"
     }
 } 

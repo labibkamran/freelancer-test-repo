@@ -3,21 +3,21 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.command.CreatePostingCommand
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.request.CreatePostingRequest
 import com.respiroc.webapp.controller.request.CreateBatchPostingRequest
+import com.respiroc.webapp.controller.request.CreatePostingRequest
 import com.respiroc.webapp.controller.request.PostingEntry
-import com.respiroc.ledger.api.command.CreatePostingCommand
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import org.springframework.http.ResponseEntity
-import jakarta.validation.Valid
-import java.time.LocalDate
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Controller
 @RequestMapping(value = ["/voucher"])
@@ -35,25 +35,18 @@ class VoucherWebController(
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "General Ledger")
-        
         // Get all accounts for dropdown
         val accounts = accountApi.findAllAccounts()
         model.addAttribute("accounts", accounts)
-        
+
         // Get company currency based on country (assume NO for now)
         val companyCurrency = currencyService.getCompanyCurrency("NO")
         model.addAttribute("companyCurrency", companyCurrency)
-        
+
         // Get supported currencies
         val supportedCurrencies = currencyService.getSupportedCurrencies()
         model.addAttribute("supportedCurrencies", supportedCurrencies)
-        
+
         // Create empty form object for legacy single posting
         val createRequest = CreatePostingRequest(
             accountNumber = "",
@@ -79,8 +72,11 @@ class VoucherWebController(
     fun getCurrencyRates(@RequestParam currencies: List<String>): ResponseEntity<Map<String, BigDecimal>> {
         val companyCurrency = currencyService.getCompanyCurrency("NO")
         val rates = currencies.associate { currency ->
-            currency to if (currency == companyCurrency) BigDecimal.ONE 
-                        else currencyService.convertCurrency(BigDecimal.ONE, currency, companyCurrency)
+            currency to if (currency == companyCurrency) BigDecimal.ONE
+            else currencyService.convertCurrency(
+                BigDecimal.ONE,
+                currency, companyCurrency
+            )
         }
         return ResponseEntity.ok(rates)
     }
@@ -94,22 +90,22 @@ class VoucherWebController(
     ): ResponseEntity<Map<String, Any>> {
         val companyCurrency = currencyService.getCompanyCurrency("NO")
         val targetCurrency = toCurrency ?: companyCurrency
-        
+
         val convertedAmount = if (fromCurrency == targetCurrency) {
             amount
         } else {
             currencyService.convertCurrency(amount, fromCurrency, targetCurrency)
         }
-        
+
         val response = mapOf(
             "originalAmount" to amount,
             "originalCurrency" to fromCurrency,
             "convertedAmount" to convertedAmount,
             "convertedCurrency" to targetCurrency,
-            "rate" to if (fromCurrency == targetCurrency) BigDecimal.ONE 
-                     else currencyService.convertCurrency(BigDecimal.ONE, fromCurrency, targetCurrency)
+            "rate" to if (fromCurrency == targetCurrency) BigDecimal.ONE
+            else currencyService.convertCurrency(BigDecimal.ONE, fromCurrency, targetCurrency)
         )
-        
+
         return ResponseEntity.ok(response)
     }
 
@@ -120,16 +116,22 @@ class VoucherWebController(
         redirectAttributes: RedirectAttributes,
         model: Model
     ): String {
-        return handleBatchPostingSubmission(createBatchPostingRequest, bindingResult, redirectAttributes, model, false)
+        return handleBatchPostingSubmission(
+            createBatchPostingRequest, bindingResult,
+            redirectAttributes, model, false
+        )
     }
-    
+
     @PostMapping("/batch-postings", headers = ["HX-Request"])
     fun createBatchPostingsHtmx(
         @Valid @ModelAttribute createBatchPostingRequest: CreateBatchPostingRequest,
         bindingResult: BindingResult,
         model: Model
     ): String {
-        return handleBatchPostingSubmission(createBatchPostingRequest, bindingResult, null, model, true)
+        return handleBatchPostingSubmission(
+            createBatchPostingRequest, bindingResult,
+            null, model, true
+        )
     }
 
     // -------------------------------
@@ -148,7 +150,7 @@ class VoucherWebController(
 
         // Get company currency
         val companyCurrency = currencyService.getCompanyCurrency("NO")
-        
+
         // Get all posting entries from both journal entries and legacy entries
         val allPostingEntries = createBatchPostingRequest.getAllPostingEntries()
 
@@ -162,15 +164,26 @@ class VoucherWebController(
         // Enhanced validation for each entry
         allPostingEntries.forEachIndexed { index: Int, entry: PostingEntry ->
             if (entry.accountNumber.isBlank()) {
-                bindingResult.rejectValue("entries[$index].accountNumber", "error.accountNumber", "Account number is required")
+                bindingResult.rejectValue(
+                    "entries[$index].accountNumber",
+                    "error.accountNumber",
+                    "Account number is required"
+                )
             }
 
             if (entry.amount == null || entry.amount <= BigDecimal.ZERO) {
-                bindingResult.rejectValue("entries[$index].amount", "error.amount", "Amount must be greater than zero")
+                bindingResult.rejectValue(
+                    "entries[$index].amount",
+                    "error.amount", "Amount must be greater than zero"
+                )
             }
 
             if (!currencyService.isCurrencySupported(entry.currency)) {
-                bindingResult.rejectValue("entries[$index].currency", "error.currency", "Unsupported currency: ${entry.currency}")
+                bindingResult.rejectValue(
+                    "entries[$index].currency",
+                    "error.currency",
+                    "Unsupported currency: ${entry.currency}"
+                )
             }
         }
 
@@ -180,7 +193,8 @@ class VoucherWebController(
 
         if (bindingResult.hasErrors()) {
             if (isHtmx) {
-                val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
+                val errorMessages =
+                    bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
                 model.addAttribute("errorMessage", errorMessages)
                 return "voucher/fragments :: messages"
             } else {
@@ -212,27 +226,27 @@ class VoucherWebController(
             val postingDataList = allPostingEntries.map { entry ->
                 val originalAmount = entry.amount!!
                 val originalCurrency = entry.currency
-                
+
                 // For PostingLine entries, get the posting date from the posting line
                 val postingLines = createBatchPostingRequest.postingLines.filterNotNull()
-                val matchingPostingLine = postingLines.find { line -> 
-                    line.getAccountNumber() == entry.accountNumber && 
-                    line.amount == entry.amount &&
-                    line.getAccountType() == entry.type
+                val matchingPostingLine = postingLines.find { line ->
+                    line.getAccountNumber() == entry.accountNumber &&
+                            line.amount == entry.amount &&
+                            line.getAccountType() == entry.type
                 }
                 val postingDate = matchingPostingLine?.postingDate ?: LocalDate.now()
-                
+
                 // Convert to company currency if different
                 val convertedAmount = if (originalCurrency == companyCurrency) {
                     originalAmount
                 } else {
                     currencyService.convertCurrency(originalAmount, originalCurrency, companyCurrency)
                 }
-                
+
                 CreatePostingCommand(
                     accountNumber = entry.accountNumber,
-                    amount = entry.getSignedAmount().let { 
-                        if (originalCurrency == companyCurrency) it 
+                    amount = entry.getSignedAmount().let {
+                        if (originalCurrency == companyCurrency) it
                         else currencyService.convertCurrency(it, originalCurrency, companyCurrency)
                     },
                     currency = companyCurrency,
