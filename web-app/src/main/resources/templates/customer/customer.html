@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/assets/customer/customer.css}">
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="table-container">
+        <div class="table-toolbar">
+            <div class="search-bar">
+                <form hx-get="/customer"
+                      hx-trigger="keyup changed delay:500ms"
+                      hx-target="#customer-table"
+                      hx-swap="innerHTML">
+                    <label>
+                        <input type="text"
+                               id="search-input"
+                               name="name"
+                               placeholder="Search customers..."/>
+                    </label>
+                    <input type="hidden" name="tenantId" th:value="${user.ctx.currentTenant.id}"/>
+                </form>
+            </div>
+            <a href="/customer/create" class="btn-create">Create Customer</a>
+        </div>
+        <div id="loading-indicator" class="htmx-indicator">Loading...</div>
+        <div th:replace="fragments/customer/customer-table :: table(customers=${customers})"></div>
+    </div>
+</main>
+<th:block layout:fragment="scripts">
+    <script th:src="@{/assets/customer/customer.js}"></script>
+</th:block>
+</body>
+</html>
