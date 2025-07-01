@@ -380,13 +380,14 @@
                         <div class="vat-search" style="position: relative;">
                             <input type="text" 
                                    name="postingLines[${rowCounter}].debitVatCode" 
-                                   placeholder="Type or click to select VAT..." 
+                                   placeholder="VAT code required" 
                                    autocomplete="off"
                                    onclick="handleVatFieldClick(this, ${rowCounter}, 'debit')"
                                    onfocus="handleVatFieldFocus(this, ${rowCounter}, 'debit')"
                                    onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'debit')"
                                    onblur="handleVatFieldBlur(this, ${rowCounter}, 'debit')"
-                                   class="vat-field">
+                                   class="vat-field"
+                                   required>
                             <div id="debit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
                         </div>
                     </div>
@@ -408,13 +409,14 @@
                         <div class="vat-search" style="position: relative;">
                             <input type="text" 
                                    name="postingLines[${rowCounter}].creditVatCode" 
-                                   placeholder="Type or click to select VAT..." 
+                                   placeholder="VAT code required" 
                                    autocomplete="off"
                                    onclick="handleVatFieldClick(this, ${rowCounter}, 'credit')"
                                    onfocus="handleVatFieldFocus(this, ${rowCounter}, 'credit')"
                                    onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'credit')"
                                    onblur="handleVatFieldBlur(this, ${rowCounter}, 'credit')"
-                                   class="vat-field">
+                                   class="vat-field"
+                                   required>
                             <div id="credit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
                         </div>
                     </div>
@@ -450,6 +452,11 @@
             `;
             
             tbody.appendChild(row);
+            
+            // Set default VAT codes after adding the row
+            setDefaultVatCode(rowCounter, 'debit');
+            setDefaultVatCode(rowCounter, 'credit');
+            
             rowCounter++;
             updateBalance();
         }
@@ -467,9 +474,11 @@
             const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
             const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
             const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
+            const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
+            const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
             
             // Clear previous error states
-            [dateInput, debitInput, creditInput, amountInput].forEach(input => {
+            [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
                 if (input) input.classList.remove('field-error');
             });
             
@@ -477,6 +486,8 @@
             const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
             const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
             const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+            const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
+            const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
             
             // If any field has data, validate the entire row
             if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
@@ -492,6 +503,14 @@
                 
                 if (!hasAmount) {
                     amountInput.classList.add('field-error');
+                }
+                
+                // VAT validation: if account is filled, VAT must be filled
+                if (hasDebitAccount && !hasDebitVat) {
+                    debitVatInput.classList.add('field-error');
+                }
+                if (hasCreditAccount && !hasCreditVat) {
+                    creditVatInput.classList.add('field-error');
                 }
             }
         }
@@ -726,6 +745,20 @@
             document.getElementById(type + '-vat-dropdown-' + rowId).style.display = 'none';
         }
         
+        function setDefaultVatCode(rowId, type) {
+            // Set the first VAT code as default if VAT codes are available
+            if (vatCodes && vatCodes.length > 0) {
+                const firstVatCode = vatCodes[0];
+                const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
+                
+                if (input) {
+                    // Set the display value with rate
+                    input.value = `${firstVatCode.code} (${firstVatCode.rate}%)`;
+                    input.setAttribute('data-vat-code', firstVatCode.code);
+                }
+            }
+        }
+        
         function showAllVatCodes(input, rowId, type) {
             // Clear the search and show all codes
             input.value = '';
@@ -750,6 +783,12 @@
         }
         
         function handleVatFieldKeyup(input, rowId, type) {
+            // If user deletes all content, prevent it and restore default
+            if (!input.value || input.value.trim() === '') {
+                setDefaultVatCode(rowId, type);
+                return;
+            }
+            
             // Clear data attribute when user types
             input.removeAttribute('data-vat-code');
             searchVatCodes(input, rowId, type);
@@ -761,6 +800,11 @@
                 const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
                 if (dropdown) {
                     dropdown.style.display = 'none';
+                }
+                
+                // If VAT field is empty after blur, set default value
+                if (!input.value || input.value.trim() === '' || !getActualVatCode(input)) {
+                    setDefaultVatCode(rowId, type);
                 }
             }, 150);
         }
@@ -805,9 +849,11 @@
                 const debitInput = row.querySelector('input[name*=".debitAccount"]');
                 const creditInput = row.querySelector('input[name*=".creditAccount"]');
                 const amountInput = row.querySelector('input[name*=".amount"]');
+                const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
+                const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
                 
                 // Clear previous errors
-                [dateInput, debitInput, creditInput, amountInput].forEach(input => {
+                [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
                     if (input) input.classList.remove('field-error');
                 });
                 
@@ -815,6 +861,8 @@
                 const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
                 const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
                 const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+                const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
+                const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
                 
                 if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
                     // This row has some data, validate it completely
@@ -835,7 +883,18 @@
                         isValid = false;
                     }
                     
-                    if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
+                    // VAT validation: if account is filled, VAT must be filled
+                    if (hasDebitAccount && !hasDebitVat) {
+                        debitVatInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    if (hasCreditAccount && !hasCreditVat) {
+                        creditVatInput.classList.add('field-error');
+                        isValid = false;
+                    }
+                    
+                    if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount && 
+                        (!hasDebitAccount || hasDebitVat) && (!hasCreditAccount || hasCreditVat)) {
                         hasValidEntries = true;
                     }
                 }
