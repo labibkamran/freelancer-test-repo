@@ -343,7 +343,6 @@
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {
             addPostingLine();
-            addPostingLine();
         });
         
         function addPostingLine() {
@@ -485,6 +484,7 @@
                     dateInput.classList.add('field-error');
                 }
                 
+                // Must have at least one account (debit or credit, or both)
                 if (!hasDebitAccount && !hasCreditAccount) {
                     debitInput.classList.add('field-error');
                     creditInput.classList.add('field-error');
@@ -518,10 +518,20 @@
                     const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : originalAmount;
 
                     if (!isNaN(convertedAmount) && convertedAmount > 0) {
-                        if (debitInput && debitInput.value.trim() !== '') {
+                        const hasDebit = debitInput && debitInput.value.trim() !== '';
+                        const hasCredit = creditInput && creditInput.value.trim() !== '';
+                        
+                        if (hasDebit && hasCredit) {
+                            // Both debit and credit filled - this line is self-balanced
+                            totalDebit += convertedAmount;
+                            totalCredit += convertedAmount;
+                            hasValidEntries = true;
+                        } else if (hasDebit) {
+                            // Only debit filled
                             totalDebit += convertedAmount;
                             hasValidEntries = true;
-                        } else if (creditInput && creditInput.value.trim() !== '') {
+                        } else if (hasCredit) {
+                            // Only credit filled
                             totalCredit += convertedAmount;
                             hasValidEntries = true;
                         }
@@ -615,24 +625,8 @@
             const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
             const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
             
-            if (type === 'debit' && debitInput.value.trim() !== '') {
-                creditInput.value = '';
-                creditInput.disabled = true;
-                creditVatInput.value = '';
-                creditVatInput.disabled = true;
-                debitVatInput.disabled = false;
-            } else if (type === 'credit' && creditInput.value.trim() !== '') {
-                debitInput.value = '';
-                debitInput.disabled = true;
-                debitVatInput.value = '';
-                debitVatInput.disabled = true;
-                creditVatInput.disabled = false;
-            } else {
-                debitInput.disabled = false;
-                creditInput.disabled = false;
-                debitVatInput.disabled = false;
-                creditVatInput.disabled = false;
-            }
+            // Allow both debit and credit to be filled - no disabling logic needed
+            // VAT inputs remain enabled for their respective sides
             
             validatePostingLineFields(rowId);
             updateBalance();
@@ -829,6 +823,7 @@
                         isValid = false;
                     }
                     
+                    // Must have at least one account (debit or credit, or both)
                     if (!hasDebitAccount && !hasCreditAccount) {
                         debitInput.classList.add('field-error');
                         creditInput.classList.add('field-error');
@@ -903,89 +898,111 @@
             const tbody = document.getElementById('postingLines');
             const allRows = Array.from(tbody.querySelectorAll('.posting-line-row'));
             
-            // Filter out empty rows
-            const validRows = allRows.filter(row => {
+            // Filter out empty rows and prepare posting lines
+            const validPostingLines = [];
+            
+            allRows.forEach(row => {
                 const dateInput = row.querySelector('input[name*=".postingDate"]');
                 const debitInput = row.querySelector('input[name*=".debitAccount"]');
                 const creditInput = row.querySelector('input[name*=".creditAccount"]');
                 const amountInput = row.querySelector('input[name*=".amount"]');
+                const currencySelect = row.querySelector('select[name*=".currency"]');
+                const descriptionInput = row.querySelector('input[name*=".description"]');
+                const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
+                const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
                 
                 const hasDate = dateInput && dateInput.value.trim() !== '';
                 const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
                 const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
                 const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
                 
-                return hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount;
-            });
-
-            // Check balance before submission
-            let totalDebit = 0;
-            let totalCredit = 0;
-            
-            validRows.forEach((row, index) => {
-                const amountInput = row.querySelector('input[name*=".amount"]');
-                const debitInput = row.querySelector('input[name*=".debitAccount"]');
-                const creditInput = row.querySelector('input[name*=".creditAccount"]');
-                const currencySelect = row.querySelector('select[name*=".currency"]');
-                
-                if (amountInput && amountInput.value) {
-                    const convertedAmountStr = amountInput.getAttribute('data-converted-amount');
-                    const convertedAmount = convertedAmountStr ? parseFloat(convertedAmountStr) : parseFloat(amountInput.value);
+                if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
+                    const baseData = {
+                        postingDate: dateInput.value,
+                        amount: amountInput.value,
+                        currency: currencySelect.value,
+                        description: descriptionInput ? descriptionInput.value : ''
+                    };
                     
-                    if (debitInput && debitInput.value.trim() !== '') {
-                        totalDebit += convertedAmount;
-                    } else if (creditInput && creditInput.value.trim() !== '') {
-                        totalCredit += convertedAmount;
-                    }
+                    // Always create one posting line with both debit and credit accounts (backend will handle splitting)
+                    validPostingLines.push({
+                        ...baseData,
+                        debitAccount: hasDebitAccount ? debitInput.value : '',
+                        creditAccount: hasCreditAccount ? creditInput.value : '',
+                        debitVatCode: hasDebitAccount ? getActualVatCode(debitVatInput) : '',
+                        creditVatCode: hasCreditAccount ? getActualVatCode(creditVatInput) : ''
+                    });
                 }
             });
-            
-            const balance = totalDebit - totalCredit;
 
-            if (Math.abs(balance) >= 0.01) {
-                alert(`Transaction is not balanced! Difference: ${balance.toFixed(2)} ${companyCurrency}`);
+            // Check balance before submission - use the same logic as backend
+            let totalSignedAmount = 0;
+            
+            validPostingLines.forEach(line => {
+                const amount = parseFloat(line.amount);
+                const hasDebit = line.debitAccount.trim() !== '';
+                const hasCredit = line.creditAccount.trim() !== '';
+                
+                if (hasDebit && hasCredit) {
+                    // Both sides filled - this line is balanced (backend will create +amount and -amount)
+                    // No contribution to total (0)
+                } else if (hasDebit) {
+                    // Only debit - positive contribution
+                    totalSignedAmount += amount;
+                } else if (hasCredit) {
+                    // Only credit - negative contribution
+                    totalSignedAmount -= amount;
+                }
+            });
+
+            if (Math.abs(totalSignedAmount) >= 0.01) {
+                alert(`Transaction is not balanced! Total signed amount: ${totalSignedAmount.toFixed(2)} ${companyCurrency}`);
                 return false;
             }
             
             // Remove all rows
             allRows.forEach(row => row.remove());
             
-            // Re-add only valid rows with proper indexing
-            validRows.forEach((row, index) => {
-                // Update input names to use sequential indexing
-                const inputs = row.querySelectorAll('input, select');
-                inputs.forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name && name.includes('postingLines[')) {
-                        const newName = name.replace(/postingLines\[\d+\]/, `postingLines[${index}]`);
-                        input.setAttribute('name', newName);
-                        
-                        // Handle VAT code fields - ensure we send the actual code, not display value
-                        if (name.includes('VatCode')) {
-                            const actualCode = input.getAttribute('data-vat-code');
-                            if (actualCode) {
-                                input.value = actualCode;
-                            } else if (input.value && input.value.includes('(')) {
-                                // Extract code from display value like "1 (25%)"
-                                const codeMatch = input.value.match(/^(\w+)\s*\(/);
-                                if (codeMatch) {
-                                    input.value = codeMatch[1];
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                tbody.appendChild(row);
+            // Create new rows from validPostingLines
+            validPostingLines.forEach((line, index) => {
+                const newRow = document.createElement('tr');
+                newRow.className = 'posting-line-row';
+                newRow.innerHTML = `
+                    <input type="hidden" name="postingLines[${index}].postingDate" value="${line.postingDate}">
+                    <input type="hidden" name="postingLines[${index}].debitAccount" value="${line.debitAccount || ''}">
+                    <input type="hidden" name="postingLines[${index}].creditAccount" value="${line.creditAccount || ''}">
+                    <input type="hidden" name="postingLines[${index}].amount" value="${line.amount}">
+                    <input type="hidden" name="postingLines[${index}].currency" value="${line.currency}">
+                    <input type="hidden" name="postingLines[${index}].description" value="${line.description || ''}">
+                    <input type="hidden" name="postingLines[${index}].debitVatCode" value="${line.debitVatCode || ''}">
+                    <input type="hidden" name="postingLines[${index}].creditVatCode" value="${line.creditVatCode || ''}">
+                `;
+                tbody.appendChild(newRow);
             });
             
-            // If no valid rows, prevent form submission
-            if (validRows.length === 0) {
+            // If no valid posting lines, prevent form submission
+            if (validPostingLines.length === 0) {
                 alert('Please add at least one complete posting line.');
                 return false;
             }
             
             return true;
+        }
+        
+        function getActualVatCode(vatInput) {
+            if (!vatInput || !vatInput.value) return '';
+            
+            const actualCode = vatInput.getAttribute('data-vat-code');
+            if (actualCode) {
+                return actualCode;
+            } else if (vatInput.value.includes('(')) {
+                // Extract code from display value like "1 (25%)"
+                const codeMatch = vatInput.value.match(/^(\w+)\s*\(/);
+                if (codeMatch) {
+                    return codeMatch[1];
+                }
+            }
+            return vatInput.value;
         }
     </script>
 </th:block>
