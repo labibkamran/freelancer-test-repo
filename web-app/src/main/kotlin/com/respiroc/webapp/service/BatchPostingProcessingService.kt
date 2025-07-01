@@ -46,15 +46,46 @@ class BatchPostingProcessingService(
         return postingLines.flatMap { line ->
             val originalAmount = line.amount!!
             val originalCurrency = line.currency
-            val vatCode = line.getVatCode()
-
-            if (vatCode != null) {
-                // Create two postings: one for base amount and one for VAT
-                createVatPostings(line, originalAmount, originalCurrency, companyCurrency, vatCode)
-            } else {
-                // Create single posting without VAT
-                listOf(createSinglePosting(line, originalAmount, originalCurrency, companyCurrency, null))
+            
+            val hasDebit = line.debitAccount.isNotBlank()
+            val hasCredit = line.creditAccount.isNotBlank()
+            
+            when {
+                hasDebit && hasCredit -> {
+                    // Both debit and credit filled - create two postings
+                    val debitLine = line.copy(creditAccount = "", creditVatCode = null)
+                    val creditLine = line.copy(debitAccount = "", debitVatCode = null)
+                    
+                    val debitCommands = createCommandsForLine(debitLine, originalAmount, originalCurrency, companyCurrency)
+                    val creditCommands = createCommandsForLine(creditLine, originalAmount, originalCurrency, companyCurrency)
+                    
+                    debitCommands + creditCommands
+                }
+                hasDebit || hasCredit -> {
+                    // Only one side filled
+                    createCommandsForLine(line, originalAmount, originalCurrency, companyCurrency)
+                }
+                else -> {
+                    emptyList()
+                }
             }
+        }
+    }
+    
+    private fun createCommandsForLine(
+        line: PostingLine,
+        originalAmount: BigDecimal,
+        originalCurrency: String,
+        companyCurrency: String
+    ): List<CreatePostingCommand> {
+        val vatCode = line.getVatCode()
+        
+        return if (vatCode != null) {
+            // Create two postings: one for base amount and one for VAT
+            createVatPostings(line, originalAmount, originalCurrency, companyCurrency, vatCode)
+        } else {
+            // Create single posting without VAT
+            listOf(createSinglePosting(line, originalAmount, originalCurrency, companyCurrency, null))
         }
     }
 
