@@ -22,10 +22,9 @@ class ErrorPageController(
             addCommonAttributes(model, "Tenant Not Found")
             model.addAttribute("user", null)
             model.addAttribute("companies", emptyList<Any>())
-            model.addAttribute("title", "Tenant Not Found")
             model.addAttribute("errorMessage", "The requested company was not found")
         }
-        
+
         return "error/tenant-not-found"
     }
 
@@ -38,10 +37,9 @@ class ErrorPageController(
             addCommonAttributes(model, "Access Denied")
             model.addAttribute("user", null)
             model.addAttribute("companies", emptyList<Any>())
-            model.addAttribute("title", "Access Denied")
             model.addAttribute("errorMessage", "You don't have access to this company")
         }
-        
+
         return "error/tenant-access-denied"
     }
 } 

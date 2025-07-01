@@ -5,12 +5,12 @@ import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
+import jakarta.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import jakarta.validation.Valid
 
 @Controller
 @RequestMapping(value = ["/company"])
@@ -49,12 +49,15 @@ class CompanyWebController(
                 organizationNumber = createCompanyRequest.organizationNumber,
                 countryCode = createCompanyRequest.countryCode
             )
-            
+
             val company = companyApi.createNewCompany(command, springUser.ctx)
-            
-            redirectAttributes.addFlashAttribute("success", "Company '${company.name}' has been created successfully!")
+
+            redirectAttributes.addFlashAttribute(
+                "success",
+                "Company '${company.name}' has been created successfully!"
+            )
             return "redirect:/dashboard?tenantId=${company.tenantId}"
-            
+
         } catch (e: Exception) {
             addCommonAttributes(model, companyApi, "Create Company")
             model.addAttribute("error", "Failed to create company: ${e.message}")
@@ -80,13 +83,16 @@ class CompanyWebController(
                 organizationNumber = createCompanyRequest.organizationNumber,
                 countryCode = createCompanyRequest.countryCode
             )
-            
+
             val company = companyApi.createNewCompany(command, springUser.ctx)
-            
-            model.addAttribute("success", "Company '${company.name}' has been created successfully! Redirecting to dashboard...")
+
+            model.addAttribute(
+                "success",
+                "Company '${company.name}' has been created successfully! Redirecting to dashboard..."
+            )
             model.addAttribute("redirectUrl", "/dashboard?tenantId=${company.tenantId}")
             return "fragments/alert :: success-with-redirect"
-            
+
         } catch (e: Exception) {
             model.addAttribute("error", "Failed to create company: ${e.message}")
             return "fragments/alert :: error"
@@ -100,7 +106,7 @@ class CompanyWebController(
         model: Model
     ): String {
         val query = name.trim()
-        
+
         if (query.length < 2) {
             return "fragments/company-search :: empty"
         }

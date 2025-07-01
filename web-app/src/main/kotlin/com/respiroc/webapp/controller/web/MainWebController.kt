@@ -16,7 +16,7 @@ class MainWebController(
     fun home(): String {
         return try {
             val springUser = springUser()
-            
+
             if (springUser.ctx.tenants.isEmpty()) {
                 "redirect:/company/create"
             } else {
