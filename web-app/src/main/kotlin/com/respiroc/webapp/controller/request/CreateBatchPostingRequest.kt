@@ -1,28 +1,17 @@
 package com.respiroc.webapp.controller.request
 
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Size
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class CreatePostingRequest(
-    @field:NotBlank(message = "Account number is required")
-    @field:Size(max = 10, message = "Account number must not exceed 10 characters")
-    val accountNumber: String,
-
-    @field:NotNull(message = "Amount is required")
-    val amount: BigDecimal,
-
-    @field:NotBlank(message = "Currency is required")
-    @field:Size(min = 3, max = 3, message = "Currency must be exactly 3 characters")
-    val currency: String,
-
-    @field:NotNull(message = "Posting date is required")
-    val postingDate: LocalDate,
-
-    val description: String?
-)
+data class CreateBatchPostingRequest(
+    val postingLines: List<PostingLine?> = emptyList()
+) {
+    fun getValidPostingLines(): List<PostingLine> {
+        return postingLines.filterNotNull()
+            .filter { it.amount != null && it.amount > BigDecimal.ZERO }
+            .filter { it.getAccountNumber().isNotBlank() }
+    }
+}
 
 // Single posting line - represents either debit or credit in a journal entry
 data class PostingLine(
@@ -65,13 +54,3 @@ data class PostingLine(
         }
     }
 }
-
-data class CreateBatchPostingRequest(
-    val postingLines: List<PostingLine?> = emptyList()
-) {
-    fun getValidPostingLines(): List<PostingLine> {
-        return postingLines.filterNotNull()
-            .filter { it.amount != null && it.amount > BigDecimal.ZERO }
-            .filter { it.getAccountNumber().isNotBlank() }
-    }
-} 
