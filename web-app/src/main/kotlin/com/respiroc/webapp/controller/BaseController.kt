@@ -28,11 +28,13 @@ open class BaseController() {
     fun addCommonAttributes(model: Model, companyApi: CompanyInternalApi, title: String) {
         addCommonAttributes(model, title)
         val springUser = springUser()
-        val tenantId = springUser.ctx.currentTenant!!.id
         model.addAttribute(userAttributeName, springUser)
         val companies = companyApi.findAllCompanyByUser(springUser.ctx)
         model.addAttribute(companiesAttributeNames, companies)
-        val currentCompany = companies.find { it.tenantId == tenantId }
-        model.addAttribute(currentCompanyAttributeNames, currentCompany)
+        val tenantId = springUser.ctx.currentTenant?.id
+        if (tenantId != null) {
+            val currentCompany = companies.find { it.tenantId == tenantId }
+            model.addAttribute(currentCompanyAttributeNames, currentCompany)
+        }
     }
 }
