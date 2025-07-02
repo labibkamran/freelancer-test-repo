@@ -14,7 +14,6 @@ class TenantIdFilter(
     private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/report/**"),
     private val excludePaths: List<String> = listOf(
         "/company/create",
-        "/company/select",
         "/company/search",
         "/errors/**",
         "/error/**"
@@ -63,7 +62,7 @@ class TenantIdFilter(
             if (tenants.isEmpty()) {
                 response.sendRedirect("/company/create")
             } else {
-                response.sendRedirect("/company/select")
+                response.sendRedirect("/dashboard?tenantId=${tenants[0].id}")
             }
             return
         }

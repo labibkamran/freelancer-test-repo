@@ -1,830 +1,343 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      class="wa-cloak wa-theme-matter">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title != null ? title + ' - Reai' : 'Reai'}">Reai</title>
-    
+
     <!-- Web Awesome -->
-    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/default.css" />
-    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/webawesome.css" />
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/default.css"/>
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/webawesome.css"/>
     <script type="module" src="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/webawesome.loader.js"></script>
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/matter.css"/>
 
     <!-- HTMX Latest -->
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success-color: #16a34a;
-            --error-color: #dc2626;
-            --warning-color: #f59e0b;
-            --info-color: #06b6d4;
-            --background-color: #f8fafc;
-            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            --border-radius: 12px;
-            --border-color: #e2e8f0;
-        }
-        
-        * {
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: var(--background-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Layout */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-        
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -0.5rem;
-        }
-        
-        .col {
-            padding: 0 0.5rem;
-            flex: 1;
-        }
-        
-        .col-md-6 {
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-        
-        @media (max-width: 768px) {
-            .col-md-6 {
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
-        }
-        
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-        }
-        
-        .card-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            background: #f8f9fa;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-        
-        .btn-outline-primary {
-            background: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-lg {
-            padding: 1rem 2rem;
-            font-size: 1.125rem;
-        }
-        
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
-        
-        .w-100 {
-            width: 100%;
-        }
-        
-        /* Forms */
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .form-control-lg {
-            padding: 1rem;
-            font-size: 1.125rem;
-        }
-        
-        /* Alerts */
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-danger {
-            background-color: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        .alert-success {
-            background-color: #f0fdf4;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-        
-        .alert-info {
-            background-color: #f0f9ff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-        
-        /* Navigation */
-        .navbar {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 0;
-        }
-        
-        .navbar-brand {
-            font-weight: bold;
-            color: white !important;
-            text-decoration: none;
-            font-size: 1.25rem;
-        }
-        
-        .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-        }
-        
-        .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white !important;
-        }
-        
-        /* Auth Layout */
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 0;
-        }
-        
-        .auth-card {
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        /* Utilities */
-        .text-center {
-            text-align: center;
-        }
-        
-        .text-muted {
-            color: #6b7280;
-        }
-        
-        .text-primary {
-            color: var(--primary-color);
-        }
-        
-        .mb-2 {
-            margin-bottom: 0.5rem;
-        }
-        
-        .mb-3 {
-            margin-bottom: 1rem;
-        }
-        
-        .mb-4 {
-            margin-bottom: 1.5rem;
-        }
-        
-        .mt-4 {
-            margin-top: 1.5rem;
-        }
-        
-        .py-4 {
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-        }
-        
-        .p-5 {
-            padding: 3rem;
-        }
-        
-        .d-flex {
-            display: flex;
-        }
-        
-        .justify-content-between {
-            justify-content: space-between;
-        }
-        
-        .align-items-center {
-            align-items: center;
-        }
-        
-        .fw-bold {
-            font-weight: bold;
-        }
-        
-        .small {
-            font-size: 0.875rem;
-        }
-        
-        .h3 {
-            font-size: 1.875rem;
-            font-weight: 600;
-        }
-        
-        /* Loading States */
-        .htmx-indicator {
-            display: none;
-        }
-        
-        .htmx-request .htmx-indicator {
-            display: inline-block;
-        }
-        
-        .htmx-request.htmx-indicator {
-            display: inline-block;
-        }
-        
-        .spinner {
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid #f3f4f6;
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            
-            .auth-card {
-                margin: 0 1rem;
-            }
-            
-            .card-body {
-                padding: 1rem;
-            }
-            
-            .p-5 {
-                padding: 2rem;
-            }
-        }
 
-        /* Left Navigation Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 280px;
-            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            color: white;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .sidebar-brand {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: white;
-            text-decoration: none;
-        }
-
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.25rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-            margin: 0;
-        }
-
-        .menu-item {
-            margin-bottom: 0.25rem;
-        }
-
-        .menu-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            background: none;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .menu-link:hover,
-        .menu-link.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        .menu-link .menu-icon {
-            margin-right: 0.75rem;
-            font-size: 1.125rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .menu-link .menu-text {
-            flex: 1;
-            text-align: left;
-        }
-
-        .menu-link .menu-arrow {
-            transition: transform 0.2s ease;
-        }
-
-        .menu-link.expanded .menu-arrow {
-            transform: rotate(90deg);
-        }
-
-        .submenu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            background: rgba(0, 0, 0, 0.2);
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .submenu.expanded {
-            max-height: 500px;
-        }
-
-        .submenu .menu-link {
-            padding: 0.5rem 1.5rem 0.5rem 3rem;
-            font-size: 0.875rem;
-        }
-
-        /* Main Content Area */
-        .main-wrapper {
-            margin-left: 280px;
-            min-height: 100vh;
-            transition: margin-left 0.3s ease;
-        }
-
-        .main-wrapper.sidebar-collapsed {
-            margin-left: 0;
-        }
-        
-        /* Auth Content Area */
-        .auth-wrapper {
-            margin-left: 0;
-            min-height: 100vh;
-            width: 100%;
-        }
-
-        /* Top Navigation adjustments */
-        .navbar {
-            position: relative;
-            z-index: 999;
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-280px);
-            }
-            
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            
-            .main-wrapper {
-                margin-left: 0;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-            }
-            
-            .desktop-sidebar-toggle {
-                display: none !important;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .mobile-menu-toggle {
-                display: none;
-            }
-            
-            .desktop-sidebar-toggle {
-                display: block !important;
-            }
-        }
-
-        /* Overlay for mobile */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-        }
-    </style>
-    
     <!-- Custom head content -->
     <th:block layout:fragment="head"></th:block>
 </head>
 <body>
-    <!-- Left Sidebar Navigation (only show if authenticated) -->
-    <aside class="sidebar" id="sidebar" th:if="${user != null}">
-        <div class="sidebar-header">
-            <a href="/dashboard" class="sidebar-brand">
-                🧮 Accounting System
-            </a>
-            <button class="sidebar-toggle" onclick="toggleSidebar()">
-                ✕
-            </button>
+<!-- Authenticated User Layout -->
+<wa-page mobile-breakpoint="920" th:if="${user != null}">
+    <!-- Header -->
+    <header slot="header" class="wa-split">
+        <div class="wa-cluster">
+            <span class="wa-heading-s wa-desktop-only">Reai - Accounting System</span>
+            <!-- Company Selector -->
+            <wa-dropdown>
+                <wa-button slot="trigger" size="small" variant="brand" appearance="outlined" with-caret
+                           th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">
+                    Select Company
+                </wa-button>
+                <wa-dropdown-item th:each="company : ${companies}"
+                                  th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
+                                  th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
+                    <span th:text="${company.name}">Company Name</span>
+                </wa-dropdown-item>
+                <wa-divider></wa-divider>
+                <wa-dropdown-item onclick="window.open('/company/create', '_blank')">
+                    <wa-icon slot="icon" name="plus"></wa-icon>
+                    <span>Create New Company</span>
+                </wa-dropdown-item>
+            </wa-dropdown>
         </div>
-        
-        <nav>
-            <ul class="sidebar-menu">
-                <!-- Dashboard -->
-                <li class="menu-item">
-                    <a href="/dashboard" class="menu-link" onclick="setActiveMenu(this)">
-                        <span class="menu-icon">🏠</span>
-                        <span class="menu-text">Home</span>
-                    </a>
-                </li>
+        <div class="wa-cluster wa-gap-xs">
+            <!-- User Menu -->
+            <wa-dropdown>
+                <wa-button slot="trigger" size="small" variant="brand" with-caret>
+                    <wa-icon slot="prefix" name="user"></wa-icon>
+                    <th:block th:text="${user.username}"></th:block>
+                </wa-button>
+                <wa-dropdown-item onclick="window.location.href='/auth/logout'" variant="danger">
+                    <wa-icon slot="icon" name="arrow-right-from-bracket"></wa-icon>
+                    Logout
+                </wa-dropdown-item>
+            </wa-dropdown>
+        </div>
+    </header>
 
-                <!-- Vouchers (Accounting Documents) -->
-                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">📋</span>
-                        <span class="menu-text">Vouchers</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                    <ul class="submenu">
-                        <li><a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}" class="menu-link">📝 Create Advanced Voucher</a></li>
-                    </ul>
-                </li>
+    <!-- Subheader with breadcrumbs -->
+    <nav slot="subheader">
+        <div class="wa-cluster" style="flex-wrap: nowrap">
+            <wa-button data-toggle-nav appearance="plain" size="small">
+                <wa-icon name="bars" label="Menu"></wa-icon>
+            </wa-button>
+            <wa-breadcrumb style="font-size: var(--wa-font-size-s)">
+                <wa-breadcrumb-item>Dashboard</wa-breadcrumb-item>
+                <wa-breadcrumb-item th:if="${currentCompany != null}" th:text="${currentCompany.name}">Company
+                </wa-breadcrumb-item>
+            </wa-breadcrumb>
+        </div>
+    </nav>
 
-                <!-- Chart of Accounts -->
-                <li class="menu-item" th:if="${user.ctx.currentTenant != null}">
-                    <button class="menu-link" onclick="toggleSubmenu(this)">
-                        <span class="menu-icon">📊</span>
-                        <span class="menu-text">Accounts</span>
-                        <span class="menu-arrow">▶</span>
-                    </button>
-                                            <ul class="submenu">
-                            <li><a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"class="menu-link">⚖️ Trial Balance</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-    
-    <!-- Sidebar Overlay for Mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-    <!-- Main Content Wrapper - Only for authenticated users -->
-    <div class="main-wrapper" id="mainWrapper" th:if="${user != null}">
-        <!-- Top Navigation (only show if authenticated) -->
-        <nav class="navbar" th:if="${user != null}">
-            <div class="container">
-                <div class="d-flex justify-content-between align-items-center w-100">
-                    <!-- Left Side: Mobile Menu Toggle + Company Selector -->
-                    <div class="d-flex align-items-center">
-                        <!-- Mobile Menu Toggle -->
-                        <button class="mobile-menu-toggle sidebar-toggle" onclick="openSidebar()" style="background: none; border: none; color: white; font-size: 1.25rem; margin-right: 1rem;">
-                            ☰
-                        </button>
-                        
-                        <!-- Desktop Sidebar Toggle -->
-                        <button class="desktop-sidebar-toggle sidebar-toggle" onclick="toggleSidebar()" style="background: none; border: none; color: white; font-size: 1.25rem; margin-right: 1rem; display: none;">
-                            ☰
-                        </button>
-                        
-                        <!-- Company Selector Dropdown -->
-                        <wa-dropdown>
-
-                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral"
-                                       pill with-caret
-                                       th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">
-                                Select Company
-                            </wa-button>
-
-                            <wa-dropdown-item th:each="company : ${companies}"
-                                              th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
-                                              th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''"
-                                              value="full-screen">
-                                <span th:text="${company.name}">Company Name</span>
-                            </wa-dropdown-item>
-
-                            <wa-divider></wa-divider>
-
-                            <wa-dropdown-item onclick="window.open('/company/create', '_blank')">
-                                <wa-icon slot="icon" name="plus"></wa-icon>
-                                <span>Create New Company</span>
-                            </wa-dropdown-item>
-
-                        </wa-dropdown>
-
-                    </div>
-                    
-                    <!-- Right Side: User Account Dropdown -->
-                    <div class="d-flex align-items-center">
-                        <wa-dropdown>
-                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
-                                <th:block th:text="${user.username}"></th:block>
-                            </wa-button>
-                            <wa-dropdown-item onclick="window.location.href='/auth/logout'" variant="danger">
-                                Logout
-                            </wa-dropdown-item>
-                        </wa-dropdown>
-                    </div>
+    <!-- Navigation -->
+    <nav slot="navigation">
+        <th:block th:if="${user.ctx.currentTenant != null}">
+            <!-- Dashboard -->
+            <wa-details appearance="outlined" variant="brand">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="dashboard" aria-hidden="true"></wa-icon>
+                    Dashboard
                 </div>
-            </div>
-        </nav>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/dashboard?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Home
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
 
-        <!-- Main Content -->
-        <main layout:fragment="content">
-            <!-- Page content will be inserted here -->
-        </main>
+            <!-- Vouchers Section -->
+            <wa-details appearance="outlined" variant="success">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="file-text" aria-hidden="true"></wa-icon>
+                    Vouchers
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            New Advanced Voucher
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
 
-        <!-- Footer -->
-        <footer style="background: #f8f9fa; padding: 2rem 0; margin-top: 3rem;" th:if="${user != null}">
-            <div class="container text-center">
-                <p class="text-muted mb-0">
-                    © 2025 - Accounting System
-                </p>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- Auth Content Wrapper - Only for non-authenticated users -->
-    <div class="auth-wrapper" th:if="${user == null}">
-        <!-- Main Content -->
-        <main layout:fragment="content">
-            <!-- Page content will be inserted here -->
-        </main>
-    </div>
+            <!-- Reports Section -->
+            <wa-details appearance="outlined" variant="info">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="chart-simple" aria-hidden="true"></wa-icon>
+                    Reports
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Trial Balance
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
+        </th:block>
+    </nav>
 
-    <!-- HTMX Extensions -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/loading-states.js"></script>
-    
-    <!-- Custom JS -->
-    <script>
-        // HTMX Configuration
-        htmx.config.globalViewTransitions = true;
+    <!-- Navigation Footer -->
+   <!-- <nav slot="navigation-footer">
+        <a href="/company/create" class="wa-flank">
+            <wa-icon name="building"></wa-icon>
+            <span>Create Company</span>
+        </a>
+    </nav>-->
+
+    <!-- Aside Sidebar -->
+    <aside slot="aside" class="wa-desktop-only" th:if="${user.ctx.currentTenant != null}" id="aside-panel">
+        <div layout:fragment="aside" id="aside-content">
+            <!-- Aside content will be inserted here -->
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main layout:fragment="content" id="main-content">
+        <!-- Page content will be inserted here -->
+    </main>
+
+    <!-- Footer -->
+    <footer slot="footer" class="wa-grid wa-gap-xl">
+        <div class="wa-cluster" style="flex-wrap: nowrap">
+            <span class="wa-heading-s">Reai - Accounting System</span>
+        </div>
+        <div class="wa-stack">
+            <h3 class="wa-heading-xs">Account</h3>
+            <a href="/auth/logout">Logout</a>
+        </div>
+        <div class="wa-stack">
+            <span class="wa-body-s">© 2025 - Accounting System</span>
+        </div>
+    </footer>
+</wa-page>
+
+<!-- Non-authenticated User Layout -->
+<div th:if="${user == null}" class="wa-center"
+     style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <main layout:fragment="content">
+        <!-- Auth page content will be inserted here -->
+    </main>
+</div>
+
+<!-- HTMX Extensions -->
+<script src="https://unpkg.com/htmx.org/dist/ext/loading-states.js"></script>
+
+<!-- Custom JS -->
+<script>
+    // HTMX Configuration
+    htmx.config.globalViewTransitions = true;
+
+    // Company switching function
+    function switchCompany(tenantId) {
+        const dashboardUrl = new URL('/dashboard', window.location.origin);
+        dashboardUrl.searchParams.set('tenantId', tenantId);
+        window.open(dashboardUrl.toString(), '_blank');
+    }
+
+    // Get current tenant ID from URL
+    function getCurrentTenantId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('tenantId');
+    }
+
+    // Show loading states
+    document.addEventListener('htmx:beforeRequest', function (evt) {
+        const target = evt.target;
+        if (target.tagName === 'WA-BUTTON') {
+            target.loading = true;
+        }
+    });
+
+    document.addEventListener('htmx:afterRequest', function (evt) {
+        const target = evt.target;
+        if (target.tagName === 'WA-BUTTON') {
+            target.loading = false;
+        }
+    });
+
+    // Auto-hide success alerts after 5 seconds
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('wa-alert[variant="success"]');
+        alerts.forEach(function (alert) {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+
+    // Handle navigation
+    document.addEventListener('DOMContentLoaded', function () {
+        // Close drawer on navigation link click (mobile)
+        const navigationLinks = document.querySelectorAll("[slot='navigation'] a[href]:not([href='#'])");
+        navigationLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                // Close mobile navigation drawer
+                const page = document.querySelector('wa-page');
+                if (page && page.getAttribute('view') === 'mobile') {
+                    page.setAttribute('drawer', 'closed');
+                }
+            });
+        });
+
+        // Handle section anchors
+        const sectionAnchors = document.querySelectorAll("[slot*='navigation'] a[href*='#']");
+        sectionAnchors.forEach(sectionAnchor => sectionAnchor.setAttribute('data-drawer', 'close'));
+    });
+
+    // Handle aside visibility based on content
+    document.addEventListener('DOMContentLoaded', function () {
+        const asideContent = document.getElementById('aside-content');
+        const page = document.querySelector('wa-page');
         
-        // Sidebar Management
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainWrapper = document.getElementById('mainWrapper');
-            const overlay = document.getElementById('sidebarOverlay');
+        function updateAsideVisibility() {
+            if (!asideContent || !page) return;
             
-            if (window.innerWidth <= 768) {
-                // Mobile behavior
-                sidebar.classList.toggle('mobile-open');
-                overlay.classList.toggle('active');
+            const hasContent = asideContent.textContent.trim().length > 0 || asideContent.children.length > 0;
+            
+            if (hasContent) {
+                page.setAttribute('data-aside-visible', 'true');
             } else {
-                // Desktop behavior
-                sidebar.classList.toggle('collapsed');
-                mainWrapper.classList.toggle('sidebar-collapsed');
-                
-                // Store sidebar state
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                page.setAttribute('data-aside-visible', 'false');
             }
         }
         
-        function openSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            if (window.innerWidth <= 768) {
-                sidebar.classList.add('mobile-open');
-                overlay.classList.add('active');
-            }
-        }
+        // Check on load
+        updateAsideVisibility();
         
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-        }
-        
-        // Submenu Management
-        function toggleSubmenu(button) {
-            const submenu = button.nextElementSibling;
-            const arrow = button.querySelector('.menu-arrow');
-            
-            // Close other submenus
-            const allButtons = document.querySelectorAll('.menu-link');
-            const allSubmenus = document.querySelectorAll('.submenu');
-            
-            allButtons.forEach(btn => {
-                if (btn !== button) {
-                    btn.classList.remove('expanded');
-                }
-            });
-            
-            allSubmenus.forEach(sub => {
-                if (sub !== submenu) {
-                    sub.classList.remove('expanded');
-                }
-            });
-            
-            // Toggle current submenu
-            button.classList.toggle('expanded');
-            submenu.classList.toggle('expanded');
-        }
-        
-        // Active Menu Management
-        function setActiveMenu(link) {
-            // Remove active class from all menu links
-            const allLinks = document.querySelectorAll('.menu-link');
-            allLinks.forEach(l => l.classList.remove('active'));
-            
-            // Add active class to clicked link
-            link.classList.add('active');
-            
-            // Store active menu
-            localStorage.setItem('activeMenu', link.href);
-        }
-        
-        // Initialize sidebar state on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Restore sidebar state
-            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (sidebarCollapsed && window.innerWidth > 768) {
-                document.getElementById('sidebar').classList.add('collapsed');
-                document.getElementById('mainWrapper').classList.add('sidebar-collapsed');
-            }
-            
-            // Set active menu based on current URL
-            const currentPath = window.location.pathname;
-            const menuLinks = document.querySelectorAll('.sidebar-menu a[href]');
-            menuLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    setActiveMenu(link);
-                }
-            });
-            
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                const sidebar = document.getElementById('sidebar');
-                const mainWrapper = document.getElementById('mainWrapper');
-                const overlay = document.getElementById('sidebarOverlay');
-                
-                if (window.innerWidth > 768) {
-                    // Desktop mode
-                    sidebar.classList.remove('mobile-open');
-                    overlay.classList.remove('active');
-                } else {
-                    // Mobile mode
-                    sidebar.classList.remove('collapsed');
-                    mainWrapper.classList.remove('sidebar-collapsed');
-                }
-            });
-        });
-        
-        // Company switching function
-        function switchCompany(tenantId) {
-            const dashboardUrl = new URL('/dashboard', window.location.origin);
-            dashboardUrl.searchParams.set('tenantId', tenantId);
-            window.open(dashboardUrl.toString(), '_blank');
-        }
-        
-        // Get current tenant ID from URL
-        function getCurrentTenantId() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('tenantId');
-        }
-        
-        // Show loading states
-        document.addEventListener('htmx:beforeRequest', function(evt) {
-            const target = evt.target;
-            if (target.classList.contains('btn')) {
-                target.disabled = true;
-            }
-        });
-        
-        document.addEventListener('htmx:afterRequest', function(evt) {
-            const target = evt.target;
-            if (target.classList.contains('btn')) {
-                target.disabled = false;
-            }
-        });
-        
-        // Auto-hide success alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert-success');
-            alerts.forEach(function(alert) {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-    </script>
+        // Check after HTMX requests
+        document.addEventListener('htmx:afterSettle', updateAsideVisibility);
+    });
+</script>
 
+<!-- Page styling -->
+<style>
+    wa-page {
+        --menu-width: 15rem;
+        --aside-width: 15rem;
+    }
 
-    
-    <!-- Custom scripts -->
-    <th:block layout:fragment="scripts"></th:block>
+    wa-page[view='desktop'] {
+        [slot*='navigation'] {
+            border-inline-end: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
+        }
+    }
+
+    wa-page[view='mobile'] {
+        --menu-width: auto;
+        --aside-width: auto;
+    }
+
+    [slot='header'] {
+        --wa-link-decoration-default: none;
+        border-block-end: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
+    }
+
+    [slot*='header'] a {
+        font-weight: var(--wa-font-weight-action);
+    }
+
+    [slot='subheader'] {
+        background-color: var(--wa-color-surface-lowered);
+        border-block-end: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
+    }
+
+    [slot='navigation-footer'] {
+        border-block-start: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
+
+        .wa-flank {
+            --flank-size: 1.25em;
+        }
+    }
+
+    main {
+        max-inline-size: 60rem;
+        margin-inline: auto;
+        padding: var(--wa-space-l);
+    }
+
+    [slot='footer'] {
+        --wa-color-text-link: var(--wa-color-text-quiet);
+        background-color: var(--wa-color-surface-lowered);
+        font-size: var(--wa-font-size-s);
+    }
+
+    /* Auth layout styling */
+    .wa-center main {
+        max-width: 400px;
+        width: 100%;
+        padding: var(--wa-space-xl);
+    }
+
+    /* Dynamic aside width based on content */
+    wa-page[data-aside-visible="false"] {
+        --aside-width: 0;
+    }
+
+    wa-page[data-aside-visible="true"] {
+        --aside-width: 15rem;
+    }
+
+    /* Hide aside when empty */
+    wa-page[data-aside-visible="false"] [slot="aside"] {
+        display: none;
+    }
+
+    /* Expand main content when aside is hidden */
+    wa-page[data-aside-visible="false"] main {
+        max-inline-size: 80rem;
+    }
+</style>
+
+<!-- Custom scripts -->
+<th:block layout:fragment="scripts"></th:block>
 </body>
-</html> 
+</html>

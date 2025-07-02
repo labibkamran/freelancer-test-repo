@@ -6,81 +6,33 @@
 
 <body>
 <main layout:fragment="content">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="card">
-                <div class="card-body">
-                    <!-- Header -->
-                    <div class="text-center mb-4">
-                        <div class="mb-3" style="font-size: 3rem;">
-                            🧮
-                        </div>
-                        <h3 class="fw-bold mb-2">Login to Your Account</h3>
-                        <p class="text-muted">Please enter your credentials</p>
-                    </div>
+    <div>
+        <wa-card style="max-width: 45ch; margin: 0 auto">
+            <!-- Alerts -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}"></span>
+            </div>
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <span th:text="${success}"></span>
+            </div>
 
-                    <!-- Alerts -->
-                    <div th:if="${error}" class="alert alert-danger" role="alert">
-                        <span th:text="${error}"></span>
-                    </div>
-
-                    <div th:if="${success}" class="alert alert-success" role="alert">
-                        <span th:text="${success}"></span>
-                    </div>
-
-                    <!-- Login Form -->
-                    <form method="post" action="/auth/login">
-                        <!-- Remember Me as hidden field (always true) -->
-                        <input type="hidden" name="remember" value="true">
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">
-                                📧 Email
-                            </label>
-                            <input type="email" 
-                                   class="form-control form-control-lg" 
-                                   id="email" 
-                                   name="email" 
-                                   placeholder="example@domain.com"
-                                   required
-                                   autocomplete="email">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password" class="form-label">
-                                🔒 Password
-                            </label>
-                            <input type="password" 
-                                   class="form-control form-control-lg" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="Enter your password"
-                                   required
-                                   autocomplete="current-password">
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                            🚀 Login
-                        </button>
-
-                        <!-- Sign Up Link -->
-                        <div class="text-center">
-                            <span class="text-muted">Don't have an account?</span>
-                            <a href="/auth/signup" style="text-decoration: none; font-weight: bold; color: var(--primary-color);">
-                                Sign Up
-                            </a>
-                        </div>
-                    </form>
+            <!-- Login Form -->
+            <form method="post" action="/auth/login">
+                <div class="wa-stack">
+                    <h2 class="wa-heading-m">Login</h2>
+                    <wa-input label="Email" type="email" id="email" name="email" required></wa-input>
+                    <wa-input label="Password" type="password" id="password" name="password" required></wa-input>
+                    <a href="/auth/signup">Don't have an account? Sign Up</a>
+                    <wa-button type="submit">Sign in</wa-button>
                 </div>
-            </div>
+            </form>
+        </wa-card>
 
-            <!-- Footer -->
-            <div class="text-center mt-4">
-                <p class="text-muted small">
-                    🔐 Your information is safe and secure
-                </p>
-            </div>
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 0.5rem">
+            <p class="wa-body-xs">
+                🔐 Your information is safe and secure
+            </p>
         </div>
     </div>
 </main>
@@ -88,7 +40,7 @@
 <th:block layout:fragment="scripts">
     <script>
         // Focus on email input when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('email').focus();
         });
     </script>
