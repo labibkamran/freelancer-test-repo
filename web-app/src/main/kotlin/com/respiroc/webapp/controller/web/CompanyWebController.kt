@@ -85,16 +85,4 @@ class CompanyWebController(
             return "fragments/company-search :: error"
         }
     }
-
-    @GetMapping("/select")
-    fun selectTenant(model: Model): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Select Company")
-
-        return "company/select"
-    }
 }
