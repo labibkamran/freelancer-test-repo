@@ -6,35 +6,33 @@
 
 <body>
 <main layout:fragment="content">
-    <div class="auth-container">
-        <div class="auth-card">
-            <wa-card style="max-width: 45ch; margin: 0 auto">
-                <!-- Alerts -->
-                <div th:if="${error}" class="alert alert-danger" role="alert">
-                    <span th:text="${error}"></span>
-                </div>
-                <div th:if="${success}" class="alert alert-success" role="alert">
-                    <span th:text="${success}"></span>
-                </div>
-
-                <!-- Login Form -->
-                <form method="post" action="/auth/login">
-                    <div class="wa-stack">
-                        <h2 class="wa-heading-m">Login</h2>
-                        <wa-input label="Email" type="email" id="email" name="email" required></wa-input>
-                        <wa-input label="Password" type="password" id="password" name="password" required></wa-input>
-                        <a href="/auth/signup">Don't have an account? Sign Up</a>
-                        <wa-button type="submit">Sign in</wa-button>
-                    </div>
-                </form>
-            </wa-card>
-
-            <!-- Footer -->
-            <div class="text-center mt-4">
-                <p class="text-muted small">
-                    🔐 Your information is safe and secure
-                </p>
+    <div>
+        <wa-card style="max-width: 45ch; margin: 0 auto">
+            <!-- Alerts -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}"></span>
             </div>
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <span th:text="${success}"></span>
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" action="/auth/login">
+                <div class="wa-stack">
+                    <h2 class="wa-heading-m">Login</h2>
+                    <wa-input label="Email" type="email" id="email" name="email" required></wa-input>
+                    <wa-input label="Password" type="password" id="password" name="password" required></wa-input>
+                    <a href="/auth/signup">Don't have an account? Sign Up</a>
+                    <wa-button type="submit">Sign in</wa-button>
+                </div>
+            </form>
+        </wa-card>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 0.5rem">
+            <p class="wa-body-xs">
+                🔐 Your information is safe and secure
+            </p>
         </div>
     </div>
 </main>
@@ -42,7 +40,7 @@
 <th:block layout:fragment="scripts">
     <script>
         // Focus on email input when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('email').focus();
         });
     </script>
