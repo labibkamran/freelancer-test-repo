@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" class="wa-cloak wa-theme-matter">
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      class="wa-cloak wa-theme-matter">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title != null ? title + ' - Reai' : 'Reai'}">Reai</title>
 
     <!-- Web Awesome -->
-    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/default.css" />
-    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/webawesome.css" />
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/default.css"/>
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/webawesome.css"/>
     <script type="module" src="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/webawesome.loader.js"></script>
-    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/matter.css" />
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.1/dist/styles/themes/matter.css"/>
 
     <!-- HTMX Latest -->
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
@@ -65,61 +66,67 @@
             </wa-button>
             <wa-breadcrumb style="font-size: var(--wa-font-size-s)">
                 <wa-breadcrumb-item>Dashboard</wa-breadcrumb-item>
-                <wa-breadcrumb-item th:if="${currentCompany != null}" th:text="${currentCompany.name}">Company</wa-breadcrumb-item>
+                <wa-breadcrumb-item th:if="${currentCompany != null}" th:text="${currentCompany.name}">Company
+                </wa-breadcrumb-item>
             </wa-breadcrumb>
         </div>
     </nav>
 
     <!-- Navigation -->
     <nav slot="navigation">
-        <wa-tree class="navigation-tree">
+        <th:block th:if="${user.ctx.currentTenant != null}">
             <!-- Dashboard -->
-            <wa-tree-item>
-                <wa-icon name="house"></wa-icon>
-                <a href="/dashboard" style="text-decoration: none; color: inherit;">Home</a>
-            </wa-tree-item>
+            <wa-details appearance="outlined" variant="brand">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="dashboard" aria-hidden="true"></wa-icon>
+                    Dashboard
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/dashboard?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Home
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
 
-            <th:block th:if="${user.ctx.currentTenant != null}">
-                <!-- Vouchers Section -->
-                <wa-tree-item>
-                    <wa-icon name="file-text"></wa-icon>
+            <!-- Vouchers Section -->
+            <wa-details appearance="outlined" variant="success">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="file-text" aria-hidden="true"></wa-icon>
                     Vouchers
-                    <wa-tree-item>
-                        <wa-icon name="plus"></wa-icon>
-                        <a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}" 
-                           style="text-decoration: none; color: inherit;">Create Advanced Voucher</a>
-                    </wa-tree-item>
-                    <wa-tree-item>
-                        <wa-icon name="list"></wa-icon>
-                        <a href="#" style="text-decoration: none; color: inherit;">View Vouchers</a>
-                    </wa-tree-item>
-                </wa-tree-item>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            New Advanced Voucher
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
 
-                <!-- Reports Section -->
-                <wa-tree-item>
-                    <wa-icon name="chart-simple"></wa-icon>
+            <!-- Reports Section -->
+            <wa-details appearance="outlined" variant="info">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="chart-simple" aria-hidden="true"></wa-icon>
                     Reports
-                    <wa-tree-item>
-                        <wa-icon name="scale-balanced"></wa-icon>
-                        <a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}" 
-                           style="text-decoration: none; color: inherit;">Trial Balance</a>
-                    </wa-tree-item>
-                    <wa-tree-item>
-                        <wa-icon name="chart-line"></wa-icon>
-                        <a href="#" style="text-decoration: none; color: inherit;">Profit & Loss</a>
-                    </wa-tree-item>
-                    <wa-tree-item>
-                        <wa-icon name="chart-pie"></wa-icon>
-                        <a href="#" style="text-decoration: none; color: inherit;">Balance Sheet</a>
-                    </wa-tree-item>
-                </wa-tree-item>
-            </th:block>
-
-        </wa-tree>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Trial Balance
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
+        </th:block>
     </nav>
 
     <!-- Navigation Footer -->
-    <!--<nav slot="navigation-footer">
+   <!-- <nav slot="navigation-footer">
         <a href="/company/create" class="wa-flank">
             <wa-icon name="building"></wa-icon>
             <span>Create Company</span>
@@ -147,7 +154,8 @@
 </wa-page>
 
 <!-- Non-authenticated User Layout -->
-<div th:if="${user == null}" class="wa-center" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+<div th:if="${user == null}" class="wa-center"
+     style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
     <main layout:fragment="content">
         <!-- Auth page content will be inserted here -->
     </main>
@@ -175,14 +183,14 @@
     }
 
     // Show loading states
-    document.addEventListener('htmx:beforeRequest', function(evt) {
+    document.addEventListener('htmx:beforeRequest', function (evt) {
         const target = evt.target;
         if (target.tagName === 'WA-BUTTON') {
             target.loading = true;
         }
     });
 
-    document.addEventListener('htmx:afterRequest', function(evt) {
+    document.addEventListener('htmx:afterRequest', function (evt) {
         const target = evt.target;
         if (target.tagName === 'WA-BUTTON') {
             target.loading = false;
@@ -190,21 +198,21 @@
     });
 
     // Auto-hide success alerts after 5 seconds
-    setTimeout(function() {
+    setTimeout(function () {
         const alerts = document.querySelectorAll('wa-alert[variant="success"]');
-        alerts.forEach(function(alert) {
+        alerts.forEach(function (alert) {
             alert.style.transition = 'opacity 0.5s';
             alert.style.opacity = '0';
             setTimeout(() => alert.remove(), 500);
         });
     }, 5000);
 
-    // Handle navigation tree
-    document.addEventListener('DOMContentLoaded', function() {
+    // Handle navigation
+    document.addEventListener('DOMContentLoaded', function () {
         // Close drawer on navigation link click (mobile)
-        const navigationLinks = document.querySelectorAll(".navigation-tree a[href]:not([href='#'])");
+        const navigationLinks = document.querySelectorAll("[slot='navigation'] a[href]:not([href='#'])");
         navigationLinks.forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function () {
                 // Close mobile navigation drawer
                 const page = document.querySelector('wa-page');
                 if (page && page.getAttribute('view') === 'mobile') {
@@ -249,43 +257,6 @@
     [slot='subheader'] {
         background-color: var(--wa-color-surface-lowered);
         border-block-end: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
-    }
-
-    /* Navigation Tree Styling */
-    .navigation-tree {
-        font-size: var(--wa-font-size-s);
-        padding: var(--wa-space-s);
-    }
-
-    .navigation-tree wa-tree-item {
-        --tree-item-padding: var(--wa-space-xs) var(--wa-space-s);
-        margin-bottom: var(--wa-space-2xs);
-    }
-
-    .navigation-tree wa-tree-item wa-icon {
-        margin-right: var(--wa-space-xs);
-        font-size: var(--wa-font-size-s);
-    }
-
-    .navigation-tree wa-tree-item > wa-tree-item {
-        font-size: var(--wa-font-size-xs);
-        margin-left: var(--wa-space-m);
-    }
-
-    .navigation-tree a {
-        color: inherit;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        width: 100%;
-        padding: var(--wa-space-2xs) 0;
-        border-radius: var(--wa-border-radius-s);
-        transition: background-color 0.2s ease;
-    }
-
-    .navigation-tree a:hover {
-        background-color: var(--wa-color-surface-lowered);
-        padding-left: var(--wa-space-xs);
     }
 
     [slot='navigation-footer'] {
