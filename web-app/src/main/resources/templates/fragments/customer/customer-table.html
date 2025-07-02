@@ -4,7 +4,6 @@
         <th hx-get="/customer?sort=name" hx-target="#customer-table-body">Name</th>
         <th hx-get="/customer?sort=email" hx-target="#customer-table-body">Type</th>
         <th hx-get="/customer?sort=organizationNumber" hx-target="#customer-table-body">Organization Number</th>
-        <th hx-get="/customer?sort=status" hx-target="#customer-table-body">Create At</th>
         <th>Actions</th>
     </tr>
     </thead>
@@ -16,7 +15,6 @@
         <td data-label="Name" th:text="${customer.name}"></td>
         <td data-label="Email" th:text="${customer.type}"></td>
         <td data-label="organizationNumber" th:text="${customer.organizationNumber}"></td>
-        <td data-label="Status" th:text="${#temporals.format(customer.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
         <td data-label="Actions" class="action-buttons">
             <a href="#" title="Edit">Edit</a>
             <a href="#" title="Delete">Delete</a>

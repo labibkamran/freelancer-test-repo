@@ -3,14 +3,9 @@ package com.respiroc.customer.domain.model
 import com.respiroc.tenant.domain.model.Tenant
 import jakarta.persistence.*
 import jakarta.validation.constraints.Size
-import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.time.Instant
 
 @Entity
 @Table(name = "customers")
-@EntityListeners(AuditingEntityListener::class)
 open class Customer {
 
     @Id
@@ -36,12 +31,4 @@ open class Customer {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     open lateinit var type: CustomerType
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    open lateinit var createdAt: Instant
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    open lateinit var updatedAt: Instant
 }
