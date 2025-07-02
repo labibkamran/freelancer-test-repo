@@ -20,7 +20,7 @@ class MainWebController(
             if (springUser.ctx.tenants.isEmpty()) {
                 "redirect:/company/create"
             } else {
-                "redirect:/company/select"
+                "redirect:/dashboard?tenantId=${springUser.ctx.tenants[0].id}"
             }
         } catch (_: Exception) {
             // User not authenticated
