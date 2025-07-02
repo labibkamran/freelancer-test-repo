@@ -598,41 +598,41 @@
                         </button>
                         
                         <!-- Company Selector Dropdown -->
-                        <wa-dropdown placement="bottom-start" hoist>
-                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
-                                <wa-icon name="buildings" style="margin-right: 0.5rem;"></wa-icon>
-                                <span th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">Select Company</span>
-                                <wa-icon name="chevron-down" style="margin-left: 0.5rem;"></wa-icon>
+                        <wa-dropdown>
+
+                            <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral"
+                                       pill with-caret
+                                       th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">
+                                Select Company
                             </wa-button>
-                            
-                            <wa-menu>
-                                <wa-menu-item th:each="company : ${companies}" 
-                                             th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
-                                             th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
-                                    <wa-icon name="building" style="margin-right: 0.5rem;"></wa-icon>
-                                    <span th:text="${company.name}">Company Name</span>
-                                </wa-menu-item>
-                                
-                                <wa-divider></wa-divider>
-                                
-                                <wa-menu-item onclick="window.open('/company/create', '_blank')">
-                                    <wa-icon name="plus"></wa-icon>
-                                    <span>Create New Company</span>
-                                </wa-menu-item>
-                            </wa-menu>
+
+                            <wa-dropdown-item th:each="company : ${companies}"
+                                              th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
+                                              th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''"
+                                              value="full-screen">
+                                <span th:text="${company.name}">Company Name</span>
+                            </wa-dropdown-item>
+
+                            <wa-divider></wa-divider>
+
+                            <wa-dropdown-item onclick="window.open('/company/create', '_blank')">
+                                <wa-icon slot="icon" name="plus"></wa-icon>
+                                <span>Create New Company</span>
+                            </wa-dropdown-item>
+
                         </wa-dropdown>
+
                     </div>
                     
                     <!-- Right Side: User Account Dropdown -->
                     <div class="d-flex align-items-center">
-                        <wa-dropdown placement="bottom-end">
+                        <wa-dropdown>
                             <wa-button slot="trigger" size="small" appearance="filled outlined" variant="neutral" pill>
-                                <wa-icon slot="prefix" name="user" variant="solid"></wa-icon>
                                 <th:block th:text="${user.username}"></th:block>
                             </wa-button>
-                            <wa-menu>
-                                <wa-menu-item onclick="window.location.href='/auth/logout'">Logout</wa-menu-item>
-                            </wa-menu>
+                            <wa-dropdown-item onclick="window.location.href='/auth/logout'" variant="danger">
+                                Logout
+                            </wa-dropdown-item>
                         </wa-dropdown>
                     </div>
                 </div>
