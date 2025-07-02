@@ -34,11 +34,11 @@ class CustomerService(
     }
 
     override fun findAllCustomerByTenantId(tenantId: Long): List<Customer> {
-        return customerRepository.findAllByTenantId(tenantId)
+        return customerRepository.findCustomersByTenantId(tenantId)
     }
 
     override fun findByNameContainingAndTenantId(name: String, tenantId: Long): List<Customer> {
-        return customerRepository.findByNameContainingAndTenantId(name, tenantId)
+        return customerRepository.findCustomersByNameContainingIgnoreCaseAndTenantId(name, tenantId)
     }
 
     override fun getCustomerById() {
