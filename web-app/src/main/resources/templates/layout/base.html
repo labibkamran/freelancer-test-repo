@@ -133,8 +133,15 @@
         </a>
     </nav>-->
 
+    <!-- Aside Sidebar -->
+    <aside slot="aside" class="wa-desktop-only" th:if="${user.ctx.currentTenant != null}" id="aside-panel">
+        <div layout:fragment="aside" id="aside-content">
+            <!-- Aside content will be inserted here -->
+        </div>
+    </aside>
+
     <!-- Main Content -->
-    <main layout:fragment="content">
+    <main layout:fragment="content" id="main-content">
         <!-- Page content will be inserted here -->
     </main>
 
@@ -225,6 +232,30 @@
         const sectionAnchors = document.querySelectorAll("[slot*='navigation'] a[href*='#']");
         sectionAnchors.forEach(sectionAnchor => sectionAnchor.setAttribute('data-drawer', 'close'));
     });
+
+    // Handle aside visibility based on content
+    document.addEventListener('DOMContentLoaded', function () {
+        const asideContent = document.getElementById('aside-content');
+        const page = document.querySelector('wa-page');
+        
+        function updateAsideVisibility() {
+            if (!asideContent || !page) return;
+            
+            const hasContent = asideContent.textContent.trim().length > 0 || asideContent.children.length > 0;
+            
+            if (hasContent) {
+                page.setAttribute('data-aside-visible', 'true');
+            } else {
+                page.setAttribute('data-aside-visible', 'false');
+            }
+        }
+        
+        // Check on load
+        updateAsideVisibility();
+        
+        // Check after HTMX requests
+        document.addEventListener('htmx:afterSettle', updateAsideVisibility);
+    });
 </script>
 
 <!-- Page styling -->
@@ -284,6 +315,25 @@
         max-width: 400px;
         width: 100%;
         padding: var(--wa-space-xl);
+    }
+
+    /* Dynamic aside width based on content */
+    wa-page[data-aside-visible="false"] {
+        --aside-width: 0;
+    }
+
+    wa-page[data-aside-visible="true"] {
+        --aside-width: 15rem;
+    }
+
+    /* Hide aside when empty */
+    wa-page[data-aside-visible="false"] [slot="aside"] {
+        display: none;
+    }
+
+    /* Expand main content when aside is hidden */
+    wa-page[data-aside-visible="false"] main {
+        max-inline-size: 80rem;
     }
 </style>
 
