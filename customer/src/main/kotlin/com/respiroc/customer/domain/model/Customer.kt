@@ -21,7 +21,7 @@ open class Customer {
     @Column(name = "tenant_id", nullable = false, updatable = false, insertable = false)
     open var tenantId: Long = -1
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tenant_id", nullable = false)
     open lateinit var tenant: Tenant
 
