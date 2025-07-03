@@ -41,7 +41,16 @@ class CustomerService(
         return customerRepository.findCustomersByNameContainingIgnoreCaseAndTenantId(name, tenantId)
     }
 
-    override fun getCustomerById() {
-        TODO("Not yet implemented")
+
+    /**
+     * Deletes a customer by ID and tenant ID.
+     *
+     * @throws CustomerNotFoundException if the customer does not exist.
+     */
+    override fun deleteByIdAndTenantId(id: Long, tenantId: Long) {
+        val exists = customerRepository.existsByIdAndTenantId(id, tenantId)
+        if (!exists)
+            throw CustomerNotFoundException("Customer with id=$id and tenantId=$tenantId not found.")
+        customerRepository.deleteById(id)
     }
 }

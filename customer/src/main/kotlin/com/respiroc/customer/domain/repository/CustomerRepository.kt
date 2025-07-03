@@ -9,5 +9,6 @@ interface CustomerRepository : CustomJpaRepository<Customer, Long> {
 
     fun findCustomersByTenantId(tenantId: Long): List<Customer>
     fun findCustomersByNameContainingIgnoreCaseAndTenantId(name: String, tenantId: Long): List<Customer>
+    fun existsByIdAndTenantId(id: Long, tenantId: Long): Boolean
 
 }
