@@ -36,7 +36,7 @@ class VoucherWebController(
         TenantContextHolder.getTenantId()
         val springUser = springUser()
         setupModelAttributes(model, springUser)
-        return "voucher/index"
+        return "voucher/advanced-voucher"
     }
 
     @PostMapping("/batch-postings")
