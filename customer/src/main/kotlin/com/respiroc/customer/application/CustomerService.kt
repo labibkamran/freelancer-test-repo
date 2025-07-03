@@ -1,10 +1,10 @@
 package com.respiroc.customer.application
 
 import com.respiroc.customer.api.CustomerInternalApi
-import com.respiroc.customer.api.command.CreateCustomerCommand
+import com.respiroc.customer.api.payload.NewCustomerPayload
 import com.respiroc.customer.domain.model.Customer
 import com.respiroc.customer.domain.repository.CustomerRepository
-import com.respiroc.util.context.UserContext
+import com.respiroc.customer.exception.CustomerNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,14 +14,14 @@ class CustomerService(
     private val customerRepository: CustomerRepository,
 ) : CustomerInternalApi {
     override fun createNewCustomer(
-        createCustomerCommand: CreateCustomerCommand,
-        user: UserContext
+        newCustomerPayload: NewCustomerPayload,
+        tenantId: Long
     ): Customer {
         val customer = Customer()
-        customer.name = createCustomerCommand.name
-        customer.organizationNumber = createCustomerCommand.organizationNumber
-        customer.type = createCustomerCommand.type
-        customer.tenantId = user.currentTenant!!.id
+        customer.name = newCustomerPayload.name
+        customer.organizationNumber = newCustomerPayload.organizationNumber
+        customer.type = newCustomerPayload.type
+        customer.tenantId = tenantId
         return customerRepository.save(customer)
     }
 
