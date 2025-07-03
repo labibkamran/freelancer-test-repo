@@ -25,14 +25,6 @@ class CustomerService(
         return customerRepository.save(customer)
     }
 
-    override fun editCustomer(
-        id: Long,
-        createCustomerCommand: CreateCustomerCommand,
-        user: UserContext
-    ): Customer {
-        TODO("Not yet implemented")
-    }
-
     override fun findAllCustomerByTenantId(tenantId: Long): List<Customer> {
         return customerRepository.findCustomersByTenantId(tenantId)
     }
@@ -53,4 +45,5 @@ class CustomerService(
             throw CustomerNotFoundException("Customer with id=$id and tenantId=$tenantId not found.")
         customerRepository.deleteById(id)
     }
+
 }
