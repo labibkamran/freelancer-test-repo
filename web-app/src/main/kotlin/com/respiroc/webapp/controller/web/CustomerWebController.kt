@@ -87,4 +87,10 @@ class CustomerWebController(
 //    }
 
 
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    fun deleteCustomer(@PathVariable(name = "id") id: Long) {
+        val userTenantId = user().currentTenant!!.id
+        customerService.deleteByIdAndTenantId(id, userTenantId)
+    }
 }
