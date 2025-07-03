@@ -2,7 +2,7 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.customer.api.CustomerInternalApi
-import com.respiroc.customer.api.command.CreateCustomerCommand
+import com.respiroc.customer.api.payload.NewCustomerPayload
 import com.respiroc.customer.domain.model.Customer
 import com.respiroc.customer.domain.model.CustomerType
 import com.respiroc.webapp.controller.BaseController
@@ -46,46 +46,17 @@ class CustomerWebController(
         addCommonAttributes(model, companyApi, "New Customer")
         return "customer/form"
     }
-//      not implemented yet
-//    @PostMapping
-//    fun createCustomer(@ModelAttribute customer: CreateCustomerRequest): String {
-//        val command = CreateCustomerCommand(
-//            name = customer.name,
-//            organizationNumber = customer.organizationNumber,
-//            type = CustomerType.valueOf(customer.type)
-//        )
-//        customerService.createNewCustomer(command, user())
-//        return "redirect:/customers"
-//    }
-//
-//    @GetMapping("/{id}/edit")
-//    fun showEditForm(
-//        @PathVariable id: Long?,
-//        @ModelAttribute customer: CreateCustomerRequest,
-//        model: Model
-//    ): String {
-////        val customer: Customer? = customerService.findAllCustomerByTenantId(id)
-////        model.addAttribute("customer", customer)
-//        return "customer/form"
-//    }
-//
-//    @PostMapping("/{id}")
-//    fun updateCustomer(@PathVariable id: Long, @ModelAttribute customer: CreateCustomerRequest): String {
-//        val command = CreateCustomerCommand(
-//            name = customer.name,
-//            organizationNumber = customer.organizationNumber,
-//            type = CustomerType.valueOf(customer.type)
-//        )
-//        customerService.editCustomer(id, command, user())
-//        return "redirect:/customers"
-//    }
-//
-//    @PostMapping("/{id}/delete")
-//    fun deleteCustomer(@PathVariable id: Long?): String {
-////        customerService.deleteById(id)
-//        return "redirect:/customers"
-//    }
 
+    @PostMapping
+    fun createCustomer(@ModelAttribute customer: CreateCustomerRequest): String {
+        val payload = NewCustomerPayload(
+            name = customer.name,
+            organizationNumber = customer.organizationNumber,
+            type = CustomerType.valueOf(customer.type)
+        )
+        customerService.createNewCustomer(payload, user().currentTenant!!.id)
+        return "redirect:/customers"
+    }
 
     @DeleteMapping("/{id}")
     @ResponseBody
