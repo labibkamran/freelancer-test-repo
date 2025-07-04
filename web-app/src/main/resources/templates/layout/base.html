@@ -115,6 +115,28 @@
                     </li>
                 </ul>
             </wa-details>
+
+            <!-- Customers Section -->
+            <wa-details appearance="outlined" variant="info">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="users" aria-hidden="true"></wa-icon>
+                    Customer
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/customer?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Customers/Suppliers
+                        </a>
+                    </li>
+                    <li class="wa-body-s">
+                        <a th:href="'/customer/new?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            New Customers/Suppliers
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
         </th:block>
     </nav>
 
