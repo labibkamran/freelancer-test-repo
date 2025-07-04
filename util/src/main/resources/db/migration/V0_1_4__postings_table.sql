@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS postings
 (
-    id             BIGSERIAL PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     account_number VARCHAR(10)    NOT NULL,
     amount         DECIMAL(15, 2) NOT NULL,
     currency       VARCHAR(3)     NOT NULL,
