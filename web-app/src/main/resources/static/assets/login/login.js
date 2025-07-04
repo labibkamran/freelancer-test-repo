@@ -1,3 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+// Focus on email input when page loads
+document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('email').focus();
 });
