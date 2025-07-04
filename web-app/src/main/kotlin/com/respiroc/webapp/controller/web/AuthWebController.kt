@@ -20,7 +20,7 @@ class AuthWebController(
     private val userApi: UserInternalApi
 ) : BaseController() {
 
-    private val JWT_TOKEN_PERIOD: Int = 24 * 60 * 60 // 24 hours (adjust based on JWT expiration)
+    private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60
 
     @GetMapping("/login")
     fun loginPage(model: Model): String {
@@ -47,8 +47,7 @@ class AuthWebController(
                 password = loginRequest.password
             )
 
-            // Set JWT token in HTTP-only cookie
-            val jwtCookie = Cookie("jwt_token", result.token)
+            val jwtCookie = Cookie("token", result.token)
             jwtCookie.isHttpOnly = true
             jwtCookie.secure = false // Set to true in production with HTTPS
             jwtCookie.path = "/"
@@ -96,12 +95,11 @@ class AuthWebController(
 
     @GetMapping("/logout")
     fun logout(response: HttpServletResponse): String {
-        // Clear the JWT cookie
-        val jwtCookie = Cookie("jwt_token", "")
+        val jwtCookie = Cookie("token", "")
         jwtCookie.isHttpOnly = true
         jwtCookie.secure = false
         jwtCookie.path = "/"
-        jwtCookie.maxAge = 0 // Expire immediately
+        jwtCookie.maxAge = 0
         response.addCookie(jwtCookie)
 
         return "redirect:/auth/login"

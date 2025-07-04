@@ -11,11 +11,17 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/customer/**"),
+    private val paths: List<String> = listOf(
+        "/dashboard/**",
+        "/voucher/**",
+        "/company/**",
+        "/report/**",
+        "/customer/**",
+    ),
     private val excludePaths: List<String> = listOf(
         "/company/create",
-        "/company/select",
         "/company/search",
+        "/errors/**",
         "/error/**"
     ),
     private val paramName: String = "tenantId"
@@ -34,6 +40,13 @@ class TenantIdFilter(
         response: HttpServletResponse,
         chain: FilterChain
     ) {
+
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication == null || !authentication.isAuthenticated) {
+            chain.doFilter(request, response)
+            return
+        }
+
         val tenantId = request.getParameter(paramName)
         val springUser = getCurrentSpringUser()
 
@@ -55,7 +68,7 @@ class TenantIdFilter(
             if (tenants.isEmpty()) {
                 response.sendRedirect("/company/create")
             } else {
-                response.sendRedirect("/company/select")
+                response.sendRedirect("/dashboard?tenantId=${tenants[0].id}")
             }
             return
         }

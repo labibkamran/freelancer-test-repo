@@ -10,7 +10,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.OnDelete
@@ -47,6 +46,10 @@ open class Posting : Serializable {
     @Size(max = 3)
     @Column(name = "original_currency", length = 3)
     open var originalCurrency: String? = null
+
+    @Size(max = 10)
+    @Column(name = "vat_code", length = 10)
+    open var vatCode: String? = null
 
     @Column(name = "posting_date", nullable = false)
     open lateinit var postingDate: LocalDate
