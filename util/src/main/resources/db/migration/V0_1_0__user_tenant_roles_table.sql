@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user_tenant_roles
 (
-    id             BIGSERIAL PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id        BIGINT    NOT NULL,
     tenant_id      BIGINT    NOT NULL,
     tenant_role_id BIGINT    NOT NULL,

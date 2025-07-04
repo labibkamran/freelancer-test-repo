@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS companies
 (
-    id                  BIGSERIAL PRIMARY KEY,
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tenant_id           BIGINT       NOT NULL UNIQUE,
     organization_number VARCHAR(50)  NOT NULL,
     name                VARCHAR(255) NOT NULL,
