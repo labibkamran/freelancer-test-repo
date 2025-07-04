@@ -4,6 +4,7 @@ import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
+import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.UserContext
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
@@ -40,7 +41,7 @@ class BatchPostingProcessingService(
             val result = voucherApi.createVoucher(voucherPayload, userContext)
 
             VoucherProcessingResult.success(
-                "New voucher <a href='/voucher/${result.id}' style='color: #3b82f6; text-decoration: underline;'>#${result.number}</a> created successfully!",
+                "New voucher <a href='/voucher/${result.id}?tenantId=${TenantContextHolder.getTenantId()}' style='color: #3b82f6; text-decoration: underline;'>#${result.number}</a> created successfully!",
                 result.id,
                 result.number
             )
