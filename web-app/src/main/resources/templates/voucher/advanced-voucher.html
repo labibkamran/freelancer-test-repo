@@ -252,7 +252,7 @@
         <div id="form-messages">
         <div th:if="${successMessage}" class="alert alert-success">
             <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
-            <span th:text="${successMessage}"></span>
+            <span th:utext="${successMessage}"></span>
         </div>
         
         <div th:if="${errorMessage}" class="alert alert-danger">

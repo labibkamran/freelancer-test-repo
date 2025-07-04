@@ -30,7 +30,36 @@ class VoucherWebController(
 
     @GetMapping(value = [])
     fun voucher(): String {
-        return "redirect:/voucher/new-advanced-voucher?tenantId=${TenantContextHolder.getTenantId()}"
+        return "redirect:/voucher/overview?tenantId=${TenantContextHolder.getTenantId()}"
+    }
+
+    @GetMapping(value = ["/overview"])
+    fun overview(model: Model): String {
+        val springUser = springUser()
+        val vouchers = voucherApi.findAllVoucherSummaries(springUser.ctx)
+        
+        model.addAttribute("user", springUser)
+        model.addAttribute("vouchers", vouchers)
+        model.addAttribute("title", "Voucher Overview")
+        
+        return "voucher/overview"
+    }
+
+    @GetMapping(value = ["/{voucherId}"])
+    fun viewVoucher(@PathVariable voucherId: Long, model: Model): String {
+        val springUser = springUser()
+        val voucher = voucherApi.findVoucherById(voucherId, springUser.ctx)
+        
+        if (voucher == null) {
+            model.addAttribute("errorMessage", "Voucher not found")
+            return "error/404"
+        }
+        
+        model.addAttribute("user", springUser)
+        model.addAttribute("voucher", voucher)
+        model.addAttribute("title", "Voucher #${voucher.number}")
+        
+        return "voucher/view"
     }
 
     @GetMapping(value = ["/new-advanced-voucher"])
