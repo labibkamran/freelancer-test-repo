@@ -5,8 +5,9 @@ import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
+import kotlin.reflect.full.memberProperties
 
-open class BaseController() {
+open class BaseController {
 
     private val titleAttributeName: String = "title"
     private val userAttributeName: String = "user"
@@ -19,6 +20,12 @@ open class BaseController() {
 
     fun user(): UserContext {
         return springUser().ctx
+    }
+
+    inline fun <reified T : Any> toMap(obj: T): Map<String, Any?> {
+        return T::class.memberProperties.associate { prop ->
+            prop.name to prop.get(obj)
+        }
     }
 
     open fun addCommonAttributes(model: Model, title: String) {
