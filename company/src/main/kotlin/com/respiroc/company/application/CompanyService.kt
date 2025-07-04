@@ -42,7 +42,7 @@ class CompanyService(
     }
 
     override fun findCurrentCompanyByUser(user: UserContext): Company? {
-        if (user.currentTenant != null) return null
+        if (user.currentTenant == null) return null
         return companyRepository.findByTenantId(user.currentTenant!!.id)
     }
 
