@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Usage: searchableInput(items, fields, idField) -->
+<div th:fragment="searchableInput(items, fields, idField)" 
+     th:with="componentId=${#ids.next('searchable_input_')}" 
+     class="searchable-input-container">
+
+    <style>
+        .searchable-input-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .searchable-input-container .main-input {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .searchable-input-container .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--wa-color-neutral-200);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 250px;
+            overflow: hidden;
+            display: none;
+            margin-top: 1px;
+        }
+
+        .searchable-input-container .dropdown.open {
+            display: block;
+        }
+
+        .searchable-input-container .search-box {
+            padding: 6px;
+            border-bottom: 1px solid var(--wa-color-neutral-100);
+            background: var(--wa-color-neutral-25);
+        }
+
+        .searchable-input-container .search-input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid var(--wa-color-neutral-200);
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        .searchable-input-container .search-input:focus {
+            outline: none;
+            border-color: var(--wa-color-primary-600);
+        }
+
+        .searchable-input-container .items-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .searchable-input-container .item {
+            padding: 6px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--wa-color-neutral-50);
+            transition: background-color 0.1s;
+        }
+
+        .searchable-input-container .item:hover {
+            background-color: var(--wa-color-neutral-50);
+        }
+
+        .searchable-input-container .item:last-child {
+            border-bottom: none;
+        }
+
+        .searchable-input-container .item.selected {
+            background-color: var(--wa-color-primary-100);
+        }
+
+        .searchable-input-container .item .primary-text {
+            font-weight: 500;
+            color: var(--wa-color-neutral-900);
+            font-size: 0.85rem;
+        }
+
+        .searchable-input-container .item .secondary-text {
+            font-size: 0.75rem;
+            color: var(--wa-color-neutral-600);
+            margin-top: 1px;
+        }
+
+        .searchable-input-container .no-results {
+            padding: 12px;
+            text-align: center;
+            color: var(--wa-color-neutral-500);
+            font-size: 0.8rem;
+        }
+    </style>
+
+    <!-- Main Input Field -->
+    <wa-input 
+        th:id="${componentId + '_input'}"
+        placeholder="Select an option..."
+        size="small"
+        readonly
+        class="main-input">
+        <wa-icon slot="suffix" name="chevron-down"></wa-icon>
+    </wa-input>
+
+    <!-- Hidden field for form submission -->
+    <input type="hidden" th:id="${componentId + '_hidden'}" th:name="${idField}" />
+
+    <!-- Dropdown -->
+    <div th:id="${componentId + '_dropdown'}" class="dropdown">
+        <!-- Search Box -->
+        <div class="search-box">
+            <input 
+                th:id="${componentId + '_search'}"
+                type="text"
+                class="search-input"
+                placeholder="Search..."
+                autocomplete="off">
+        </div>
+
+        <!-- Items List -->
+        <div th:id="${componentId + '_list'}" class="items-list">
+            <!-- Debug: Show if we have items -->
+            <div th:if="${#lists.isEmpty(items)}" class="no-results">
+                No items available
+            </div>
+            
+            <div th:each="item : ${items}" 
+                 class="item" 
+                 th:data-value="${item.get(idField)}"
+                 th:data-search-text="${#strings.toLowerCase(#strings.concat(
+                     item.get(fields[0]),
+                     #lists.size(fields) > 1 ? ' ' + item.get(fields[1]) : '',
+                     #lists.size(fields) > 2 ? ' ' + item.get(fields[2]) : ''
+                 ))}">
+                <div class="primary-text" th:text="${item.get(fields[0])}"></div>
+                <div th:if="${#lists.size(fields) > 1}" class="secondary-text">
+                    <span th:each="field, fieldStat : ${fields}" th:if="${!fieldStat.first}">
+                        <span th:text="${item.get(field)}"></span>
+                        <span th:if="${!fieldStat.last}"> • </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        (function () {
+            const cid = /*[[${componentId}]]*/ 'cid';
+            const mainInput = document.getElementById(cid + '_input');
+            const hiddenInput = document.getElementById(cid + '_hidden');
+            const dropdown = document.getElementById(cid + '_dropdown');
+            const searchInput = document.getElementById(cid + '_search');
+            const itemsList = document.getElementById(cid + '_list');
+
+            if (!mainInput || !hiddenInput || !dropdown || !searchInput || !itemsList) return;
+
+            // Open dropdown when clicking main input
+            mainInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && !mainInput.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const items = itemsList.querySelectorAll('.item');
+                let visibleCount = 0;
+
+                items.forEach(item => {
+                    const searchText = item.dataset.searchText || '';
+                    const matches = searchTerm.split(' ').every(term => 
+                        searchText.includes(term)
+                    );
+                    
+                    if (matches) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                updateNoResultsMessage(visibleCount === 0 && searchTerm.length > 0);
+            });
+
+            // Item selection
+            itemsList.addEventListener('click', function(e) {
+                const item = e.target.closest('.item');
+                if (!item) return;
+
+                const value = item.dataset.value;
+                const displayText = item.querySelector('.primary-text').textContent;
+
+                // Update inputs
+                mainInput.value = displayText;
+                hiddenInput.value = value;
+
+                // Update visual selection
+                itemsList.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+
+                // Close dropdown
+                closeDropdown();
+            });
+
+            // Keyboard navigation
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDropdown();
+                }
+            });
+
+            function toggleDropdown() {
+                if (dropdown.classList.contains('open')) {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            }
+
+            function openDropdown() {
+                dropdown.classList.add('open');
+                searchInput.focus();
+                resetSearch();
+            }
+
+            function closeDropdown() {
+                dropdown.classList.remove('open');
+                searchInput.value = '';
+                resetSearch();
+            }
+
+            function resetSearch() {
+                const items = itemsList.querySelectorAll('.item');
+                items.forEach(item => item.style.display = 'block');
+                updateNoResultsMessage(false);
+            }
+
+            function updateNoResultsMessage(show) {
+                let noResultsDiv = itemsList.querySelector('.no-results');
+                
+                if (show && !noResultsDiv) {
+                    noResultsDiv = document.createElement('div');
+                    noResultsDiv.className = 'no-results';
+                    noResultsDiv.textContent = 'No results found';
+                    itemsList.appendChild(noResultsDiv);
+                } else if (!show && noResultsDiv) {
+                    noResultsDiv.remove();
+                }
+            }
+        })();
+        /*]]>*/
+    </script>
+</div>
+
+</html> 
