@@ -37,8 +37,12 @@ class VoucherWebController(
     fun overview(model: Model): String {
         val springUser = springUser()
         val vouchers = voucherApi.findAllVoucherSummaries(springUser.ctx)
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
         
         model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
         model.addAttribute("vouchers", vouchers)
         model.addAttribute("title", "Voucher Overview")
         
@@ -54,8 +58,13 @@ class VoucherWebController(
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-        
+
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+
         model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
         model.addAttribute("voucher", voucher)
         model.addAttribute("title", "Voucher #${voucher.number}")
         

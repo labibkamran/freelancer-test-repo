@@ -11,10 +11,9 @@
             <wa-card>
                 <div class="wa-stack wa-gap-m">
                     <div class="wa-split">
-                        <h1 class="wa-heading-l">Voucher #<span th:text="${voucher.number}">1</span></h1>
+                        <h1 class="wa-heading-l">Voucher <span th:text="|${voucher.number}-${#temporals.format(voucher.date, 'yyyy')}|">1-2025</span></h1>
                         <wa-button size="small" variant="neutral" 
                                    th:onclick="'window.location.href=\'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
-                            <wa-icon name="arrow-left"></wa-icon>
                             Back to Overview
                         </wa-button>
                     </div>
@@ -35,7 +34,7 @@
             <!-- Postings Section Card -->
             <wa-card>
                 <div class="wa-stack wa-gap-m">
-                    <h2 class="wa-heading-m">Journal Entries</h2>
+                    <h2 class="wa-heading-m">Entries</h2>
                     
                     <!-- Postings Table -->
                     <wa-table>
@@ -84,19 +83,6 @@
                     
                 </div>
             </wa-card>
-
-            <!-- Actions -->
-            <div class="wa-flex wa-gap-m">
-                <wa-button size="small" variant="primary" 
-                           th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
-                    <wa-icon name="plus"></wa-icon>
-                    New Voucher
-                </wa-button>
-                <wa-button size="small" variant="neutral" onclick="window.print()">
-                    <wa-icon name="printer"></wa-icon>
-                    Print
-                </wa-button>
-            </div>
             
         </div>
     </div>

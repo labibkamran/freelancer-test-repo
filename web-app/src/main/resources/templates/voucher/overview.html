@@ -6,17 +6,6 @@
 <main layout:fragment="content">
     <div class="wa-container">
         <div class="wa-stack wa-gap-l">
-            
-            <!-- Page Header -->
-            <div class="wa-split">
-                <h1 class="wa-heading-l">Voucher Overview</h1>
-                <wa-button size="small" variant="primary" 
-                           th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
-                    <wa-icon name="plus"></wa-icon>
-                    New Voucher
-                </wa-button>
-            </div>
-
             <!-- Vouchers List -->
             <div th:if="${!#lists.isEmpty(vouchers)}" class="wa-stack wa-gap-m">
                 <div th:each="voucher : ${vouchers}">
@@ -27,7 +16,7 @@
                         <div class="wa-split">
                             <div class="wa-stack wa-gap-xs">
                                 <h3 class="wa-heading-s">
-                                    Voucher #<span th:text="${voucher.number}">1</span>
+                                    Voucher <span th:text="|${voucher.number}-${#temporals.format(voucher.date, 'yyyy')}|">1-2025</span>
                                 </h3>
                                 <div th:if="${voucher.description}" 
                                      class="wa-body-s wa-text-muted" 
@@ -53,12 +42,6 @@
                 <div class="wa-stack wa-gap-m wa-center">
                     <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
                     <h2 class="wa-heading-m">No vouchers found</h2>
-                    <p class="wa-body-m wa-text-muted">Create your first voucher to get started with bookkeeping.</p>
-                    <wa-button variant="primary" 
-                               th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
-                        <wa-icon name="plus"></wa-icon>
-                        Create First Voucher
-                    </wa-button>
                 </div>
             </div>
             
