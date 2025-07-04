@@ -1,34 +1,35 @@
 <table class="custom-table" id="customer-table">
     <thead>
     <tr>
-        <th hx-get="/customer?sort=name" hx-target="#customer-table-body">Name</th>
-        <th hx-get="/customer?sort=email" hx-target="#customer-table-body">Type</th>
-        <th hx-get="/customer?sort=organizationNumber" hx-target="#customer-table-body">Organization Number</th>
-        <th>Actions</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Organization Number</th>
+        <th class="text-right">Actions</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody id="customer-table-body">
     <tr th:if="${customers == null || customers.isEmpty()}">
-        <td colspan="5" style="text-align: center;">No customers found</td>
+        <td colspan="4" class="no-data">No customers found</td>
     </tr>
-    <tr th:each="customer, iterStat : ${customers}" th:id="'row-' + ${customer.id}">
+
+    <tr th:each="customer : ${customers}" th:id="'row-' + ${customer.id}">
         <td data-label="Name" th:text="${customer.name}"></td>
-        <td data-label="Email" th:text="${customer.type}"></td>
-        <td data-label="organizationNumber" th:text="${customer.organizationNumber}"></td>
-        <td data-label="Actions" class="action-buttons">
+        <td data-label="Type" th:text="${customer.type}"></td>
+        <td data-label="Organization Number" th:text="${customer.organizationNumber}"></td>
+        <td data-label="Actions" class="text-right">
             <wa-button
                     size="small"
                     variant="danger"
                     th:attr="
                     hx-target='#row-' + ${customer.id},
-                    hx-delete='/customer/' + ${customer.id}+'?tenantId=' + ${user.ctx.currentTenant.id}
+                    hx-delete='/customer/' + ${customer.id} + '?tenantId=' + ${user.ctx.currentTenant.id},
+                    hx-indicator='#loading-indicator-' + ${customer.id}
                     "
-                    hx-indicator="#loading-indicator"
                     hx-swap="outerHTML swap:0.5s"
                     hx-confirm="Are you sure you want to delete this customer?">
                 Delete
             </wa-button>
-            <div id="loading-indicator" style="display: none;">
+            <div th:id="'loading-indicator-' + ${customer.id}" class="loading-indicator" style="display: none;">
                 <span class="spinner">Loading...</span>
             </div>
         </td>
