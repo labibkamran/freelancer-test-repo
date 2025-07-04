@@ -4,6 +4,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/assets/customer/customer.css}">
+    <link rel="stylesheet" th:href="@{/assets/fragment/customer-table.css}">
 </head>
 <body>
 <main layout:fragment="content">
@@ -26,7 +27,7 @@
             <a href="/customer/create" class="btn-create">Create Customer</a>
         </div>
         <div id="loading-indicator" class="htmx-indicator">Loading...</div>
-        <div th:replace="fragments/customer/customer-table :: table(customers=${customers})"></div>
+        <div class="table-container" th:replace="fragments/customer/customer-table :: table(customers=${customers})"></div>
     </div>
 </main>
 <th:block layout:fragment="scripts">
