@@ -6,6 +6,7 @@ import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.ledger.api.payload.VoucherPayload
+import com.respiroc.ledger.api.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
@@ -53,15 +54,25 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findAllVouchers(user: UserContext): List<Voucher> {
+    override fun findAllVoucherSummaries(user: UserContext): List<VoucherSummaryPayload> {
         val tenantId = requireTenantContext()
-        return voucherRepository.findByTenantIdOrderByDateDescNumberDesc(tenantId)
+        val vouchers = voucherRepository.findVoucherSummariesByTenantId(tenantId)
+        
+        return vouchers.map { voucher ->
+            VoucherSummaryPayload(
+                id = voucher.id,
+                number = voucher.number,
+                date = voucher.date,
+                description = voucher.description,
+                postingCount = voucher.postings.size
+            )
+        }
     }
 
     @Transactional(readOnly = true)
     override fun findVoucherById(id: Long, user: UserContext): Voucher? {
         val tenantId = requireTenantContext()
-        return voucherRepository.findByIdAndTenantId(id, tenantId)
+        return voucherRepository.findByIdAndTenantIdWithPostings(id, tenantId)
     }
 
     // -------------------------------

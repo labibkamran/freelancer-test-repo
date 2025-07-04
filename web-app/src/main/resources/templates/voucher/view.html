@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<body>
+<main layout:fragment="content">
+    <div class="wa-container">
+        <div class="wa-stack wa-gap-l">
+            
+            <!-- Voucher Header Card -->
+            <wa-card>
+                <div class="wa-stack wa-gap-m">
+                    <div class="wa-split">
+                        <h1 class="wa-heading-l">Voucher #<span th:text="${voucher.number}">1</span></h1>
+                        <wa-button size="small" variant="neutral" 
+                                   th:onclick="'window.location.href=\'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
+                            <wa-icon name="arrow-left"></wa-icon>
+                            Back to Overview
+                        </wa-button>
+                    </div>
+                    
+                    <div class="wa-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-label">Date</label>
+                            <div class="wa-body-m" th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}">01.01.2025</div>
+                        </div>
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-label">Description</label>
+                            <div class="wa-body-m" th:text="${voucher.description ?: 'No description'}">Sample description</div>
+                        </div>
+                    </div>
+                </div>
+            </wa-card>
+
+            <!-- Postings Section Card -->
+            <wa-card>
+                <div class="wa-stack wa-gap-m">
+                    <h2 class="wa-heading-m">Journal Entries</h2>
+                    
+                    <!-- Postings Table -->
+                    <wa-table>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Description</th>
+                                    <th style="text-align:right">Amount</th>
+                                    <th>Currency</th>
+                                    <th>VAT Code</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="posting : ${voucher.postings}">
+                                    <td><strong th:text="${posting.accountNumber}">1000</strong></td>
+                                    <td th:text="${posting.description ?: '-'}">Sample posting description</td>
+                                    <td style="text-align:right">
+                                        <span th:style="${posting.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'color: var(--wa-color-success-500);' : (posting.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'color: var(--wa-color-danger-500);' : '')}"
+                                              th:text="${#numbers.formatDecimal(posting.amount, 1, 2)}">1000.00</span>
+                                        <br th:if="${posting.originalCurrency != null}"/>
+                                        <small th:if="${posting.originalCurrency != null}" class="wa-text-muted"
+                                               th:text="|(${#numbers.formatDecimal(posting.originalAmount, 1, 2)} ${posting.originalCurrency})|">(500.00 USD)</small>
+                                    </td>
+                                    <td th:text="${posting.currency}">NOK</td>
+                                    <td>
+                                        <wa-badge th:if="${posting.vatCode}" variant="neutral" th:text="${posting.vatCode}">25%</wa-badge>
+                                        <span th:unless="${posting.vatCode}" class="wa-text-muted">-</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(posting.postingDate, 'dd.MM.yyyy')}">01.01.2025</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4"></td>
+                                    <th style="text-align:right">Total Balance:</th>
+                                    <td style="text-align:right"
+                                        th:with="totalBalance=${#aggregates.sum(voucher.postings.![amount])}"
+                                        th:style="${totalBalance.compareTo(T(java.math.BigDecimal).ZERO) == 0 ? 'color: var(--wa-color-success-500);' : 'color: var(--wa-color-danger-500);'}"
+                                        th:text="${#numbers.formatDecimal(totalBalance, 1, 2)} + ' NOK'">0.00 NOK</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </wa-table>
+                    
+                </div>
+            </wa-card>
+
+            <!-- Actions -->
+            <div class="wa-flex wa-gap-m">
+                <wa-button size="small" variant="primary" 
+                           th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
+                    <wa-icon name="plus"></wa-icon>
+                    New Voucher
+                </wa-button>
+                <wa-button size="small" variant="neutral" onclick="window.print()">
+                    <wa-icon name="printer"></wa-icon>
+                    Print
+                </wa-button>
+            </div>
+            
+        </div>
+    </div>
+</main>
+</body>
+</html> 

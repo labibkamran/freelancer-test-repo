@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<body>
+<main layout:fragment="content">
+    <div class="wa-container">
+        <div class="wa-stack wa-gap-l">
+            
+            <!-- Page Header -->
+            <div class="wa-split">
+                <h1 class="wa-heading-l">Voucher Overview</h1>
+                <wa-button size="small" variant="primary" 
+                           th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
+                    <wa-icon name="plus"></wa-icon>
+                    New Voucher
+                </wa-button>
+            </div>
+
+            <!-- Vouchers List -->
+            <div th:if="${!#lists.isEmpty(vouchers)}" class="wa-stack wa-gap-m">
+                <div th:each="voucher : ${vouchers}">
+                    <wa-card 
+                        style="cursor: pointer; transition: transform 0.2s ease;"
+                        th:onclick="'window.location.href=\'/voucher/' + ${voucher.id} + '?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
+                        
+                        <div class="wa-split">
+                            <div class="wa-stack wa-gap-xs">
+                                <h3 class="wa-heading-s">
+                                    Voucher #<span th:text="${voucher.number}">1</span>
+                                </h3>
+                                <div th:if="${voucher.description}" 
+                                     class="wa-body-s wa-text-muted" 
+                                     th:text="${voucher.description}">
+                                    Sample voucher description
+                                </div>
+                                <p class="wa-body-xs wa-text-muted">Click to view details</p>
+                            </div>
+                            
+                            <div class="wa-stack wa-gap-xs">
+                                <div class="wa-body-s" th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}">01.01.2025</div>
+                                <wa-badge variant="neutral">
+                                    <span th:text="${voucher.postingCount}">3</span> postings
+                                </wa-badge>
+                            </div>
+                        </div>
+                    </wa-card>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(vouchers)}" class="wa-center">
+                <div class="wa-stack wa-gap-m wa-center">
+                    <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
+                    <h2 class="wa-heading-m">No vouchers found</h2>
+                    <p class="wa-body-m wa-text-muted">Create your first voucher to get started with bookkeeping.</p>
+                    <wa-button variant="primary" 
+                               th:onclick="'window.location.href=\'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
+                        <wa-icon name="plus"></wa-icon>
+                        Create First Voucher
+                    </wa-button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</main>
+</body>
+</html> 

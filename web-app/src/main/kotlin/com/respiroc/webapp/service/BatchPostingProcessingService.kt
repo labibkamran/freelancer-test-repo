@@ -40,7 +40,7 @@ class BatchPostingProcessingService(
             val result = voucherApi.createVoucher(voucherPayload, userContext)
 
             VoucherProcessingResult.success(
-                "Voucher #${result.number} saved successfully!",
+                "New voucher <a href='/voucher/${result.id}' style='color: #3b82f6; text-decoration: underline;'>#${result.number}</a> created successfully!",
                 result.id,
                 result.number
             )

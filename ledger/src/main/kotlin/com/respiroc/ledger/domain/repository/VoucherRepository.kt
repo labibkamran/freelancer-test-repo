@@ -9,9 +9,11 @@ import java.time.LocalDate
 
 @Repository
 interface VoucherRepository : CustomJpaRepository<Voucher, Long> {
-    fun findByTenantIdOrderByDateDescNumberDesc(tenantId: Long): List<Voucher>
+    @Query("SELECT v FROM Voucher v WHERE v.tenantId = :tenantId ORDER BY v.date DESC, v.number DESC")
+    fun findVoucherSummariesByTenantId(@Param("tenantId") tenantId: Long): List<Voucher>
     
-    fun findByIdAndTenantId(id: Long, tenantId: Long): Voucher?
+    @Query("SELECT v FROM Voucher v LEFT JOIN FETCH v.postings WHERE v.id = :id AND v.tenantId = :tenantId")
+    fun findByIdAndTenantIdWithPostings(@Param("id") id: Long, @Param("tenantId") tenantId: Long): Voucher?
     
     @Query("SELECT COALESCE(MAX(v.number), 0) FROM Voucher v WHERE v.tenantId = :tenantId AND EXTRACT(YEAR FROM v.date) = :year")
     fun findMaxVoucherNumberForYear(@Param("tenantId") tenantId: Long, @Param("year") year: Int): Short
