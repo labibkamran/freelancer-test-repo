@@ -7,35 +7,35 @@
     <div class="wa-container">
         <div class="wa-stack wa-gap-l">
             <!-- Vouchers List -->
-            <div th:if="${!#lists.isEmpty(vouchers)}" class="wa-stack wa-gap-m">
-                <div th:each="voucher : ${vouchers}">
-                    <wa-card 
-                        style="cursor: pointer; transition: transform 0.2s ease;"
-                        th:onclick="'window.location.href=\'/voucher/' + ${voucher.id} + '?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
-                        
-                        <div class="wa-split">
-                            <div class="wa-stack wa-gap-xs">
-                                <h3 class="wa-heading-s">
-                                    Voucher <span th:text="|${voucher.number}-${#temporals.format(voucher.date, 'yyyy')}|">1-2025</span>
-                                </h3>
-                                <div th:if="${voucher.description}" 
-                                     class="wa-body-s wa-text-muted" 
-                                     th:text="${voucher.description}">
-                                    Sample voucher description
-                                </div>
-                                <p class="wa-body-xs wa-text-muted">Click to view details</p>
-                            </div>
-                            
-                            <div class="wa-stack wa-gap-xs">
-                                <div class="wa-body-s" th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}">01.01.2025</div>
+            <wa-table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Number</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Postings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="voucher : ${vouchers}">
+                            <td>
+                                <a th:href="'/voucher/' + ${voucher.id} + '?tenantId=' + ${user.ctx.currentTenant?.id}"
+                                   style="color: var(--wa-color-blue-50); text-decoration: none;">
+                                    <strong th:text="|${voucher.number}-${#temporals.format(voucher.date,'yyyy')}|">1-2025</strong>
+                                </a>
+                            </td>
+                            <td th:text="${voucher.description ?: '-'}">Sample voucher description</td>
+                            <td th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}">01.01.2025</td>
+                            <td>
                                 <wa-badge variant="neutral">
-                                    <span th:text="${voucher.postingCount}">3</span> postings
+                                    <span th:text="${voucher.postingCount}">0</span> postings
                                 </wa-badge>
-                            </div>
-                        </div>
-                    </wa-card>
-                </div>
-            </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </wa-table>
 
             <!-- Empty State -->
             <div th:if="${#lists.isEmpty(vouchers)}" class="wa-center">
