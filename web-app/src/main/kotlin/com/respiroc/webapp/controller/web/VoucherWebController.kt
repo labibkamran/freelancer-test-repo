@@ -36,7 +36,7 @@ class VoucherWebController(
         TenantContextHolder.getTenantId()
         val springUser = springUser()
         setupModelAttributes(model, springUser)
-        return "voucher/index"
+        return "voucher/advanced-voucher"
     }
 
     @PostMapping("/batch-postings")
@@ -73,7 +73,8 @@ class VoucherWebController(
     // -------------------------------
 
     private fun setupModelAttributes(model: Model, springUser: SpringUser) {
-        val companies = companyApi.findAllCompanyByUser((springUser.ctx))
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
         val companyCurrency = currencyService.getCompanyCurrency("NO")
@@ -81,6 +82,7 @@ class VoucherWebController(
 
         model.addAttribute("user", springUser)
         model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
         model.addAttribute("title", "General Ledger")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)

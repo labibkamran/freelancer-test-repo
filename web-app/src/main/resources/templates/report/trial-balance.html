@@ -212,12 +212,7 @@
             
             <!-- Filters Section -->
             <div class="filters-section">
-                <form class="filters-form" 
-                      th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}" 
-                      hx-target="#content-area"
-                      hx-indicator="#loading-indicator"
-                      hx-swap="innerHTML"
-                      th:if="${user != null and user.ctx.currentTenant != null}">
+                <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
                     
                     <div class="filter-group">
                         <label class="filter-label" for="startDate">Start Date</label>
@@ -225,7 +220,13 @@
                                size="small"
                                id="startDate" 
                                name="startDate"
-                               th:value="${startDate}"></wa-input>
+                               th:value="${startDate}"
+                               th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                               hx-target="#content-area"
+                               hx-indicator="#loading-indicator"
+                               hx-swap="innerHTML"
+                               hx-trigger="change"
+                               hx-include="[name='endDate']"></wa-input>
                     </div>
                     
                     <div class="filter-group">
@@ -234,16 +235,23 @@
                                size="small"
                                id="endDate" 
                                name="endDate"
-                               th:value="${endDate}"></wa-input>
+                               th:value="${endDate}"
+                               th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                               hx-target="#content-area"
+                               hx-indicator="#loading-indicator"
+                               hx-swap="innerHTML"
+                               hx-trigger="change"
+                               hx-include="[name='startDate']"></wa-input>
                     </div>
                     
+                    <!-- Loading Indicator -->
                     <div class="filter-group">
-                        <wa-button type="submit" size="small" variant="primary">
-                            <wa-icon name="filter" slot="prefix"></wa-icon>
-                            Apply
-                        </wa-button>
+                        <div id="loading-indicator" class="htmx-indicator loading-indicator">
+                            <wa-spinner size="small"></wa-spinner>
+                            <span style="margin-left: 0.5rem;">Loading...</span>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
             
             <!-- Error Message Fragment -->

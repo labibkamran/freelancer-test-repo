@@ -1,6 +1,8 @@
 package com.respiroc.webapp.controller.web
 
+import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.webapp.controller.BaseController
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -15,7 +17,8 @@ import java.time.format.DateTimeFormatter
 @Controller
 @RequestMapping(value = ["/report"])
 class ReportWebController(
-    private val postingApi: PostingInternalApi
+    private val postingApi: PostingInternalApi,
+    private val companyApi: CompanyInternalApi
 ) : BaseController() {
 
     private val logger = LoggerFactory.getLogger(ReportWebController::class.java)
@@ -37,8 +40,12 @@ class ReportWebController(
         val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
         
         val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate, springUser.ctx)
+        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
         
         model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
         model.addAttribute("title", "Trial Balance")
         model.addAttribute("trialBalanceData", trialBalanceData)
         model.addAttribute("startDate", effectiveStartDate)
