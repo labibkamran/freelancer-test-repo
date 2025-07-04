@@ -1,19 +1,20 @@
 package com.respiroc.webapp.service
 
-import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.command.CreatePostingCommand
+import com.respiroc.ledger.api.payload.CreatePostingPayload
+import com.respiroc.ledger.api.payload.CreateVoucherPayload
+import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.UserContext
 import com.respiroc.util.currency.CurrencyService
-import com.respiroc.webapp.controller.request.CreateBatchPostingRequest
+import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Service
 class BatchPostingProcessingService(
-    private val postingApi: PostingInternalApi,
+    private val voucherApi: VoucherInternalApi,
     private val vatApi: VatInternalApi,
     private val currencyService: CurrencyService
 ) {
@@ -22,27 +23,37 @@ class BatchPostingProcessingService(
         private const val VAT_ACCOUNT_NUMBER = "2710"
     }
 
-    fun processBatchPostingRequest(
-        request: CreateBatchPostingRequest,
+    fun processVoucherRequest(
+        request: CreateVoucherRequest,
         userContext: UserContext
-    ): BatchPostingResult {
+    ): VoucherProcessingResult {
         return try {
             val companyCurrency = currencyService.getCompanyCurrency("NO") // TODO: Replace with actual country code
             val validPostingLines = request.getValidPostingLines()
             val postingCommands = convertToPostingCommands(validPostingLines, companyCurrency)
 
-            postingApi.createBatchPostings(postingCommands, userContext)
+            val voucherPayload = CreateVoucherPayload(
+                date = request.voucherDate,
+                description = request.voucherDescription,
+                postings = postingCommands
+            )
 
-            BatchPostingResult.success("Journal entry saved successfully!")
+            val result = voucherApi.createVoucher(voucherPayload, userContext)
+
+            VoucherProcessingResult.success(
+                "New voucher <a href='/voucher/${result.id}?tenantId=${TenantContextHolder.getTenantId()}' style='color: #3b82f6; text-decoration: underline;'>#${result.number}</a> created successfully!",
+                result.id,
+                result.number
+            )
         } catch (e: Exception) {
-            BatchPostingResult.failure("Failed to save journal entry: ${e.message}")
+            VoucherProcessingResult.failure("Failed to save voucher: ${e.message}")
         }
     }
 
     private fun convertToPostingCommands(
         postingLines: List<PostingLine>,
         companyCurrency: String
-    ): List<CreatePostingCommand> {
+    ): List<CreatePostingPayload> {
         return postingLines.flatMap { line ->
             val originalAmount = line.amount!!
             val originalCurrency = line.currency
@@ -77,7 +88,7 @@ class BatchPostingProcessingService(
         originalAmount: BigDecimal,
         originalCurrency: String,
         companyCurrency: String
-    ): List<CreatePostingCommand> {
+    ): List<CreatePostingPayload> {
         val vatCode = line.getVatCode()
         
         return if (vatCode != null) {
@@ -95,7 +106,7 @@ class BatchPostingProcessingService(
         originalCurrency: String,
         companyCurrency: String,
         vatCode: String
-    ): List<CreatePostingCommand> {
+    ): List<CreatePostingPayload> {
         val vatCodeEntity = vatApi.findVatCodeByCode(vatCode)
             ?: throw IllegalArgumentException("Invalid VAT code: $vatCode")
 
@@ -122,7 +133,7 @@ class BatchPostingProcessingService(
             Pair(null, null)
         }
 
-        val basePosting = CreatePostingCommand(
+        val basePosting = CreatePostingPayload(
             accountNumber = line.getAccountNumber(),
             amount = signedBaseAmount,
             currency = companyCurrency,
@@ -133,7 +144,7 @@ class BatchPostingProcessingService(
             vatCode = null
         )
 
-        val vatPosting = CreatePostingCommand(
+        val vatPosting = CreatePostingPayload(
             accountNumber = VAT_ACCOUNT_NUMBER, // 2710 hard-coded
             amount = signedVatAmount,
             currency = companyCurrency,
@@ -153,8 +164,8 @@ class BatchPostingProcessingService(
         originalCurrency: String,
         companyCurrency: String,
         vatCode: String?
-    ): CreatePostingCommand {
-        return CreatePostingCommand(
+    ): CreatePostingPayload {
+        return CreatePostingPayload(
             accountNumber = line.getAccountNumber(),
             amount = calculateConvertedSignedAmount(line, originalCurrency, companyCurrency),
             currency = companyCurrency,
@@ -179,13 +190,16 @@ class BatchPostingProcessingService(
         }
     }
 
-    data class BatchPostingResult(
+    data class VoucherProcessingResult(
         val isSuccess: Boolean,
-        val message: String
+        val message: String,
+        val voucherId: Long? = null,
+        val voucherNumber: Short? = null
     ) {
         companion object {
-            fun success(message: String) = BatchPostingResult(true, message)
-            fun failure(message: String) = BatchPostingResult(false, message)
+            fun success(message: String, voucherId: Long, voucherNumber: Short) = 
+                VoucherProcessingResult(true, message, voucherId, voucherNumber)
+            fun failure(message: String) = VoucherProcessingResult(false, message)
         }
     }
 } 
