@@ -12,6 +12,10 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         
+        .posting-form.mb-4 {
+            margin-bottom: 2rem !important;
+        }
+        
         .form-header {
             display: flex;
             justify-content: space-between;
@@ -261,24 +265,53 @@
         <div id="loading-indicator" class="htmx-indicator" style="display: none;">
             <div class="alert alert-info">
                 <wa-icon name="clock" style="margin-right: 0.5rem;"></wa-icon>
-                Saving journal entry...
+                Saving voucher...
             </div>
         </div>
 
-        <!-- Batch Posting Form -->
-        <div class="posting-form">
-            <div class="form-header">
-                <h4 style="margin: 0;">Postings</h4>
-                <small class="text-muted">Debits must equal credits</small>
+        <!-- Complete Voucher Form -->
+        <form th:attr="hx-post='/voucher/create-voucher?tenantId=' + ${user.ctx.currentTenant?.id}"
+              method="post"
+              hx-target="#form-messages" 
+              hx-swap="innerHTML"
+              hx-indicator="#loading-indicator"
+              id="voucherForm" 
+              onsubmit="event.preventDefault(); return validateAndPrepareForm(event);">
+
+            <!-- Voucher Information Card -->
+            <div class="posting-form mb-4">
+                <div class="form-header">
+                    <h4 style="margin: 0;">Voucher Information</h4>
+                    <small class="text-muted">Basic voucher details</small>
+                </div>
+                
+                <div class="wa-stack">
+                    <div>
+                        <label for="voucherDate" class="form-label">Date <span class="text-danger">*</span></label>
+                        <wa-input size="small" type="date"
+                               class="form-control"
+                               id="voucherDate"
+                               name="voucherDate"
+                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                                  required></wa-input>
+                    </div>
+                    <div>
+                        <label for="voucherDescription" class="form-label">Description</label>
+                        <wa-input size="small" type="text"
+                               class="form-control" 
+                               id="voucherDescription"
+                               name="voucherDescription" 
+                                  placeholder="Optional voucher description"></wa-input>
+                    </div>
+                </div>
             </div>
-            
-            <form th:attr="hx-post='/voucher/batch-postings?tenantId=' + ${user.ctx.currentTenant?.id}"
-                  method="post"
-                  hx-target="#form-messages" 
-                  hx-swap="innerHTML"
-                  hx-indicator="#loading-indicator"
-                  id="batchPostingForm" 
-                  onsubmit="event.preventDefault(); return validateAndPrepareForm(event);">
+
+            <!-- Postings Card -->
+            <div class="posting-form">
+                <div class="form-header">
+                    <h4 style="margin: 0;">Postings</h4>
+                    <small class="text-muted">Debits must equal credits</small>
+                </div>
                 
                 <!-- Individual Posting Lines Table -->
                 <table class="posting-table">
@@ -310,16 +343,15 @@
                 <!-- Form Actions -->
                 <div class="form-actions">
                     <wa-button type="button" size="small" variant="neutral" onclick="addPostingLine()">
-                        <wa-icon name="plus"></wa-icon>
                         New row
                     </wa-button>
                     
                     <wa-button type="submit" size="small" variant="success" id="saveButton" disabled>
-                        Save Postings
+                        Save Voucher
                     </wa-button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
 
 
     </div>
@@ -1009,7 +1041,7 @@
             });
 
             if (Math.abs(totalSignedAmount) >= 0.01) {
-                alert(`Transaction is not balanced! Total signed amount: ${totalSignedAmount.toFixed(2)} ${companyCurrency}`);
+                alert(`Voucher is not balanced! Total signed amount: ${totalSignedAmount.toFixed(2)} ${companyCurrency}`);
                 return false;
             }
             
