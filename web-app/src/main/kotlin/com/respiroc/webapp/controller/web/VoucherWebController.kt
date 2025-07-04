@@ -3,11 +3,12 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
+import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.request.CreateBatchPostingRequest
+import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.service.BatchPostingProcessingService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -23,6 +24,7 @@ class VoucherWebController(
     private val companyApi: CompanyInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
+    private val voucherApi: VoucherInternalApi,
     private val batchPostingProcessingService: BatchPostingProcessingService
 ) : BaseController() {
 
@@ -39,9 +41,9 @@ class VoucherWebController(
         return "voucher/advanced-voucher"
     }
 
-    @PostMapping("/batch-postings")
-    fun createBatchPostings(
-        @Valid @ModelAttribute createBatchPostingRequest: CreateBatchPostingRequest,
+    @PostMapping("/create-voucher")
+    fun createVoucher(
+        @Valid @ModelAttribute createVoucherRequest: CreateVoucherRequest,
         bindingResult: BindingResult,
         model: Model
     ): String {
@@ -54,8 +56,8 @@ class VoucherWebController(
             return "voucher/fragments :: messages"
         }
 
-        val result = batchPostingProcessingService.processBatchPostingRequest(
-            createBatchPostingRequest,
+        val result = batchPostingProcessingService.processVoucherRequest(
+            createVoucherRequest,
             springUser.ctx
         )
 
@@ -91,7 +93,7 @@ class VoucherWebController(
 
         // Form objects
         model.addAttribute(
-            "createBatchPostingRequest", CreateBatchPostingRequest(postingLines = listOf())
+            "createVoucherRequest", CreateVoucherRequest(postingLines = listOf())
         )
     }
 } 

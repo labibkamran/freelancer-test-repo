@@ -1,9 +1,9 @@
-package com.respiroc.ledger.api.command
+package com.respiroc.ledger.api.payload
 
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class CreatePostingCommand(
+data class CreatePostingPayload(
     val accountNumber: String,
     val amount: BigDecimal,
     val currency: String,
