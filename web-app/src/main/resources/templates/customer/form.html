@@ -1,13 +1,131 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/assets/customer/form.css}">
 </head>
 <body>
 <main layout:fragment="content">
-    Not Implemented Yet!
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-2">
+                    Create New Customer/Supplier
+                </h1>
+                <p class="text-muted">Fill out your Customer/Supplier details or search the Norwegian business registry
+                    for automatic completion</p>
+            </div>
+        </div>
+        <div>
+            <div id="alert-container" style="margin-bottom: 1rem;"></div>
+            <wa-card style="margin-bottom: 1rem;">
+                <div slot="header">
+                    <h5 style="margin: 0;">
+                        🏢 Customer/Supplier Information
+                    </h5>
+                </div>
+                <div style="padding: 2rem;">
+                    <form id="createCustomerForm"
+                          th:object="${customer}"
+                          th:attr="hx-post='/customer?tenantId=' + ${user.ctx.currentTenant?.id}"
+                          hx-target="#alert-container"
+                          hx-swap="innerHTML">
+                        <div class="form-group">
+                            <label for="type" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                Type *
+                            </label>
+                            <select id="type" name="type" th:field="*{type}" class="form-control"
+                                    style="width: 100%; padding: 0.5rem;">
+                                <option value="CUSTOMER">Customer</option>
+                                <option value="SUPPLIER">Supplier</option>
+                                <option value="CUSTOMER_SUPPLIER">Customer/Supplier</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div style="display: flex; gap: 2rem; align-items: center;">
+                                <label>
+                                    <input type="radio" name="privateCustomer" value="false"
+                                           th:attr="
+                                           hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}
+                                           "
+                                           hx-target="#customerFormFields"
+                                           hx-trigger="change"
+                                           th:checked="${!customer.privateCustomer}"/>
+                                    Company
+                                </label>
+                                <label>
+                                    <input type="radio" name="privateCustomer" value="true"
+                                           th:attr="
+                                           hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}
+                                           "
+                                           hx-target="#customerFormFields"
+                                           hx-trigger="change"
+                                           th:checked="${customer.privateCustomer}"/>
+                                    Private Person
+                                </label>
+                            </div>
+                        </div>
+                        <div th:fragment="customerFormFields" id="customerFormFields">
+                            <div class="form-group">
+                                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                    Customer Name *
+                                </label>
+                                <wa-input
+                                        th:unless="${customer.privateCustomer}"
+                                        id="companyName"
+                                        name="name"
+                                        th:field="*{name}"
+                                        placeholder="Enter company name or search registry..."
+                                        size="medium"
+                                        required
+                                        autocomplete="off"
+                                        hx-get="/company/search"
+                                        hx-trigger="input changed delay:200ms"
+                                        hx-target="#name-dropdown"
+                                        hx-swap="outerHTML">
+                                </wa-input>
+                                <wa-input
+                                        th:if="${customer.privateCustomer}"
+                                        id="companyName"
+                                        name="name"
+                                        th:field="*{name}"
+                                        placeholder="Enter full name of private person..."
+                                        size="medium"
+                                        required
+                                        autocomplete="off">
+                                </wa-input>
+                                <div id="name-dropdown"></div>
+                            </div>
+                            <div th:unless="${customer.privateCustomer}" class="form-group" id="orgNumberGroup">
+                                <label for="organizationNumber"
+                                       style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                                    Organization Number
+                                </label>
+                                <wa-input
+                                        id="organizationNumber"
+                                        name="organizationNumber"
+                                        th:field="*{organizationNumber}"
+                                        placeholder="Enter organization number..."
+                                        size="medium"
+                                        autocomplete="off">
+                                </wa-input>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <wa-button type="submit" variant="success" size="small" id="submitButton">
+                                <wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>
+                                Create Customer
+                            </wa-button>
+                        </div>
+                    </form>
+                </div>
+            </wa-card>
+        </div>
+    </div>
 </main>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/assets/customer/form.js}"></script>
+</th:block>
 </body>
 </html>

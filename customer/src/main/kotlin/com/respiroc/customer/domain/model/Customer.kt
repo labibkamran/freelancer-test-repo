@@ -22,7 +22,7 @@ open class Customer {
 
     @Size(max = 36)
     @Column(name = "organization_number", length = 36)
-    open lateinit var organizationNumber: String
+    open var organizationNumber: String? = null
 
     @Size(max = 255)
     @Column(name = "name", nullable = false)
@@ -31,4 +31,7 @@ open class Customer {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     open lateinit var type: CustomerType
+
+    @Column(name = "private_customer", nullable = false)
+    open var privateCustomer: Boolean = false
 }
