@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import jakarta.validation.Valid
 
 @Controller
@@ -24,7 +23,7 @@ class CompanyWebController(
         val springUser = springUser()
         model.addAttribute("user", springUser)
 
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val companies = companyApi.findAllCompany()
         model.addAttribute("companies", companies)
 
         model.addAttribute("title", "Create Company")
@@ -45,14 +44,13 @@ class CompanyWebController(
         }
 
         try {
-            val springUser = springUser()
             val command = CreateCompanyCommand(
                 name = createCompanyRequest.name,
                 organizationNumber = createCompanyRequest.organizationNumber,
                 countryCode = createCompanyRequest.countryCode
             )
             
-            val company = companyApi.createNewCompany(command, springUser.ctx)
+            val company = companyApi.createNewCompany(command)
             
             model.addAttribute("success", "Company '${company.name}' has been created successfully! Redirecting to dashboard...")
             model.addAttribute("redirectUrl", "/dashboard?tenantId=${company.tenantId}")

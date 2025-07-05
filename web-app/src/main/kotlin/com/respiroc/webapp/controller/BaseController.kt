@@ -15,6 +15,10 @@ open class BaseController {
         return springUser().ctx
     }
 
+    fun tenantId(): Long {
+        return user().currentTenant?.id ?: throw IllegalStateException("No current tenant is set for the user")
+    }
+
     inline fun <reified T : Any> toMap(obj: T): Map<String, Any?> {
         return T::class.memberProperties.associate { prop ->
             prop.name to prop.get(obj)
