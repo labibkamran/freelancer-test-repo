@@ -11,8 +11,7 @@ import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -24,27 +23,22 @@ class PostingService(
     private val postingRepository: PostingRepository,
     private val accountApi: AccountInternalApi,
     private val vatApi: VatInternalApi
-) : PostingInternalApi {
+) : PostingInternalApi, ContextAwareApi {
 
-    override fun createBatchPostings(
-        postings: List<CreatePostingPayload>,
-        user: UserContext
-    ): List<Posting> {
-        val tenantId = requireTenantContext()
-        
+    override fun createBatchPostings(postings: List<CreatePostingPayload>): List<Posting> {
         validatePostingCommands(postings)
         validateBalance(postings)
         
         val createdPostings = postings.map { postingData ->
-            createPostingEntity(postingData, tenantId)
+            createPostingEntity(postingData, currentTenantId())
         }
 
         return postingRepository.saveAll(createdPostings)
     }
 
     @Transactional(readOnly = true)
-    override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate, user: UserContext): TrialBalancePayload {
-        val tenantId = requireTenantContext()
+    override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload {
+        val tenantId = currentTenantId()
         val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
         val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
         
@@ -85,11 +79,6 @@ class PostingService(
     // -------------------------------
     // Private Helper Methods
     // -------------------------------
-    
-    private fun requireTenantContext(): Long {
-        return TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-    }
     
     private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
         postings.forEach { postingData ->
