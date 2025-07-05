@@ -4,10 +4,10 @@ import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.ledger.api.payload.VoucherPayload
 import com.respiroc.ledger.api.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.model.Voucher
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.ContextAwareApi
 
-interface VoucherInternalApi {
-    fun createVoucher(payload: CreateVoucherPayload, user: UserContext): VoucherPayload
-    fun findAllVoucherSummaries(user: UserContext): List<VoucherSummaryPayload>
-    fun findVoucherById(id: Long, user: UserContext): Voucher?
+interface VoucherInternalApi : ContextAwareApi {
+    fun createVoucher(payload: CreateVoucherPayload): VoucherPayload
+    fun findAllVoucherSummaries(): List<VoucherSummaryPayload>
+    fun findVoucherById(id: Long): Voucher?
 }

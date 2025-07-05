@@ -20,12 +20,11 @@ class CompanyService(
 ) : CompanyInternalApi {
 
     override fun createNewCompany(
-        command: CreateCompanyCommand,
-        user: UserContext
+        command: CreateCompanyCommand
     ): Company {
         val tenant = tenantApi.createNewTenant(command.name)
         val tenantRole = tenantApi.findTenantRoleByCode(TenantRoleCode.OWNER)
-        userApi.addUserTenantRole(tenant, tenantRole, user)
+        userApi.addUserTenantRole(tenant, tenantRole, user())
 
         val company = Company()
         company.name = command.name
@@ -37,19 +36,15 @@ class CompanyService(
         return companyRepository.save(company)
     }
 
-    override fun findAllCompanyByUser(user: UserContext): List<Company> {
-        return companyRepository.findByTenantIdIn(user.tenants.map { it.id })
+    override fun findAllCompany(): List<Company> {
+        return companyRepository.findByTenantIdIn(user().tenants.map { it.id })
     }
 
-    override fun findCurrentCompanyByUser(user: UserContext): Company? {
-        if (user.currentTenant == null) return null
-        return companyRepository.findByTenantId(user.currentTenant!!.id)
-    }
-
-    override fun findCompanyByUserAndTenantId(
-        user: UserContext,
-        tenantId: Long
-    ): Company? {
-        TODO("Not yet implemented")
+    override fun findCurrentCompany(): Company? {
+        return try {
+            companyRepository.findByTenantId(currentTenantId())
+        } catch (_: Exception) {
+            null
+        }
     }
 }

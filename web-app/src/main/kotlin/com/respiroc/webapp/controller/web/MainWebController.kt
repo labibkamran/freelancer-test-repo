@@ -1,7 +1,6 @@
 package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.webapp.controller.BaseController
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -35,11 +34,10 @@ class MainWebController(
         val springUser = springUser()
         model.addAttribute("user", springUser)
 
-        val tenantId = TenantContextHolder.getTenantId()!!
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val companies = companyApi.findAllCompany()
         model.addAttribute("companies", companies)
 
-        val currentCompany = companies.find { it.tenantId == tenantId }
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         model.addAttribute("currentCompany", currentCompany)
 
         val companyName = currentCompany?.name ?: "Default Company"

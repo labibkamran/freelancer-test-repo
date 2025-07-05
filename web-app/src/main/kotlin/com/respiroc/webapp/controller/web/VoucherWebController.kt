@@ -4,7 +4,6 @@ import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
@@ -30,15 +29,15 @@ class VoucherWebController(
 
     @GetMapping(value = [])
     fun voucher(): String {
-        return "redirect:/voucher/overview?tenantId=${TenantContextHolder.getTenantId()}"
+        return "redirect:/voucher/overview?tenantId=${tenantId()}"
     }
 
     @GetMapping(value = ["/overview"])
     fun overview(model: Model): String {
         val springUser = springUser()
-        val vouchers = voucherApi.findAllVoucherSummaries(springUser.ctx)
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+        val vouchers = voucherApi.findAllVoucherSummaries()
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         
         model.addAttribute("user", springUser)
         model.addAttribute("companies", companies)
@@ -52,15 +51,15 @@ class VoucherWebController(
     @GetMapping(value = ["/{voucherId}"])
     fun viewVoucher(@PathVariable voucherId: Long, model: Model): String {
         val springUser = springUser()
-        val voucher = voucherApi.findVoucherById(voucherId, springUser.ctx)
+        val voucher = voucherApi.findVoucherById(voucherId)
         
         if (voucher == null) {
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
 
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
 
         model.addAttribute("user", springUser)
         model.addAttribute("companies", companies)
@@ -73,7 +72,7 @@ class VoucherWebController(
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
-        TenantContextHolder.getTenantId()
+        tenantId()
         val springUser = springUser()
         setupModelAttributes(model, springUser)
         return "voucher/advanced-voucher"
@@ -113,8 +112,8 @@ class VoucherWebController(
     // -------------------------------
 
     private fun setupModelAttributes(model: Model, springUser: SpringUser) {
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
         val companyCurrency = currencyService.getCompanyCurrency("NO")

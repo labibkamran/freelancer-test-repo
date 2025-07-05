@@ -2,7 +2,6 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.webapp.controller.BaseController
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -39,9 +38,9 @@ class ReportWebController(
         val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
         
-        val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate, springUser.ctx)
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+        val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         
         model.addAttribute("user", springUser)
         model.addAttribute("companies", companies)
@@ -72,7 +71,7 @@ class ReportWebController(
             val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
             
-            val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate, springUser.ctx)
+            val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
             
             model.addAttribute("user", springUser)
             model.addAttribute("trialBalanceData", trialBalanceData)

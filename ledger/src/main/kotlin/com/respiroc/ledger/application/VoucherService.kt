@@ -14,8 +14,7 @@ import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.ledger.domain.repository.VoucherRepository
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -28,10 +27,10 @@ class VoucherService(
     private val postingRepository: PostingRepository,
     private val accountApi: AccountInternalApi,
     private val vatApi: VatInternalApi
-) : VoucherInternalApi {
+) : VoucherInternalApi, ContextAwareApi {
 
-    override fun createVoucher(payload: CreateVoucherPayload, user: UserContext): VoucherPayload {
-        val tenantId = requireTenantContext()
+    override fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
+        val tenantId = currentTenantId()
 
         val voucherNumber = generateNextVoucherNumber(tenantId, payload.date)
 
@@ -44,7 +43,7 @@ class VoucherService(
         val postings = payload.postings.map { postingData ->
             createPostingEntity(postingData, tenantId, savedVoucher.id)
         }
-        val savedPostings = postingRepository.saveAll(postings)
+        postingRepository.saveAll(postings)
         
         return VoucherPayload(
             id = savedVoucher.id,
@@ -54,9 +53,8 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findAllVoucherSummaries(user: UserContext): List<VoucherSummaryPayload> {
-        val tenantId = requireTenantContext()
-        val vouchers = voucherRepository.findVoucherSummariesByTenantId(tenantId)
+    override fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
+        val vouchers = voucherRepository.findVoucherSummariesByTenantId(currentTenantId())
         
         return vouchers.map { voucher ->
             VoucherSummaryPayload(
@@ -70,19 +68,13 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findVoucherById(id: Long, user: UserContext): Voucher? {
-        val tenantId = requireTenantContext()
-        return voucherRepository.findByIdAndTenantIdWithPostings(id, tenantId)
+    override fun findVoucherById(id: Long): Voucher? {
+        return voucherRepository.findByIdAndTenantIdWithPostings(id, currentTenantId())
     }
 
     // -------------------------------
     // Private Helper Methods
     // -------------------------------
-    
-    private fun requireTenantContext(): Long {
-        return TenantContextHolder.getTenantId()
-            ?: throw IllegalStateException("No tenant context available")
-    }
 
     private fun generateNextVoucherNumber(tenantId: Long, date: LocalDate): Short {
         val maxNumber = voucherRepository.findMaxVoucherNumberForYear(tenantId, date.year)
