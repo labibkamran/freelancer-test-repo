@@ -4,7 +4,6 @@ import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantRole
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
-import com.respiroc.user.api.result.SignupResult
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 
