@@ -72,4 +72,12 @@ open class Posting : Serializable {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     open lateinit var updatedAt: Instant
+
+    @Column(name = "voucher_id")
+    open var voucherId: Long? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "voucher_id", nullable = true, updatable = false, insertable = false)
+    open var voucher: Voucher? = null
 }

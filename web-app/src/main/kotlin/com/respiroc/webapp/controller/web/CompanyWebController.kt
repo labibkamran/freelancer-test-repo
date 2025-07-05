@@ -5,12 +5,11 @@ import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
-import jakarta.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import jakarta.validation.Valid
 
 @Controller
 @RequestMapping(value = ["/company"])
@@ -21,11 +20,15 @@ class CompanyWebController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        addCommonAttributes(model, companyApi, "Create Company")
-        model.addAttribute(
-            "createCompanyRequest",
-            CreateCompanyRequest("", "", "NO")
-        )
+        val springUser = springUser()
+        model.addAttribute("user", springUser)
+
+        val companies = companyApi.findAllCompany()
+        model.addAttribute("companies", companies)
+
+        model.addAttribute("title", "Create Company")
+        model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
+
         return "company/create"
     }
 
@@ -41,19 +44,15 @@ class CompanyWebController(
         }
 
         try {
-            val springUser = springUser()
             val command = CreateCompanyCommand(
                 name = createCompanyRequest.name,
                 organizationNumber = createCompanyRequest.organizationNumber,
                 countryCode = createCompanyRequest.countryCode
             )
 
-            val company = companyApi.createNewCompany(command, springUser.ctx)
+            val company = companyApi.createNewCompany(command)
 
-            model.addAttribute(
-                "success",
-                "Company '${company.name}' has been created successfully! Redirecting to dashboard..."
-            )
+            model.addAttribute("success", "Company '${company.name}' has been created successfully! Redirecting to dashboard...")
             model.addAttribute("redirectUrl", "/dashboard?tenantId=${company.tenantId}")
             return "fragments/alert :: success-with-redirect"
 

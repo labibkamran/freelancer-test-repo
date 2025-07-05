@@ -3,11 +3,11 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
+import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.request.CreateBatchPostingRequest
+import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.service.BatchPostingProcessingService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -23,25 +23,64 @@ class VoucherWebController(
     private val companyApi: CompanyInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
+    private val voucherApi: VoucherInternalApi,
     private val batchPostingProcessingService: BatchPostingProcessingService
 ) : BaseController() {
 
     @GetMapping(value = [])
     fun voucher(): String {
-        return "redirect:/voucher/new-advanced-voucher?tenantId=${TenantContextHolder.getTenantId()}"
+        return "redirect:/voucher/overview?tenantId=${tenantId()}"
+    }
+
+    @GetMapping(value = ["/overview"])
+    fun overview(model: Model): String {
+        val springUser = springUser()
+        val vouchers = voucherApi.findAllVoucherSummaries()
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
+        
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
+        model.addAttribute("vouchers", vouchers)
+        model.addAttribute("title", "Voucher Overview")
+        
+        return "voucher/overview"
+    }
+
+    @GetMapping(value = ["/{voucherId}"])
+    fun viewVoucher(@PathVariable voucherId: Long, model: Model): String {
+        val springUser = springUser()
+        val voucher = voucherApi.findVoucherById(voucherId)
+        
+        if (voucher == null) {
+            model.addAttribute("errorMessage", "Voucher not found")
+            return "error/404"
+        }
+
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
+        model.addAttribute("voucher", voucher)
+        model.addAttribute("title", "Voucher #${voucher.number}")
+        
+        return "voucher/view"
     }
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
-        TenantContextHolder.getTenantId()
+        tenantId()
         val springUser = springUser()
         setupModelAttributes(model, springUser)
         return "voucher/advanced-voucher"
     }
 
-    @PostMapping("/batch-postings")
-    fun createBatchPostings(
-        @Valid @ModelAttribute createBatchPostingRequest: CreateBatchPostingRequest,
+    @PostMapping("/create-voucher")
+    fun createVoucher(
+        @Valid @ModelAttribute createVoucherRequest: CreateVoucherRequest,
         bindingResult: BindingResult,
         model: Model
     ): String {
@@ -54,8 +93,8 @@ class VoucherWebController(
             return "voucher/fragments :: messages"
         }
 
-        val result = batchPostingProcessingService.processBatchPostingRequest(
-            createBatchPostingRequest,
+        val result = batchPostingProcessingService.processVoucherRequest(
+            createVoucherRequest,
             springUser.ctx
         )
 
@@ -73,8 +112,8 @@ class VoucherWebController(
     // -------------------------------
 
     private fun setupModelAttributes(model: Model, springUser: SpringUser) {
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
-        val currentCompany = companies.find { it.tenantId == TenantContextHolder.getTenantId() }
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
         val companyCurrency = currencyService.getCompanyCurrency("NO")
@@ -91,7 +130,7 @@ class VoucherWebController(
 
         // Form objects
         model.addAttribute(
-            "createBatchPostingRequest", CreateBatchPostingRequest(postingLines = listOf())
+            "createVoucherRequest", CreateVoucherRequest(postingLines = listOf())
         )
     }
 } 

@@ -1,16 +1,19 @@
 package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.ledger.api.VatInternalApi
+import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
-import com.respiroc.ledger.api.payload.TrialBalanceEntry
-import com.respiroc.ledger.api.payload.TrialBalancePayload
+import com.respiroc.ledger.api.payload.CreateVoucherPayload
+import com.respiroc.ledger.api.payload.VoucherPayload
+import com.respiroc.ledger.api.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
 import com.respiroc.ledger.domain.model.Posting
+import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
+import com.respiroc.ledger.domain.repository.VoucherRepository
 import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,66 +22,64 @@ import java.time.LocalDate
 
 @Service
 @Transactional
-class PostingService(
+class VoucherService(
+    private val voucherRepository: VoucherRepository,
     private val postingRepository: PostingRepository,
     private val accountApi: AccountInternalApi,
     private val vatApi: VatInternalApi
-) : PostingInternalApi, ContextAwareApi {
+) : VoucherInternalApi, ContextAwareApi {
 
-    override fun createBatchPostings(postings: List<CreatePostingPayload>): List<Posting> {
-        validatePostingCommands(postings)
-        validateBalance(postings)
-        
-        val createdPostings = postings.map { postingData ->
-            createPostingEntity(postingData, currentTenantId())
+    override fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
+        val tenantId = currentTenantId()
+
+        val voucherNumber = generateNextVoucherNumber(tenantId, payload.date)
+
+        validatePostingCommands(payload.postings)
+        validateBalance(payload.postings)
+
+        val voucher = createVoucherEntity(payload, tenantId, voucherNumber)
+        val savedVoucher = voucherRepository.save(voucher)
+
+        val postings = payload.postings.map { postingData ->
+            createPostingEntity(postingData, tenantId, savedVoucher.id)
         }
-
-        return postingRepository.saveAll(createdPostings)
+        postingRepository.saveAll(postings)
+        
+        return VoucherPayload(
+            id = savedVoucher.id,
+            number = savedVoucher.number,
+            date = savedVoucher.date
+        )
     }
 
     @Transactional(readOnly = true)
-    override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload {
-        val tenantId = currentTenantId()
-        val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
-        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+    override fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
+        val vouchers = voucherRepository.findVoucherSummariesByTenantId(currentTenantId())
         
-        val trialBalanceEntries = accountNumbers.mapNotNull { accountNumber ->
-            val account = accounts[accountNumber]
-            if (account != null) {
-                val openingBalance = postingRepository.getAccountBalanceBeforeDate(accountNumber, tenantId, startDate)
-                val movement = postingRepository.getAccountMovementInPeriod(accountNumber, tenantId, startDate, endDate)
-                val closingBalance = openingBalance + movement
-                
-                // Only include accounts that have activity or balance
-                if (openingBalance.compareTo(BigDecimal.ZERO) != 0 || 
-                    movement.compareTo(BigDecimal.ZERO) != 0 || 
-                    closingBalance.compareTo(BigDecimal.ZERO) != 0) {
-                    TrialBalanceEntry(
-                        accountNumber = accountNumber,
-                        accountName = account.accountName,
-                        openingBalance = openingBalance,
-                        difference = movement,
-                        closingBalance = closingBalance
-                    )
-                } else null
-            } else null
+        return vouchers.map { voucher ->
+            VoucherSummaryPayload(
+                id = voucher.id,
+                number = voucher.number,
+                date = voucher.date,
+                description = voucher.description,
+                postingCount = voucher.postings.size
+            )
         }
-        
-        val totalOpeningBalance = trialBalanceEntries.sumOf { it.openingBalance }
-        val totalDifference = trialBalanceEntries.sumOf { it.difference }
-        val totalClosingBalance = trialBalanceEntries.sumOf { it.closingBalance }
-        
-        return TrialBalancePayload(
-            entries = trialBalanceEntries,
-            totalOpeningBalance = totalOpeningBalance,
-            totalDifference = totalDifference,
-            totalClosingBalance = totalClosingBalance
-        )
     }
-    
+
+    @Transactional(readOnly = true)
+    override fun findVoucherById(id: Long): Voucher? {
+        return voucherRepository.findByIdAndTenantIdWithPostings(id, currentTenantId())
+    }
+
     // -------------------------------
     // Private Helper Methods
     // -------------------------------
+
+    private fun generateNextVoucherNumber(tenantId: Long, date: LocalDate): Short {
+        val maxNumber = voucherRepository.findMaxVoucherNumberForYear(tenantId, date.year)
+        return (maxNumber + 1).toShort()
+    }
     
     private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
         postings.forEach { postingData ->
@@ -108,7 +109,20 @@ class PostingService(
         }
     }
     
-    private fun createPostingEntity(postingData: CreatePostingPayload, tenantId: Long): Posting {
+    private fun createVoucherEntity(payload: CreateVoucherPayload, tenantId: Long, voucherNumber: Short): Voucher {
+        val voucher = Voucher()
+        voucher.number = voucherNumber
+        voucher.date = payload.date
+        voucher.description = payload.description
+        voucher.tenantId = tenantId
+        return voucher
+    }
+    
+    private fun createPostingEntity(
+        postingData: CreatePostingPayload,
+        tenantId: Long,
+        voucherId: Long
+    ): Posting {
         val posting = Posting()
         posting.accountNumber = postingData.accountNumber
         posting.amount = postingData.amount
@@ -119,6 +133,7 @@ class PostingService(
         posting.originalAmount = postingData.originalAmount
         posting.originalCurrency = postingData.originalCurrency
         posting.vatCode = postingData.vatCode
+        posting.voucherId = voucherId
         
         return posting
     }

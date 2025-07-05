@@ -1,8 +1,8 @@
-package com.respiroc.ledger.api.result
+package com.respiroc.ledger.api.payload
 
 import java.math.BigDecimal
 
-data class TrialBalanceResult (
+data class TrialBalancePayload (
     val entries: List<TrialBalanceEntry>,
     val totalOpeningBalance: BigDecimal,
     val totalDifference: BigDecimal,
