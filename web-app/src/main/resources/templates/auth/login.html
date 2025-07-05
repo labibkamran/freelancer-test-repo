@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" class="wa-cloak wa-theme-matter">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Reai</title>
+    <th:block th:replace="~{layout/libs :: common-libs}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/login/login.css}">
 </head>
 
 <body>
-<main layout:fragment="content">
-    <div>
+<div class="main">
+    <div class="wa-center">
         <wa-card style="max-width: 45ch; margin: 0 auto">
             <!-- Alerts -->
             <div th:if="${error}" class="alert alert-danger" role="alert">
@@ -35,15 +39,8 @@
             </p>
         </div>
     </div>
-</main>
+</div>
 
-<th:block layout:fragment="scripts">
-    <script>
-        // Focus on email input when page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('email').focus();
-        });
-    </script>
-</th:block>
+<script th:src="@{/assets/login/login.js}"></script>
 </body>
 </html> 
