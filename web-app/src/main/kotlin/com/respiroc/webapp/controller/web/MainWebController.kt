@@ -34,12 +34,10 @@ class MainWebController(
         val springUser = springUser()
         model.addAttribute("user", springUser)
 
-        val tenantId = springUser.ctx.currentTenant?.id 
-            ?: throw IllegalStateException("No current tenant is set")
         val companies = companyApi.findAllCompany()
         model.addAttribute("companies", companies)
 
-        val currentCompany = companies.find { it.tenantId == tenantId }
+        val currentCompany = companies.find { it.tenantId == tenantId() }
         model.addAttribute("currentCompany", currentCompany)
 
         val companyName = currentCompany?.name ?: "Default Company"
