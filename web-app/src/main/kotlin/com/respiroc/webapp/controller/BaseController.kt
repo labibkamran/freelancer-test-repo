@@ -40,7 +40,7 @@ open class BaseController {
         addCommonAttributes(model, title)
         val springUser = springUser()
         model.addAttribute(userAttributeName, springUser)
-        val companies = companyApi.findAllCompanyByUser(springUser.ctx)
+        val companies = companyApi.findAllCompany()
         model.addAttribute(companiesAttributeNames, companies)
         val tenantId = springUser.ctx.currentTenant?.id
         if (tenantId != null) {
