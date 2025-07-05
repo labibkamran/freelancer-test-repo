@@ -18,6 +18,7 @@ class CustomerService(
         newCustomerPayload: NewCustomerPayload,
         tenantId: Long
     ): Customer {
+        // TODO, Add a check for existing customer by name and organization number.
         val customer = Customer()
         val tenant = Tenant()
         tenant.id = tenantId
