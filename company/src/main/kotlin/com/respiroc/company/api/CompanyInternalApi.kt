@@ -7,7 +7,6 @@ import com.respiroc.util.context.UserContext
 interface CompanyInternalApi {
     fun createNewCompany(command: CreateCompanyCommand, user: UserContext): Company
     fun findAllCompanyByUser(user: UserContext): List<Company>
-    fun findAllCompanies(): List<Company>
     fun findCurrentCompanyByUser(user: UserContext): Company?
     fun findCompanyByUserAndTenantId(user: UserContext, tenantId: Long): Company?
     fun findCompanyById(id: Long): Company?

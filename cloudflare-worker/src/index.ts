@@ -118,6 +118,7 @@ async function sendToReaiApi(companySlug: string, payload: DocumentPayload, env:
 			headers: {
 				'Content-Type': 'application/json',
 				'X-Company-Slug': companySlug,
+				'Authorization': `Bearer ${env.API_TOKEN}`,
 			},
 			body: JSON.stringify(payload),
 		});

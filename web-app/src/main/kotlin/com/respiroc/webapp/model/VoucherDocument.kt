@@ -1,10 +1,9 @@
-package com.respiroc.voucherreception.model
+package com.respiroc.webapp.model
 
 import com.respiroc.company.domain.model.Company
 import com.respiroc.tenant.domain.model.Tenant
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 
 @Entity
@@ -26,7 +25,8 @@ class VoucherDocument {
     lateinit var filename: String
     
     @Lob
-    @Column(name = "file_data")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "file_data", columnDefinition = "BYTEA")
     var fileData: ByteArray? = null
     
     @Column(name = "mime_type")
@@ -38,23 +38,10 @@ class VoucherDocument {
     @Column(name = "sender_email")
     var senderEmail: String? = null
     
+    @CreationTimestamp
     @Column(name = "received_at", nullable = false)
-    var receivedAt: Instant = Instant.now()
+    var receivedAt: Instant? = null
     
     @Column(name = "attached_voucher_id")
     var attachedVoucherId: Long? = null
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    var createdAt: Instant? = null
-    
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    var updatedAt: Instant? = null
-    
-    val isPending: Boolean
-        get() = attachedVoucherId == null
-        
-    val isAttached: Boolean
-        get() = attachedVoucherId != null
 }
