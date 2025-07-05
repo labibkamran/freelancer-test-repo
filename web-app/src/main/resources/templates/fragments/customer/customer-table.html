@@ -3,6 +3,7 @@
     <tr>
         <th>Name</th>
         <th>Type</th>
+        <th>Person/Company</th>
         <th>Organization Number</th>
         <th class="text-right">Actions</th>
     </tr>
@@ -14,7 +15,8 @@
 
     <tr th:each="customer : ${customers}" th:id="'row-' + ${customer.id}">
         <td data-label="Name" th:text="${customer.name}"></td>
-        <td data-label="Type" th:text="${customer.type}"></td>
+        <td data-label="Type" th:text="${customer.type.type}"></td>
+        <td data-label="Person/Company" th:text="${customer.privateCustomer? 'private person' : 'company'}"></td>
         <td data-label="Organization Number" th:text="${customer.organizationNumber}"></td>
         <td data-label="Actions" class="text-right">
             <wa-button
