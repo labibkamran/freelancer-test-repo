@@ -7,6 +7,9 @@ import com.respiroc.customer.domain.model.Customer
 import com.respiroc.customer.domain.model.CustomerType
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCustomerRequest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
@@ -34,28 +37,41 @@ class CustomerWebController(
         model.addAttribute("customers", customers)
         addCommonAttributes(model, companyApi, "Customer")
 
-        if ("true".equals(hxRequest, true))
-            return "fragments/customer/customer-table"
+        return if ("true".equals(hxRequest, true))
+            "fragments/customer/customer-table"
         else
-            return "customer/customer"
+            "customer/customer"
     }
 
     @GetMapping("/new")
-    fun showCreateForm(model: Model): String {
-        model.addAttribute("customer", Customer())
+    fun showCreateForm(
+        model: Model,
+        @RequestParam("privateCustomer", required = false) privateCustomer: Boolean = false,
+        @RequestHeader(value = "HX-Request", required = false) hxRequest: String?
+    ): String {
+        model.addAttribute("customer", CreateCustomerRequest("", "", "CUSTOMER", privateCustomer))
         addCommonAttributes(model, companyApi, "New Customer")
-        return "customer/form"
+
+        return if ("true".equals(hxRequest, true))
+            "customer/form :: customerFormFields"
+        else
+            "customer/form"
     }
 
     @PostMapping
-    fun createCustomer(@ModelAttribute customer: CreateCustomerRequest): String {
+    fun createCustomer(@ModelAttribute customer: CreateCustomerRequest): ResponseEntity<Any?> {
         val payload = NewCustomerPayload(
             name = customer.name,
             organizationNumber = customer.organizationNumber,
-            type = CustomerType.valueOf(customer.type)
+            type = CustomerType.valueOf(customer.type),
+            privateCustomer = customer.privateCustomer
         )
-        customerService.createNewCustomer(payload, user().currentTenant!!.id)
-        return "redirect:/customers"
+        val tenantId = user().currentTenant!!.id
+        customerService.createNewCustomer(payload, tenantId)
+
+        val headers = HttpHeaders()
+        headers.set("HX-Redirect", "/customer?tenantId=${tenantId}")
+        return ResponseEntity<Any?>(headers, HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")

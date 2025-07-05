@@ -24,7 +24,7 @@
                     <input type="hidden" name="tenantId" th:value="${user.ctx.currentTenant.id}"/>
                 </form>
             </div>
-            <a href="/customer/create" class="btn-create">Create Customer</a>
+            <a th:href="'/customer/new?tenantId=' + ${user.ctx.currentTenant.id}" class="btn-create">Create Customer</a>
         </div>
         <div id="loading-indicator" class="htmx-indicator">Loading...</div>
         <div class="table-container" th:replace="fragments/customer/customer-table :: table(customers=${customers})"></div>

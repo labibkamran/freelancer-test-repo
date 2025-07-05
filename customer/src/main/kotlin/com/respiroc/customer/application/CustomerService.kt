@@ -5,6 +5,7 @@ import com.respiroc.customer.api.payload.NewCustomerPayload
 import com.respiroc.customer.domain.model.Customer
 import com.respiroc.customer.domain.repository.CustomerRepository
 import com.respiroc.customer.exception.CustomerNotFoundException
+import com.respiroc.tenant.domain.model.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,10 +19,14 @@ class CustomerService(
         tenantId: Long
     ): Customer {
         val customer = Customer()
+        val tenant = Tenant()
+        tenant.id = tenantId
         customer.name = newCustomerPayload.name
         customer.organizationNumber = newCustomerPayload.organizationNumber
         customer.type = newCustomerPayload.type
         customer.tenantId = tenantId
+        customer.tenant = tenant
+        customer.privateCustomer = newCustomerPayload.privateCustomer
         return customerRepository.save(customer)
     }
 
