@@ -1,6 +1,6 @@
 CREATE TABLE customers
 (
-    id                  BIGSERIAL PRIMARY KEY,
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tenant_id           BIGINT       NOT NULL,
     organization_number VARCHAR(50),
     name                VARCHAR(255) NOT NULL,
