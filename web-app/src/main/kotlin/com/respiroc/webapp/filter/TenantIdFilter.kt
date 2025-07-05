@@ -1,6 +1,5 @@
 package com.respiroc.webapp.filter
 
-import com.respiroc.tenant.infrastructure.context.TenantContextHolder
 import com.respiroc.util.context.SpringUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -73,11 +72,7 @@ class TenantIdFilter(
             return
         }
 
-        try {
-            chain.doFilter(wrappedRequest, response)
-        } finally {
-            TenantContextHolder.clear()
-        }
+        chain.doFilter(wrappedRequest, response)
     }
 
     private fun getCurrentSpringUser(): SpringUser {
@@ -109,8 +104,6 @@ class TenantIdFilter(
         val tenantIdLong = tenantId.toLong()
         val tenant = springUser.ctx.tenants.find { it.id == tenantIdLong }
             ?: return // This shouldn't happen due to prior checks
-
-        TenantContextHolder.setTenantId(tenantIdLong)
         springUser.ctx.currentTenant = tenant
     }
 }

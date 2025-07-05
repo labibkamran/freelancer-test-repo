@@ -92,9 +92,15 @@
                 </div>
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     <li class="wa-body-s">
+                        <a th:href="'/voucher/overview?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Overview
+                        </a>
+                    </li>
+                    <li class="wa-body-s">
                         <a th:href="'/voucher/new-advanced-voucher?tenantId=' + ${user.ctx.currentTenant.id}"
                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
-                            New Advanced Voucher
+                            Advanced Voucher
                         </a>
                     </li>
                 </ul>
