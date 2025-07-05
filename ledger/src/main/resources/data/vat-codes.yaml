@@ -47,3 +47,17 @@ vatCodes:
     rate: 25.0
     vatType: "INPUT_VAT"
     vatCategory: "STANDARD"
+
+  # Deductible input VAT for services purchased abroad, high rate (25%)
+  - code: "86"
+    description: "Deductible input VAT for services purchased abroad, high rate"
+    rate: 25.0
+    vatType: "INPUT_VAT"
+    vatCategory: "STANDARD"
+
+  # Deductible input VAT for services purchased abroad, low rate (12%)
+  - code: "88"
+    description: "Deductible input VAT for services purchased abroad, low rate"
+    rate: 12.0
+    vatType: "INPUT_VAT"
+    vatCategory: "LOW"
