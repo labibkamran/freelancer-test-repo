@@ -13,4 +13,10 @@ interface CompanyRepository : CustomJpaRepository<Company, Long> {
 
     @Query("SELECT c FROM Company c WHERE c.tenantId IN :tenantIds")
     fun findByTenantIdIn(tenantIds: List<Long>): List<Company>
+    
+    @Query("""
+        SELECT c FROM Company c 
+        WHERE LOWER(REPLACE(REPLACE(c.name, ' ', '-'), '--', '-')) = LOWER(:slug)
+    """)
+    fun findBySlug(slug: String): Company?
 }

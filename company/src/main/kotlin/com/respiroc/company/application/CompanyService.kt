@@ -42,7 +42,7 @@ class CompanyService(
     }
 
     override fun findCurrentCompanyByUser(user: UserContext): Company? {
-        if (user.currentTenant != null) return null
+        if (user.currentTenant == null) return null
         return companyRepository.findByTenantId(user.currentTenant!!.id)
     }
 
@@ -53,23 +53,11 @@ class CompanyService(
         TODO("Not yet implemented")
     }
     
-    override fun findAllCompanies(): List<Company> {
-        return companyRepository.findAll()
-    }
-    
     override fun findCompanyById(id: Long): Company? {
         return companyRepository.findById(id).orElse(null)
     }
     
     override fun findCompanyBySlug(slug: String): Company? {
-        val allCompanies = findAllCompanies()
-        return allCompanies.find { getSlugFromCompanyName(it.name) == slug }
-    }
-    
-    private fun getSlugFromCompanyName(name: String): String {
-        return name.lowercase()
-            .replace(Regex("[^a-z0-9\\s-]"), "")
-            .replace(Regex("\\s+"), "-")
-            .trim('-')
+        return companyRepository.findBySlug(slug)
     }
 }

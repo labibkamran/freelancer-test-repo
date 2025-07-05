@@ -56,13 +56,20 @@ class TenantIdFilter(
     }
 
     private fun isTenantAccessibleByUser(tenantId: String): Boolean {
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication == null) {
+            return false
+        }
+        val springUser = authentication.principal as SpringUser
         return springUser.ctx.tenants.any { it.id == tenantId.toLong() }
     }
 
     private fun setCurrentTenant(tenantId: String) {
         TenantContextHolder.setTenantId(tenantId.toLong())
-        val springUser = SecurityContextHolder.getContext().authentication.principal as SpringUser
-        springUser.ctx.currentTenant = springUser.ctx.tenants.filter { it.id == tenantId.toLong() }.first()
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication != null) {
+            val springUser = authentication.principal as SpringUser
+            springUser.ctx.currentTenant = springUser.ctx.tenants.filter { it.id == tenantId.toLong() }.first()
+        }
     }
 }
