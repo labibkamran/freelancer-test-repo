@@ -3,6 +3,8 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
+import com.respiroc.webapp.controller.response.MessageType
+import com.respiroc.webapp.controller.response.Callout
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -11,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Controller
 @RequestMapping(value = ["/report"])
@@ -49,7 +50,6 @@ class ReportWebController(
         model.addAttribute("trialBalanceData", trialBalanceData)
         model.addAttribute("startDate", effectiveStartDate)
         model.addAttribute("endDate", effectiveEndDate)
-        model.addAttribute("periodDisplay", formatPeriodDisplay(effectiveStartDate, effectiveEndDate))
         
         return "report/trial-balance"
     }
@@ -77,22 +77,12 @@ class ReportWebController(
             model.addAttribute("trialBalanceData", trialBalanceData)
             model.addAttribute("startDate", effectiveStartDate)
             model.addAttribute("endDate", effectiveEndDate)
-            model.addAttribute("periodDisplay", formatPeriodDisplay(effectiveStartDate, effectiveEndDate))
             
             "report/trial-balance :: tableContent"
         } catch (e: Exception) {
             logger.error("Error loading trial balance data via HTMX", e)
-            model.addAttribute("errorMessage", "Error loading trial balance: ${e.message}")
+            model.addAttribute("callout", Callout("Error loading trial balance: ${e.message}", MessageType.ERROR))
             return "report/trial-balance :: error-message"
-        }
-    }
-    
-    private fun formatPeriodDisplay(startDate: LocalDate, endDate: LocalDate): String {
-        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-        return if (startDate.year == endDate.year && startDate.month == endDate.month) {
-            startDate.format(formatter)
-        } else {
-            "${startDate.format(DateTimeFormatter.ofPattern("MMM yyyy"))} - ${endDate.format(DateTimeFormatter.ofPattern("MMM yyyy"))}"
         }
     }
 } 
