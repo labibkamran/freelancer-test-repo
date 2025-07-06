@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class BatchPostingProcessingService(
+class VoucherWebService(
     private val voucherApi: VoucherInternalApi,
     private val vatApi: VatInternalApi,
     private val currencyService: CurrencyService

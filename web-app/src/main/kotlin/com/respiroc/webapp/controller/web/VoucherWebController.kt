@@ -10,7 +10,7 @@ import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.response.Callout
 import com.respiroc.webapp.controller.response.MessageType
-import com.respiroc.webapp.service.BatchPostingProcessingService
+import com.respiroc.webapp.service.VoucherWebService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -26,7 +26,7 @@ class VoucherWebController(
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
     private val voucherApi: VoucherInternalApi,
-    private val batchPostingProcessingService: BatchPostingProcessingService
+    private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -95,7 +95,7 @@ class VoucherWebController(
             return "voucher/advanced-voucher"
         }
 
-        val callout = batchPostingProcessingService.processVoucherRequest(
+        val callout = voucherWebService.processVoucherRequest(
             createVoucherRequest,
             springUser.ctx
         )
