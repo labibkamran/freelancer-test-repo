@@ -1,6 +1,8 @@
 package com.respiroc.webapp.controller.web
 
 import com.respiroc.webapp.controller.BaseController
+import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.controller.response.MessageType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,14 +15,14 @@ class ErrorWebController: BaseController() {
     @GetMapping("/tenant-not-found")
     fun tenantNotFound(model: Model): String {
         model.addAttribute("title", "Tenant Not Found")
-        model.addAttribute("errorMessage", "The requested company was not found")
+        model.addAttribute("callout", Callout("The requested company was not found", MessageType.ERROR))
         return "error/tenant-not-found"
     }
 
     @GetMapping("/tenant-access-denied")
     fun tenantAccessDenied(model: Model): String {
         model.addAttribute("title", "Access Denied")
-        model.addAttribute("errorMessage", "You don't have access to this company")
+        model.addAttribute("callout", Callout("You don't have access to this company", MessageType.ERROR))
         return "error/tenant-access-denied"
     }
 } 

@@ -8,12 +8,16 @@
 <main layout:fragment="content">
     <div>
         <wa-card style="max-width: 45ch; margin: 0 auto">
-            <!-- Alerts -->
-            <div th:if="${error}" class="alert alert-danger" role="alert">
-                <span th:text="${error}"></span>
+            <!-- Messages -->
+            <div th:if="${error}" style="margin-bottom: var(--wa-space-m);">
+                <wa-callout variant="danger" open>
+                    <span th:text="${error}">Error message</span>
+                </wa-callout>
             </div>
-            <div th:if="${success}" class="alert alert-success" role="alert">
-                <span th:text="${success}"></span>
+            <div th:if="${success}" style="margin-bottom: var(--wa-space-m);">
+                <wa-callout variant="success" open>
+                    <span th:text="${success}">Success message</span>
+                </wa-callout>
             </div>
 
             <!-- Signup Form -->
