@@ -95,19 +95,16 @@ class VoucherWebController(
             return "voucher/advanced-voucher"
         }
 
-        val result = batchPostingProcessingService.processVoucherRequest(
+        val callout = batchPostingProcessingService.processVoucherRequest(
             createVoucherRequest,
             springUser.ctx
         )
 
-        return if (result.isSuccess) {
-            model.addAttribute("callout", Callout(result.message, MessageType.SUCCESS))
+        model.addAttribute("callout", callout)
+        if (callout.type == MessageType.SUCCESS) {
             model.addAttribute("clearForm", true)
-            "voucher/advanced-voucher"
-        } else {
-            model.addAttribute("callout", Callout(result.message, MessageType.ERROR))
-            "voucher/advanced-voucher"
         }
+        return "voucher/advanced-voucher"
     }
 
     // -------------------------------
