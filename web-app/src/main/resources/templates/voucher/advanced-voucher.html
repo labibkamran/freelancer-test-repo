@@ -248,17 +248,9 @@
 <main layout:fragment="content">
     <div class="container py-4">
 
-        <!-- Success/Error Messages -->
+                <!-- Messages will be displayed via the base template callout system -->
         <div id="form-messages">
-        <div th:if="${successMessage}" class="alert alert-success">
-            <wa-icon name="check-circle" style="margin-right: 0.5rem;"></wa-icon>
-            <span th:utext="${successMessage}"></span>
-        </div>
-        
-        <div th:if="${errorMessage}" class="alert alert-danger">
-            <wa-icon name="exclamation-triangle" style="margin-right: 0.5rem;"></wa-icon>
-            <span th:text="${errorMessage}"></span>
-            </div>
+            <!-- This div is kept for HTMX target, but messages will be displayed in base template -->
         </div>
 
         <!-- Loading Indicator -->
@@ -270,13 +262,10 @@
         </div>
 
         <!-- Complete Voucher Form -->
-        <form th:attr="hx-post='/voucher/create-voucher?tenantId=' + ${user.ctx.currentTenant?.id}"
+        <form th:attr="action='/voucher/create-voucher?tenantId=' + ${user.ctx.currentTenant?.id}"
               method="post"
-              hx-target="#form-messages" 
-              hx-swap="innerHTML"
-              hx-indicator="#loading-indicator"
               id="voucherForm" 
-              onsubmit="event.preventDefault(); return validateAndPrepareForm(event);">
+              onsubmit="return validateAndPrepareForm(event);">
 
             <!-- Voucher Information Card -->
             <div class="posting-form mb-4">
@@ -369,6 +358,32 @@
         // Initialize form
         document.addEventListener('DOMContentLoaded', function() {
             addPostingLine();
+            
+            // Clear form if success flag is set
+            const clearForm = /*[[${clearForm}]]*/ false;
+            if (clearForm) {
+                // Clear all input fields
+                document.querySelectorAll('#voucherForm input, #voucherForm select').forEach(input => {
+                    if (input.type === 'date') {
+                        input.value = new Date().toISOString().split('T')[0];
+                    } else if (input.type === 'text' || input.type === 'number') {
+                        input.value = '';
+                        input.removeAttribute('data-vat-code');
+                        input.removeAttribute('data-converted-amount');
+                    } else if (input.tagName === 'SELECT') {
+                        input.value = companyCurrency;
+                    }
+                    input.classList.remove('field-error');
+                });
+                
+                // Clear all posting lines and add a fresh one
+                document.getElementById('postingLines').innerHTML = '';
+                rowCounter = 0;
+                addPostingLine();
+                
+                // Update balance display
+                updateBalance();
+            }
         });
         
         function addPostingLine() {
@@ -951,11 +966,18 @@
         async function validateAndPrepareForm(event) {
             // First validate all fields
             if (!validateFormFields()) {
+                event.preventDefault();
                 return false;
             }
             
             // Then prepare form data
-            return await prepareFormData(event);
+            const isValid = await prepareFormData(event);
+            if (!isValid) {
+                event.preventDefault();
+                return false;
+            }
+            
+            return true;
         }
         
         // Prepare form data before submission
@@ -1071,6 +1093,7 @@
                 return false;
             }
             
+            // Form is valid, allow submission
             return true;
         }
         

@@ -8,6 +8,8 @@ import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
+import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.controller.response.MessageType
 import com.respiroc.webapp.service.BatchPostingProcessingService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -85,12 +87,12 @@ class VoucherWebController(
         model: Model
     ): String {
         val springUser = springUser()
-        model.addAttribute("user", springUser)
+        setupModelAttributes(model, springUser)
 
         if (bindingResult.hasErrors()) {
             val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
-            model.addAttribute("errorMessage", errorMessages)
-            return "voucher/fragments :: messages"
+            model.addAttribute("callout", Callout(errorMessages, MessageType.ERROR))
+            return "voucher/advanced-voucher"
         }
 
         val result = batchPostingProcessingService.processVoucherRequest(
@@ -99,11 +101,12 @@ class VoucherWebController(
         )
 
         return if (result.isSuccess) {
-            model.addAttribute("successMessage", result.message)
-            "voucher/fragments :: messages-and-refresh"
+            model.addAttribute("callout", Callout(result.message, MessageType.SUCCESS))
+            model.addAttribute("clearForm", true)
+            "voucher/advanced-voucher"
         } else {
-            model.addAttribute("errorMessage", result.message)
-            "voucher/fragments :: messages"
+            model.addAttribute("callout", Callout(result.message, MessageType.ERROR))
+            "voucher/advanced-voucher"
         }
     }
 
