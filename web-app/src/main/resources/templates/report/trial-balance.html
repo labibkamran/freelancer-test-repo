@@ -4,6 +4,16 @@
 <head>
     <link rel="stylesheet" th:href="@{/assets/report/trial-balance.css}">
 </head>
+
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Reports
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        Trial Balance
+    </wa-breadcrumb-item>
+</th:block>
 <body>
 <main layout:fragment="content">
     <div class="container py-4">
