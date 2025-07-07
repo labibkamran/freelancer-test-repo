@@ -36,24 +36,6 @@
     color: var(--wa-color-text-quiet);
 }
 
-.loading-indicator {
-    display: inline-block;
-    margin-left: var(--wa-space-s);
-    font-size: 0.85em;
-    color: var(--wa-color-text-quiet);
-}
-
-.spinner::after {
-    content: "⏳";
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-
 @media (max-width: 768px) {
     .custom-table thead {
         display: none;

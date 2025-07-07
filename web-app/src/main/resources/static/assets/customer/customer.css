@@ -5,52 +5,8 @@
     margin-bottom: var(--wa-space-l);
 }
 
-.search-bar {
-    width: 50%;
-}
-
-.search-bar input {
-    width: 100%;
-    padding: var(--wa-space-xs);
-    border: 1px solid var(--wa-color-neutral-border-normal);
-    border-radius: var(--wa-border-radius-m);
-    background-color: var(--wa-color-surface-default);
-    color: var(--wa-color-text-normal);
-    font-size: var(--wa-font-size-m);
-}
-
-.btn-create {
-    padding: var(--wa-space-xs) var(--wa-space-m);
-    background-color: var(--wa-color-brand-40);
-    color: var(--wa-color-surface-default);
-    border: none;
-    border-radius: var(--wa-border-radius-m);
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: var(--wa-font-weight-semibold);
-    transition: background-color var(--wa-transition-normal) var(--wa-transition-easing);
-}
-
-.btn-create:hover {
-    background-color: var(--wa-color-brand-30);
-}
-
-.htmx-indicator {
-    display: none;
-}
-
-.htmx-request .htmx-indicator,
-.htmx-request.htmx-indicator {
-    display: inline;
-}
-
 @media screen and (max-width: 768px) {
     .table-toolbar {
         flex-direction: column;
-    }
-
-    .search-bar {
-        width: 100%;
-        margin-bottom: var(--wa-space-l);
     }
 }
