@@ -49,7 +49,7 @@ class CustomerWebController(
         @RequestParam("privateCustomer", required = false) privateCustomer: Boolean = false,
         @RequestHeader(value = "HX-Request", required = false) hxRequest: String?
     ): String {
-        model.addAttribute("customer", CreateCustomerRequest("", "", "CUSTOMER", privateCustomer))
+        model.addAttribute("customer", CreateCustomerRequest("", "", CustomerType.CUSTOMER.name, privateCustomer))
         addCommonAttributes(model, companyApi, "New Customer")
 
         return if ("true".equals(hxRequest, true))
@@ -63,7 +63,7 @@ class CustomerWebController(
         val payload = NewCustomerPayload(
             name = customer.name,
             organizationNumber = customer.organizationNumber,
-            type = CustomerType.valueOf(customer.type),
+            type = CustomerType.valueOf(customer.type.uppercase()),
             privateCustomer = customer.privateCustomer
         )
         val tenantId = user().currentTenant!!.id
