@@ -85,4 +85,38 @@ class ReportWebController(
             return "report/trial-balance :: error-message"
         }
     }
-} 
+
+    @GetMapping(value = ["/profit-loss"])
+    fun profitLoss(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        val springUser = springUser()
+
+        // Default to current month if no dates provided
+        val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+        val operatingRevenue = postingApi.getOperatingRevenue(effectiveStartDate, effectiveEndDate)
+        val operatingExpences = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
+
+        val companies = companyApi.findAllCompany()
+        val currentCompany = companies.find { it.tenantId == tenantId() }
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("currentCompany", currentCompany)
+        model.addAttribute("title", "Trial Balance")
+        model.addAttribute("trialBalanceData", operatingRevenue)
+        model.addAttribute("trialBalanceData", operatingExpences)
+        model.addAttribute("startDate", effectiveStartDate)
+        model.addAttribute("endDate", effectiveEndDate)
+
+        return "report/profit-loss"
+    }
+}

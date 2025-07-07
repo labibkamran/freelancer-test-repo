@@ -10,5 +10,6 @@ import java.time.LocalDate
 interface PostingInternalApi : ContextAwareApi {
     fun createBatchPostings(postings: List<CreatePostingPayload>): List<Posting>
     fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload
+    fun getOperatingRevenue(startDate: LocalDate, endDate: LocalDate): List<Posting>
     fun getGeneralLedger(startDate: LocalDate, endDate: LocalDate, accountNumber: String? = null): GeneralLedgerPayload
 }

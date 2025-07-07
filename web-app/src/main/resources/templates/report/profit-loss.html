@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <link rel="stylesheet" th:href="@{/assets/report/trial-balance.css}">
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="container py-4">
+
+        <!-- Trial Balance Container -->
+        <div class="trial-balance-container">
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="startDate">Start Date</label>
+                        <wa-input type="date"
+                                  size="small"
+                                  id="startDate"
+                                  name="startDate"
+                                  th:value="${startDate}"
+                                  th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  hx-target="#content-area"
+                                  hx-indicator="#loading-indicator"
+                                  hx-swap="innerHTML"
+                                  hx-trigger="change"
+                                  hx-include="[name='endDate']"></wa-input>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="endDate">End Date</label>
+                        <wa-input type="date"
+                                  size="small"
+                                  id="endDate"
+                                  name="endDate"
+                                  th:value="${endDate}"
+                                  th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  hx-target="#content-area"
+                                  hx-indicator="#loading-indicator"
+                                  hx-swap="innerHTML"
+                                  hx-trigger="change"
+                                  hx-include="[name='startDate']"></wa-input>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div class="filter-group">
+                        <div id="loading-indicator" class="htmx-indicator loading-indicator">
+                            <wa-spinner size="small"></wa-spinner>
+                            <span style="margin-left: 0.5rem;">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message Fragment -->
+            <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
+                <wa-icon name="exclamation-triangle"></wa-icon>
+                <span th:text="${errorMessage}">Error occurred</span>
+            </div>
+
+            <!-- Company Selection Required -->
+            <div th:if="${user == null or user.ctx.currentTenant == null}" class="empty-state">
+                <div class="empty-state-icon">
+                    <wa-icon name="building"></wa-icon>
+                </div>
+                <h3>Company Selection Required</h3>
+                <p>Please select a company before viewing the trial balance.</p>
+                <a href="/tenant/select" class="btn btn-primary">Select Company</a>
+            </div>
+
+            <!-- Profit & Loss Content -->
+            <div id="content-area">
+                <div th:fragment="tableContent">
+                    <div th:unless="${trialBalanceData.entries.empty}">
+                        <div style="overflow-x: auto;">
+                            <!-- Operating revenues  -->
+                            <table class="trial-balance-table">
+                                <thead>
+                                <tr>
+                                    <th style="width: 15%">Operating revenues</th>
+                                    <th style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 15%;">Account</th>
+                                    <th style="width: 35%;">Account Name</th>
+                                    <th style="width: 35%;">Description</th>
+                                    <th class="amount-header" style="width: 15%;">Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="entry : ${trialBalanceData.entries}">
+                                    <td>
+                                        <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                    </td>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                            <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                            <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2"><strong>Total</strong></td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <!-- Operating expenses  -->
+                            <table class="trial-balance-table">
+                                <thead>
+                                <tr>
+                                    <th style="width: 15%">Operating expenses</th>
+                                    <th style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 15%;">Account</th>
+                                    <th style="width: 35%;">Account Name</th>
+                                    <th style="width: 35%;">Description</th>
+                                    <th class="amount-header" style="width: 15%;">Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="entry : ${trialBalanceData.entries}">
+                                    <td>
+                                        <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                    </td>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                            <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                            <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2"><strong>Total</strong></td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${trialBalanceData.entries.empty}" class="empty-state">
+                        <div class="empty-state-icon">
+                            <wa-icon name="table"></wa-icon>
+                        </div>
+                        <h3>No Data Available</h3>
+                        <p>No posting data found for the selected period.</p>
+                        <p>Try adjusting the date range or create some postings first.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+</body>
+</html>
