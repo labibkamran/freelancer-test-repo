@@ -172,15 +172,6 @@
     </main>
 </wa-page>
 
-<!-- Non-authenticated User Layout -->
-<div th:if="${user == null}" class="wa-center"
-     style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-    <main layout:fragment="content">
-        <!-- Auth page content will be inserted here -->
-    </main>
-</div>
-
-
 <!-- Custom JS -->
 <script th:src="@{/assets/base/base.js}"></script>
 
