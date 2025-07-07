@@ -8,7 +8,9 @@ import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
-import com.respiroc.webapp.service.BatchPostingProcessingService
+import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.controller.response.MessageType
+import com.respiroc.webapp.service.VoucherWebService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -24,7 +26,7 @@ class VoucherWebController(
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
     private val voucherApi: VoucherInternalApi,
-    private val batchPostingProcessingService: BatchPostingProcessingService
+    private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -85,26 +87,24 @@ class VoucherWebController(
         model: Model
     ): String {
         val springUser = springUser()
-        model.addAttribute("user", springUser)
+        setupModelAttributes(model, springUser)
 
         if (bindingResult.hasErrors()) {
             val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
-            model.addAttribute("errorMessage", errorMessages)
-            return "voucher/fragments :: messages"
+            model.addAttribute("callout", Callout(errorMessages, MessageType.ERROR))
+            return "voucher/advanced-voucher"
         }
 
-        val result = batchPostingProcessingService.processVoucherRequest(
+        val callout = voucherWebService.processVoucherRequest(
             createVoucherRequest,
             springUser.ctx
         )
 
-        return if (result.isSuccess) {
-            model.addAttribute("successMessage", result.message)
-            "voucher/fragments :: messages-and-refresh"
-        } else {
-            model.addAttribute("errorMessage", result.message)
-            "voucher/fragments :: messages"
+        model.addAttribute("callout", callout)
+        if (callout.type == MessageType.SUCCESS) {
+            model.addAttribute("clearForm", true)
         }
+        return "voucher/advanced-voucher"
     }
 
     // -------------------------------

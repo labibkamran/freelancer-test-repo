@@ -19,9 +19,6 @@
         </div>
 
         <div>
-            <!-- Alert Area for HTMX responses -->
-            <div id="alert-container" style="margin-bottom: 1rem;"></div>
-
             <wa-card style="margin-bottom: 1rem;">
                 <div slot="header">
                     <h5 style="margin: 0;">
@@ -32,8 +29,8 @@
                     <form id="createCompanyForm" 
                           th:object="${createCompanyRequest}"
                           hx-post="/company/create"
-                          hx-target="#alert-container"
-                          hx-swap="innerHTML">
+                          hx-target="body"
+                          hx-swap="outerHTML">
                         
                         <!-- Company Name Field with Search -->
                         <div class="form-group">

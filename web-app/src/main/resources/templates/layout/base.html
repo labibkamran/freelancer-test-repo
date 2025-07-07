@@ -139,6 +139,17 @@
         </div>
     </aside>
 
+    <!-- Callout -->
+    <div th:if="${callout}" style="padding: var(--wa-space-m) var(--wa-space-l) 0;">
+        <wa-callout th:attr="variant=${callout.type.variant}, data-link=${callout.link}" open
+                    th:classappend="${callout.link != null} ? 'clickable-callout' : ''"
+                    th:style="${callout.link != null} ? 'cursor: pointer;' : ''">
+            <wa-icon slot="icon" th:attr="name=${callout.type.iconName}" variant="regular"></wa-icon>
+            <span th:text="${callout.message}">Message</span>
+            <wa-icon th:if="${callout.link != null}" slot="action" name="arrow-up-right-from-square" variant="regular"></wa-icon>
+        </wa-callout>
+    </div>
+
     <!-- Main Content -->
     <main layout:fragment="content" id="main-content">
         <!-- Page content will be inserted here -->
