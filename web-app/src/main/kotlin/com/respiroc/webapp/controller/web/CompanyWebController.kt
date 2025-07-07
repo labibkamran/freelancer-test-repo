@@ -5,6 +5,8 @@ import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
+import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.controller.response.MessageType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -21,11 +23,10 @@ class CompanyWebController(
     @GetMapping("/create")
     fun createCompany(model: Model): String {
         val springUser = springUser()
-        model.addAttribute("user", springUser)
-
         val companies = companyApi.findAllCompany()
-        model.addAttribute("companies", companies)
 
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
         model.addAttribute("title", "Create Company")
         model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
 
@@ -38,9 +39,19 @@ class CompanyWebController(
         bindingResult: BindingResult,
         model: Model
     ): String {
+        val springUser = springUser()
+        val companies = companyApi.findAllCompany()
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("companies", companies)
+        model.addAttribute("title", "Create Company")
+
         if (bindingResult.hasErrors()) {
-            model.addAttribute("error", "Please fill in all required fields correctly.")
-            return "fragments/alert :: error"
+            model.addAttribute("callout", Callout(
+                message = "Please fill in all required fields correctly.",
+                type = MessageType.ERROR
+            ))
+            return "company/create"
         }
 
         try {
@@ -52,13 +63,23 @@ class CompanyWebController(
             
             val company = companyApi.createNewCompany(command)
             
-            model.addAttribute("success", "Company '${company.name}' has been created successfully! Redirecting to dashboard...")
-            model.addAttribute("redirectUrl", "/dashboard?tenantId=${company.tenantId}")
-            return "fragments/alert :: success-with-redirect"
+            model.addAttribute("callout", Callout(
+                message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
+                type = MessageType.SUCCESS,
+                link = "/dashboard?tenantId=${company.tenantId}"
+            ))
+            
+            // Reset form
+            model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
+            
+            return "company/create"
             
         } catch (e: Exception) {
-            model.addAttribute("error", "Failed to create company: ${e.message}")
-            return "fragments/alert :: error"
+            model.addAttribute("callout", Callout(
+                message = "Failed to create company: ${e.message}",
+                type = MessageType.ERROR
+            ))
+            return "company/create"
         }
     }
 

@@ -8,11 +8,13 @@ import com.respiroc.util.context.UserContext
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
+import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.controller.response.MessageType
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class BatchPostingProcessingService(
+class VoucherWebService(
     private val voucherApi: VoucherInternalApi,
     private val vatApi: VatInternalApi,
     private val currencyService: CurrencyService
@@ -25,7 +27,7 @@ class BatchPostingProcessingService(
     fun processVoucherRequest(
         request: CreateVoucherRequest,
         userContext: UserContext
-    ): VoucherProcessingResult {
+    ): Callout {
         return try {
             val companyCurrency = currencyService.getCompanyCurrency("NO") // TODO: Replace with actual country code
             val validPostingLines = request.getValidPostingLines()
@@ -39,13 +41,16 @@ class BatchPostingProcessingService(
 
             val result = voucherApi.createVoucher(voucherPayload)
 
-            VoucherProcessingResult.success(
-                "New voucher <a href='/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}' style='color: #3b82f6; text-decoration: underline;'>#${result.number}</a> created successfully!",
-                result.id,
-                result.number
+            Callout(
+                message = "New voucher #${result.number} created successfully!",
+                type = MessageType.SUCCESS,
+                link = "/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}"
             )
         } catch (e: Exception) {
-            VoucherProcessingResult.failure("Failed to save voucher: ${e.message}")
+            Callout(
+                message = "Failed to save voucher: ${e.message}",
+                type = MessageType.ERROR
+            )
         }
     }
 
@@ -186,19 +191,6 @@ class BatchPostingProcessingService(
             signedAmount
         } else {
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
-        }
-    }
-
-    data class VoucherProcessingResult(
-        val isSuccess: Boolean,
-        val message: String,
-        val voucherId: Long? = null,
-        val voucherNumber: Short? = null
-    ) {
-        companion object {
-            fun success(message: String, voucherId: Long, voucherNumber: Short) = 
-                VoucherProcessingResult(true, message, voucherId, voucherNumber)
-            fun failure(message: String) = VoucherProcessingResult(false, message)
         }
     }
 } 
