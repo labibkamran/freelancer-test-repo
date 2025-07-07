@@ -38,7 +38,7 @@ class CustomerWebController(
         addCommonAttributes(model, companyApi, "Customer")
 
         return if ("true".equals(hxRequest, true))
-            "fragments/customer/customer-table"
+            "fragments/customer-table"
         else
             "customer/customer"
     }
