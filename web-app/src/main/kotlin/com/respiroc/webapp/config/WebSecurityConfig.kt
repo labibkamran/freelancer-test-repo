@@ -38,6 +38,7 @@ class WebSecurityConfig {
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers("/").permitAll()
+                    .requestMatchers("/assets/**").permitAll()
                     .requestMatchers("/auth/login").permitAll()
                     .requestMatchers("/assets/**").permitAll()
                     .requestMatchers("/auth/signup").permitAll()

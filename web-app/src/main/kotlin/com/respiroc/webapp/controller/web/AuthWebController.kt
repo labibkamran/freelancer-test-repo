@@ -85,10 +85,11 @@ class AuthWebController(
                 signupRequest.email,
                 signupRequest.password
             )
-            redirectAttributes.addFlashAttribute("success", "Registration successful. Please login")
+            
+            redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.")
             return "redirect:/auth/login"
         } catch (e: Exception) {
-            redirectAttributes.addFlashAttribute("error", "Registration failed: ${e.message}")
+            redirectAttributes.addFlashAttribute("error", "${e.message}")
             return "redirect:/auth/signup"
         }
     }

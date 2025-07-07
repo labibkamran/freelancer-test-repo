@@ -81,3 +81,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Check after HTMX requests
     document.addEventListener('htmx:afterSettle', updateAsideVisibility);
 });
+
+// Handle clickable callouts
+document.addEventListener('click', function(e) {
+    const callout = e.target.closest('wa-callout[data-link]');
+    if (callout) {
+        const link = callout.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+});
