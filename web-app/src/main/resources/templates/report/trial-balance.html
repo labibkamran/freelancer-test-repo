@@ -71,16 +71,6 @@
                 <span th:text="${errorMessage}">Error occurred</span>
             </div>
             
-            <!-- Company Selection Required -->
-            <div th:if="${user == null or user.ctx.currentTenant == null}" class="empty-state">
-                <div class="empty-state-icon">
-                    <wa-icon name="building"></wa-icon>
-                </div>
-                <h3>Company Selection Required</h3>
-                <p>Please select a company before viewing the trial balance.</p>
-                <a href="/tenant/select" class="btn btn-primary">Select Company</a>
-            </div>
-            
             <!-- Trial Balance Content -->
             <div id="content-area">
                 <div th:fragment="tableContent">
