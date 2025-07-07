@@ -29,7 +29,6 @@ function selectCompany(name, orgNumber) {
 function clearForm() {
     document.getElementById('createCompanyForm').reset();
     document.getElementById('name-dropdown').innerHTML = '';
-    document.getElementById('alert-container').innerHTML = '';
 
     // Remove selection attributes
     document.getElementById('name').removeAttribute('data-selected');
@@ -43,26 +42,6 @@ document.getElementById('createCompanyForm').addEventListener('htmx:beforeReques
         const submitButton = document.getElementById('submitButton');
         submitButton.disabled = true;
         submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
-    }
-});
-
-// Reset button state after response
-document.getElementById('createCompanyForm').addEventListener('htmx:afterRequest', function(e) {
-    // Only handle actual form submission, not search requests
-    if (e.detail.elt.tagName === 'FORM') {
-        const submitButton = document.getElementById('submitButton');
-        submitButton.disabled = false;
-        submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon> Create Company';
-    }
-});
-
-// Handle validation state changes
-document.getElementById('createCompanyForm').addEventListener('htmx:afterSwap', function(e) {
-    // Re-enable submit button after any content changes
-    const submitButton = document.getElementById('submitButton');
-    if (submitButton.disabled && submitButton.innerHTML.includes('Creating Company')) {
-        submitButton.disabled = false;
-        submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon> Create Company';
     }
 });
 

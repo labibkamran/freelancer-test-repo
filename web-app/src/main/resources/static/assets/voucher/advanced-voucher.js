@@ -2,8 +2,32 @@
 let rowCounter = 0;
 
 // Initialize form
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     addPostingLine();
+
+    if (clearForm) {
+        // Clear all input fields
+        document.querySelectorAll('#voucherForm input, #voucherForm select').forEach(input => {
+            if (input.type === 'date') {
+                input.value = new Date().toISOString().split('T')[0];
+            } else if (input.type === 'text' || input.type === 'number') {
+                input.value = '';
+                input.removeAttribute('data-vat-code');
+                input.removeAttribute('data-converted-amount');
+            } else if (input.tagName === 'SELECT') {
+                input.value = companyCurrency;
+            }
+            input.classList.remove('field-error');
+        });
+
+        // Clear all posting lines and add a fresh one
+        document.getElementById('postingLines').innerHTML = '';
+        rowCounter = 0;
+        addPostingLine();
+
+        // Update balance display
+        updateBalance();
+    }
 });
 
 function addPostingLine() {
@@ -471,14 +495,13 @@ function handleVatFieldBlur(input, rowId, type) {
 }
 
 // Hide dropdowns when clicking outside
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (!e.target.closest('.account-search') && !e.target.closest('.vat-search')) {
         document.querySelectorAll('.account-dropdown').forEach(dropdown => {
             dropdown.style.display = 'none';
         });
     }
 });
-
 
 
 // Frontend validation functions
@@ -586,11 +609,18 @@ function showMessage(message, type) {
 async function validateAndPrepareForm(event) {
     // First validate all fields
     if (!validateFormFields()) {
+        event.preventDefault();
         return false;
     }
 
     // Then prepare form data
-    return await prepareFormData(event);
+    const isValid = await prepareFormData(event);
+    if (!isValid) {
+        event.preventDefault();
+        return false;
+    }
+
+    return true;
 }
 
 // Prepare form data before submission
@@ -706,6 +736,7 @@ async function prepareFormData(event) {
         return false;
     }
 
+    // Form is valid, allow submission
     return true;
 }
 
@@ -724,4 +755,3 @@ function getActualVatCode(vatInput) {
     }
     return vatInput.value;
 }
-    
