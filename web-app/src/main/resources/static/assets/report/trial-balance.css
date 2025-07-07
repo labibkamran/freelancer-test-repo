@@ -1,0 +1,198 @@
+.trial-balance-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.filters-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.filters-form {
+    display: flex;
+    align-items: end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.filter-input {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    min-width: 140px;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-button {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-button:hover {
+    background: #2563eb;
+}
+
+.trial-balance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.trial-balance-table th {
+    background: #f8f9fa;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.trial-balance-table th.amount-header {
+    text-align: right;
+}
+
+.trial-balance-table td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.trial-balance-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.amount-cell {
+    text-align: right;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-weight: 500;
+}
+
+.account-number {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.account-name {
+    font-weight: 500;
+    color: #374151;
+}
+
+.total-row {
+    background: #f0f9ff;
+    border-top: 2px solid #3b82f6;
+}
+
+.total-row td {
+    font-weight: 600;
+    color: #1e40af;
+    padding: 1rem 0.75rem;
+}
+
+.positive-amount {
+    color: #16a34a;
+}
+
+.negative-amount {
+    color: #dc2626;
+}
+
+.zero-amount {
+    color: #6b7280;
+}
+
+.period-display {
+    background: #f0f9ff;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid #3b82f6;
+    margin-bottom: 1rem;
+}
+
+.period-title {
+    font-weight: 600;
+    color: #1e40af;
+    margin-bottom: 0.25rem;
+}
+
+.period-subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .filters-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-input {
+        min-width: auto;
+    }
+
+    .trial-balance-table {
+        font-size: 0.75rem;
+    }
+
+    .trial-balance-table th,
+    .trial-balance-table td {
+        padding: 0.5rem 0.375rem;
+    }
+}

@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" class="wa-cloak wa-theme-matter">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up - Reai</title>
+    <th:block th:replace="~{layout/libs :: common-libs}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/signup/signup.css}">
 </head>
 
 <body>
-<main layout:fragment="content">
-    <div>
+<div class="main">
+    <div class="wa-center">
         <wa-card style="max-width: 45ch; margin: 0 auto">
             <!-- Messages -->
             <div th:if="${error}" style="margin-bottom: var(--wa-space-m);">
@@ -39,15 +44,10 @@
             </p>
         </div>
     </div>
-</main>
+</div>
 
-<th:block layout:fragment="scripts">
-    <script>
-        // Focus on email input when page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('email').focus();
-        });
-    </script>
-</th:block>
+
+<!-- Custom JS -->
+<script th:src="@{/assets/signup/signup.js}"></script>
 </body>
 </html> 

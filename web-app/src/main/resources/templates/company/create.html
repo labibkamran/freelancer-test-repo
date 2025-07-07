@@ -2,60 +2,7 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
-    <style>
-        .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.375rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .search-item {
-            padding: 0.75rem;
-            cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        
-        .search-item:hover {
-            background-color: #f8fafc;
-        }
-        
-        .search-item:last-child {
-            border-bottom: none;
-        }
-        
-        .search-item-name {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .search-item-details {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        
-        .form-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-        
-        .loading-spinner {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/assets/company/create.css}">
 </head>
 
 <body>
@@ -179,74 +126,7 @@
 </main>
 
 <th:block layout:fragment="scripts">
-    <script>
-        // Function to select company from search results
-        function selectCompany(name, orgNumber) {
-            const nameInput = document.getElementById('name');
-            const orgInput = document.getElementById('organizationNumber');
-            const countrySelect = document.getElementById('countryCode');
-            
-            // Set values directly without triggering events that cause new searches
-            nameInput.value = name;
-            if (orgNumber) {
-                orgInput.value = orgNumber;
-            }
-            
-            // Set country code to Norway
-            countrySelect.value = 'NO';
-            
-            // Hide the dropdown immediately
-            document.getElementById('name-dropdown').innerHTML = '';
-            
-            // Remove focus to prevent any focus-related issues
-            nameInput.blur();
-            orgInput.blur();
-            
-            // Mark fields as touched/valid for any form validation
-            nameInput.setAttribute('data-selected', 'true');
-            orgInput.setAttribute('data-selected', 'true');
-        }
-
-        // Function to clear form
-        function clearForm() {
-            document.getElementById('createCompanyForm').reset();
-            document.getElementById('name-dropdown').innerHTML = '';
-            
-            // Remove selection attributes
-            document.getElementById('name').removeAttribute('data-selected');
-            document.getElementById('organizationNumber').removeAttribute('data-selected');
-        }
-
-        // Show loading state on form submission
-        document.getElementById('createCompanyForm').addEventListener('htmx:beforeRequest', function(e) {
-            // Only handle actual form submission, not search requests
-            if (e.detail.elt.tagName === 'FORM') {
-                const submitButton = document.getElementById('submitButton');
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
-            }
-        });
-
-        // Hide dropdown when clicking outside or on search results
-        document.addEventListener('click', function(e) {
-            const nameInput = document.getElementById('name');
-            const nameDropdown = document.getElementById('name-dropdown');
-            
-            // Check if click is on a search result item
-            const isSearchItem = e.target.closest('.search-item');
-            
-            if (isSearchItem) {
-                // If clicking on search item, let the selectCompany function handle it
-                // and hide dropdown after a short delay to ensure selection completes
-                setTimeout(() => {
-                    nameDropdown.innerHTML = '';
-                }, 100);
-            } else if (!nameInput.contains(e.target) && !nameDropdown.contains(e.target)) {
-                // If clicking outside, hide dropdown immediately
-                nameDropdown.innerHTML = '';
-            }
-        });
-    </script>
+    <script th:src="@{/assets/company/create.js}"></script>
 </th:block>
 </body>
 </html> 
