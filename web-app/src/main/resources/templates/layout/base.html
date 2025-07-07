@@ -106,6 +106,22 @@
                 </ul>
             </wa-details>
 
+            <!-- Account Section -->
+            <wa-details appearance="outlined" variant="info">
+                <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <wa-icon name="receipt" aria-hidden="true"></wa-icon>
+                    Account
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li class="wa-body-s">
+                        <a th:href="'/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            General Ledger
+                        </a>
+                    </li>
+                </ul>
+            </wa-details>
+
             <!-- Reports Section -->
             <wa-details appearance="outlined" variant="info">
                 <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
