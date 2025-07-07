@@ -36,33 +36,25 @@
                                   hx-trigger="change"
                                   hx-include="[name='startDate'], [name='accountNumber']"></wa-input>
                     </div>
-                    
-                    <!-- Loading Indicator -->
-                    <div class="wa-stack wa-gap-xs" style="justify-content: end;">
-                        <div id="loading-indicator" class="htmx-indicator" style="display: flex; align-items: center; gap: var(--wa-space-xs); margin-top: var(--wa-space-l);">
-                            <wa-spinner size="small"></wa-spinner>
-                            <span class="wa-body-s">Loading...</span>
-                        </div>
-                    </div>
                 </div>
             </wa-card>
 
             <!-- Table Content -->
             <div id="tableContent" th:fragment="tableContent">
-                <!-- Empty State -->
-                <div th:if="${generalLedgerData.accounts.empty}" class="wa-center">
-                    <div class="wa-stack wa-gap-m wa-center">
-                        <wa-icon name="chart-line" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
-                        <h3 class="wa-heading-m">No Data Found</h3>
-                        <p class="wa-body">No transactions found for the selected period.</p>
-                    </div>
-                </div>
-                
-                <!-- Data Table in Card -->
-                <wa-card th:unless="${generalLedgerData.accounts.empty}">
+                <wa-card>
+                    <wa-progress-bar id="loading-indicator" indeterminate class="htmx-indicator"></wa-progress-bar>
                     <div class="wa-stack wa-gap-m">
-                        
-                        <wa-table>
+                        <!-- Empty State -->
+                        <div th:if="${generalLedgerData.accounts.empty}" class="wa-center">
+                            <div class="wa-stack wa-gap-m wa-center">
+                                <wa-icon name="chart-line" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
+                                <h3 class="wa-heading-m">No Data Found</h3>
+                                <p class="wa-body">No transactions found for the selected period.</p>
+                            </div>
+                        </div>
+
+                        <!-- Data Table in Card -->
+                        <wa-table th:unless="${generalLedgerData.accounts.empty}">
                             <table id="ledgerTable" style="--wa-table-row-padding: var(--wa-space-xs);">
                                 <thead>
                                     <tr>
@@ -191,7 +183,4 @@
     </div>
 </main>
 
-<th:block layout:fragment="script">
-    <script th:src="@{/assets/ledger/general.js}"></script>
-</th:block>
 </html> 
