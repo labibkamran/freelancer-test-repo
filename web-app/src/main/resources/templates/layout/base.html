@@ -130,6 +130,12 @@
                 </div>
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     <li class="wa-body-s">
+                        <a th:href="'/report/profit-loss?tenantId=' + ${user.ctx.currentTenant.id}"
+                           style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
+                            Profit and loss reports
+                        </a>
+                    </li>
+                    <li class="wa-body-s">
                         <a th:href="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;">
                             Trial Balance

@@ -81,6 +81,42 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
+    override fun getOperatingRevenue(startDate: LocalDate, endDate: LocalDate): List<Posting> {
+        val tenantId = currentTenantId()
+        val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
+        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+
+        val trialBalanceEntries = accountNumbers.mapNotNull { accountNumber ->
+            val account = accounts[accountNumber]
+            if (account != null) {
+                val openingBalance = postingRepository.getAccountBalanceBeforeDate(accountNumber, tenantId, startDate)
+                val movement = postingRepository.getAccountMovementInPeriod(accountNumber, tenantId, startDate, endDate)
+                val closingBalance = openingBalance + movement
+
+                // Only include accounts that have activity or balance
+                if (openingBalance.compareTo(BigDecimal.ZERO) != 0 ||
+                    movement.compareTo(BigDecimal.ZERO) != 0 ||
+                    closingBalance.compareTo(BigDecimal.ZERO) != 0
+                ) {
+                    TrialBalanceEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        openingBalance = openingBalance,
+                        difference = movement,
+                        closingBalance = closingBalance
+                    )
+                } else null
+            } else null
+        }
+
+        val totalOpeningBalance = trialBalanceEntries.sumOf { it.openingBalance }
+        val totalDifference = trialBalanceEntries.sumOf { it.difference }
+        val totalClosingBalance = trialBalanceEntries.sumOf { it.closingBalance }
+
+        return emptyList()
+    }
+
+    @Transactional(readOnly = true)
     override fun getGeneralLedger(
         startDate: LocalDate,
         endDate: LocalDate,
