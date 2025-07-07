@@ -16,6 +16,9 @@ import requests
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 
+# See: https://claude.ai/share/94c60538-7bd1-40e1-83aa-6ab720149e04
+# To see discussion about this script and integration with maskinporten
+
 class MaskinportenClient:
     # The private key JSON file has the same public / private key pair in test and prod for now
     def __init__(self, jwk_file_path="maskinporten_private_key.json"):
