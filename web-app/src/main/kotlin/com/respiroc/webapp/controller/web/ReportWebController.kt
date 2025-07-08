@@ -2,6 +2,7 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.MessageType
 import com.respiroc.webapp.controller.response.Callout
@@ -98,25 +99,58 @@ class ReportWebController(
     ): String {
         val springUser = springUser()
 
-        // Default to current month if no dates provided
         val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val operatingRevenue = postingApi.getOperatingRevenue(effectiveStartDate, effectiveEndDate)
-        val operatingExpences = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
+        val assetPostings = postingApi.getOperatingRevenue(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
+        val revenuePostings = postingApi.getOperatingRevenue(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
+        val operatingCostPostings = postingApi.getOperatingRevenue(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
 
-        val companies = companyApi.findAllCompany()
-        val currentCompany = companies.find { it.tenantId == tenantId() }
 
         model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("currentCompany", currentCompany)
-        model.addAttribute("title", "Trial Balance")
-        model.addAttribute("trialBalanceData", operatingRevenue)
-        model.addAttribute("trialBalanceData", operatingExpences)
         model.addAttribute("startDate", effectiveStartDate)
         model.addAttribute("endDate", effectiveEndDate)
+        model.addAttribute("assetPostings", assetPostings)
+        model.addAttribute("revenuePostings", revenuePostings)
+        model.addAttribute("operatingCostPostings", operatingCostPostings)
 
         return "report/profit-loss"
+    }
+
+    @GetMapping(value = ["/profit-loss"], headers = ["HX-Request"])
+    fun profitLossHtmx(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        return try {
+        val springUser = springUser()
+
+        val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+
+        val assetPostings = postingApi.getOperatingRevenue(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
+        val revenuePostings = postingApi.getOperatingRevenue(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
+        val operatingCostPostings = postingApi.getOperatingRevenue(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
+
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("startDate", effectiveStartDate)
+        model.addAttribute("endDate", effectiveEndDate)
+        model.addAttribute("assetPostings", assetPostings)
+        model.addAttribute("revenuePostings", revenuePostings)
+        model.addAttribute("operatingCostPostings", operatingCostPostings)
+
+         "report/profit-loss :: tableContent"
+        } catch (e: Exception) {
+            logger.error("Error loading profit loss data via HTMX", e)
+            model.addAttribute("callout", Callout("Error loading profit loss: ${e.message}", MessageType.ERROR))
+            return "report/profit-loss :: error-message"
+        }
     }
 }

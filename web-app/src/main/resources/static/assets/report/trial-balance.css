@@ -72,9 +72,7 @@
     font-weight: 600;
     color: #374151;
     border-bottom: 2px solid #e9ecef;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+
 }
 
 .trial-balance-table th.amount-header {

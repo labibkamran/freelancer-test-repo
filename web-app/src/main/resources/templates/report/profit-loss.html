@@ -22,7 +22,7 @@
                                   id="startDate"
                                   name="startDate"
                                   th:value="${startDate}"
-                                  th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  th:hx-get="'/report/profit-loss?tenantId=' + ${user.ctx.currentTenant.id}"
                                   hx-target="#content-area"
                                   hx-indicator="#loading-indicator"
                                   hx-swap="innerHTML"
@@ -37,7 +37,7 @@
                                   id="endDate"
                                   name="endDate"
                                   th:value="${endDate}"
-                                  th:hx-get="'/report/trial-balance?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  th:hx-get="'/report/profit-loss?tenantId=' + ${user.ctx.currentTenant.id}"
                                   hx-target="#content-area"
                                   hx-indicator="#loading-indicator"
                                   hx-swap="innerHTML"
@@ -74,7 +74,7 @@
             <!-- Profit & Loss Content -->
             <div id="content-area">
                 <div th:fragment="tableContent">
-                    <div th:unless="${trialBalanceData.entries.empty}">
+                    <div th:unless="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}">
                         <div style="overflow-x: auto;">
                             <!-- Operating revenues  -->
                             <table class="trial-balance-table">
@@ -82,9 +82,9 @@
                                 <tr>
                                     <th style="width: 15%">Operating revenues</th>
                                     <th style="width: 35%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 15%;"></th>
+
                                 </tr>
                                 <tr>
                                     <th style="width: 15%;">Account</th>
@@ -94,34 +94,33 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="entry : ${trialBalanceData.entries}">
+                                <tr th:each="entry : ${revenuePostings.entries}">
                                     <td>
                                         <span class="account-number" th:text="${entry.accountNumber}">7324</span>
                                     </td>
                                     <td>
                                         <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
                                     </td>
-                                    <td class="amount-cell">
-                                            <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountDescription}">17,904.46</span>
                                     </td>
                                     <td class="amount-cell">
-                                            <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
                                     </td>
                                 </tr>
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row">
-                                    <td colspan="2"><strong>Total</strong></td>
+                                    <td colspan="1"><strong>Total</strong></td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                        <strong th:text="${#numbers.formatDecimal(revenuePostings.totalBalance, 1, 2)}">-1,350,779.71</strong>
                                     </td>
                                 </tr>
                                 </tfoot>
@@ -132,9 +131,9 @@
                                 <tr>
                                     <th style="width: 15%">Operating expenses</th>
                                     <th style="width: 35%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
-                                    <th class="amount-header" style="width: 16.67%;"></th>
+                                    <th class="amount-header" style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 15%;"></th>
+
                                 </tr>
                                 <tr>
                                     <th style="width: 15%;">Account</th>
@@ -144,44 +143,92 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="entry : ${trialBalanceData.entries}">
+                                <tr th:each="entry : ${operatingCostPostings.entries}">
                                     <td>
                                         <span class="account-number" th:text="${entry.accountNumber}">7324</span>
                                     </td>
                                     <td>
                                         <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
                                     </td>
-                                    <td class="amount-cell">
-                                            <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountDescription}">17,904.46</span>
                                     </td>
                                     <td class="amount-cell">
-                                            <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
                                     </td>
                                 </tr>
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row">
-                                    <td colspan="2"><strong>Total</strong></td>
+                                    <td colspan="1"><strong>Total</strong></td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                        <strong th:text="${#numbers.formatDecimal(operatingCostPostings.totalBalance, 1, 2)}">-1,350,779.71</strong>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <table class="trial-balance-table">
+                                <thead>
+                                <tr>
+                                    <th style="width: 15%">Assets</th>
+                                    <th style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 35%;"></th>
+                                    <th class="amount-header" style="width: 15%;"></th>
+
+                                </tr>
+                                <tr>
+                                    <th style="width: 15%;">Account</th>
+                                    <th style="width: 35%;">Account Name</th>
+                                    <th style="width: 35%;">Description</th>
+                                    <th class="amount-header" style="width: 15%;">Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="entry : ${assetPostings.entries}">
+                                    <td>
+                                        <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                    </td>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
+                                    </td>
+                                    <td>
+                                        <span class="account-name" th:text="${entry.accountDescription}">17,904.46</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
+                                                  th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="1"><strong>Total</strong></td>
+                                    <td class="amount-cell">
+
+                                    </td>
+                                    <td class="amount-cell">
+
+                                    </td>
+                                    <td class="amount-cell">
+                                        <strong th:text="${#numbers.formatDecimal(assetPostings.totalBalance, 1, 2)}">-1,350,779.71</strong>
                                     </td>
                                 </tr>
                                 </tfoot>
                             </table>
 
+
                         </div>
                     </div>
 
                     <!-- Empty State -->
-                    <div th:if="${trialBalanceData.entries.empty}" class="empty-state">
+                    <div th:if="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}" class="empty-state">
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
                         </div>
