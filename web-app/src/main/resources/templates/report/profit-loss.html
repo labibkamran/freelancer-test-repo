@@ -79,6 +79,13 @@
                             <!-- Operating revenues  -->
                             <table class="trial-balance-table">
                                 <thead>
+
+                                <tr>
+                                    <th style="width: 15%;">Account</th>
+                                    <th style="width: 35%;">Account Name</th>
+                                    <th style="width: 35%;">Description</th>
+                                    <th class="amount-header" style="width: 15%;">Amount</th>
+                                </tr>
                                 <tr>
                                     <th style="width: 15%">Operating revenues</th>
                                     <th style="width: 35%;"></th>
@@ -86,17 +93,11 @@
                                     <th class="amount-header" style="width: 15%;"></th>
 
                                 </tr>
-                                <tr>
-                                    <th style="width: 15%;">Account</th>
-                                    <th style="width: 35%;">Account Name</th>
-                                    <th style="width: 35%;">Description</th>
-                                    <th class="amount-header" style="width: 15%;">Amount</th>
-                                </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="entry : ${revenuePostings.entries}">
                                     <td>
-                                        <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                        <span class="account-number"  th:text="${entry.accountNumber}">7324</span>
                                     </td>
                                     <td>
                                         <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
@@ -109,10 +110,11 @@
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
                                     </td>
                                 </tr>
+                                <tr></tr>
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row">
-                                    <td colspan="1"><strong>Total</strong></td>
+                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
                                     <td class="amount-cell">
 
                                     </td>
@@ -135,12 +137,6 @@
                                     <th class="amount-header" style="width: 15%;"></th>
 
                                 </tr>
-                                <tr>
-                                    <th style="width: 15%;">Account</th>
-                                    <th style="width: 35%;">Account Name</th>
-                                    <th style="width: 35%;">Description</th>
-                                    <th class="amount-header" style="width: 15%;">Amount</th>
-                                </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="entry : ${operatingCostPostings.entries}">
@@ -158,10 +154,11 @@
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
                                     </td>
                                 </tr>
+                                <tr></tr>
                                 </tbody>
                                 <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="1"><strong>Total</strong></td>
+                                <tr class="total-row" >
+                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
                                     <td class="amount-cell">
 
                                     </td>
@@ -183,12 +180,7 @@
                                     <th class="amount-header" style="width: 15%;"></th>
 
                                 </tr>
-                                <tr>
-                                    <th style="width: 15%;">Account</th>
-                                    <th style="width: 35%;">Account Name</th>
-                                    <th style="width: 35%;">Description</th>
-                                    <th class="amount-header" style="width: 15%;">Amount</th>
-                                </tr>
+
                                 </thead>
                                 <tbody>
                                 <tr th:each="entry : ${assetPostings.entries}">
@@ -206,10 +198,11 @@
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}">123,938.85</span>
                                     </td>
                                 </tr>
+                                <tr></tr>
                                 </tbody>
                                 <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="1"><strong>Total</strong></td>
+                                <tr class="total-row" >
+                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
                                     <td class="amount-cell">
 
                                     </td>
