@@ -6,6 +6,12 @@
     <link rel="stylesheet" th:href="@{/assets/customer/customer.css}">
     <link rel="stylesheet" th:href="@{/assets/fragments/customer-table.css}">
 </head>
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Customers
+    </wa-breadcrumb-item>
+</th:block>
 <body>
 <main layout:fragment="content">
     <div>

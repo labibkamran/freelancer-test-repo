@@ -4,6 +4,15 @@
 <head>
     <link rel="stylesheet" th:href="@{/assets/customer/form.css}">
 </head>
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item th:href="'/customer?tenantId=' + ${user.ctx.currentTenant?.id}">
+        Customers
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        Create Customer
+    </wa-breadcrumb-item>
+</th:block>
 <body>
 <main layout:fragment="content">
     <div class="container">
