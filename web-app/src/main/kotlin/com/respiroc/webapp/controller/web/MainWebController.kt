@@ -2,7 +2,6 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.response.Callout
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +30,7 @@ class MainWebController(
     fun dashboard(
         model: Model
     ): String {
-        addCommonAttributes(model, companyApi, "Dashboard",true)
+        addCommonAttributes(model, companyApi, "Dashboard", true)
         return "dashboard/index"
     }
 } 
