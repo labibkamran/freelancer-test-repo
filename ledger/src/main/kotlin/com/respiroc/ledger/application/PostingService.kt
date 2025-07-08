@@ -9,9 +9,12 @@ import com.respiroc.ledger.api.payload.TrialBalancePayload
 import com.respiroc.ledger.api.payload.GeneralLedgerPayload
 import com.respiroc.ledger.api.payload.GeneralLedgerAccountEntry
 import com.respiroc.ledger.api.payload.GeneralLedgerPostingEntry
+import com.respiroc.ledger.api.payload.ProfitLossEntry
+import com.respiroc.ledger.api.payload.ProfitLossPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
+import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.util.context.ContextAwareApi
@@ -81,40 +84,43 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun getOperatingRevenue(startDate: LocalDate, endDate: LocalDate): List<Posting> {
+    override fun getOperatingRevenue(accountType: AccountType, startDate: LocalDate, endDate: LocalDate): ProfitLossPayload {
         val tenantId = currentTenantId()
-        val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
         val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
 
-        val trialBalanceEntries = accountNumbers.mapNotNull { accountNumber ->
-            val account = accounts[accountNumber]
-            if (account != null) {
-                val openingBalance = postingRepository.getAccountBalanceBeforeDate(accountNumber, tenantId, startDate)
-                val movement = postingRepository.getAccountMovementInPeriod(accountNumber, tenantId, startDate, endDate)
-                val closingBalance = openingBalance + movement
-
-                // Only include accounts that have activity or balance
-                if (openingBalance.compareTo(BigDecimal.ZERO) != 0 ||
-                    movement.compareTo(BigDecimal.ZERO) != 0 ||
-                    closingBalance.compareTo(BigDecimal.ZERO) != 0
-                ) {
-                    TrialBalanceEntry(
-                        accountNumber = accountNumber,
-                        accountName = account.accountName,
-                        openingBalance = openingBalance,
-                        difference = movement,
-                        closingBalance = closingBalance
-                    )
-                } else null
-            } else null
+        val postings = when (accountType) {
+            AccountType.ASSET -> postingRepository.findAssetPostings(tenantId, startDate, endDate)
+            AccountType.REVENUE -> postingRepository.findRevenuePostings(tenantId, startDate, endDate)
+            AccountType.EXPENSE -> postingRepository.findOperatingCostPostings(tenantId, startDate, endDate)
+            else -> emptyList()
         }
 
-        val totalOpeningBalance = trialBalanceEntries.sumOf { it.openingBalance }
-        val totalDifference = trialBalanceEntries.sumOf { it.difference }
-        val totalClosingBalance = trialBalanceEntries.sumOf { it.closingBalance }
+        val profitLossEntries = postings.mapNotNull { postingData ->
+            val accountNumber = postingData[0] as String
+            val amount = postingData[1] as BigDecimal
+            val account = accounts[accountNumber]
+            if (account != null) {
+                ProfitLossEntry(
+                    accountNumber = accountNumber,
+                    accountName = account.accountName,
+                    accountDescription = account.accountDescription,
+                    amount = amount
+                )
+            } else {
+                null
+            }
+        }
 
-        return emptyList()
+        val totalBalance = profitLossEntries.sumOf { it.amount }
+
+        return ProfitLossPayload(
+            entries = profitLossEntries,
+            totalBalance = totalBalance
+        )
     }
+
+
+
 
     @Transactional(readOnly = true)
     override fun getGeneralLedger(

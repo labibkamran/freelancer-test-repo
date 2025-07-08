@@ -57,4 +57,25 @@ interface PostingRepository : CustomJpaRepository<Posting, Long> {
         @Param("startDate") startDate: LocalDate, 
         @Param("endDate") endDate: LocalDate
     ): List<Posting>
+
+    @Query("""SELECT p.accountNumber, p.amount FROM Posting p WHERE p.tenantId = :tenantId AND p.accountNumber LIKE '1%' AND p.postingDate BETWEEN :startDate AND :endDate ORDER BY p.postingDate, p.accountNumber""")
+    fun findAssetPostings(
+        @Param("tenantId") tenantId: Long,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate
+    ): List<Array<Any>>
+
+    @Query("""SELECT p.accountNumber, p.amount FROM Posting p WHERE p.tenantId = :tenantId AND (p.accountNumber LIKE '4%' OR p.accountNumber LIKE '5%' OR p.accountNumber LIKE '6%' OR p.accountNumber LIKE '7%') AND p.postingDate BETWEEN :startDate AND :endDate ORDER BY p.postingDate, p.accountNumber""")
+    fun findOperatingCostPostings(
+        @Param("tenantId") tenantId: Long,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate
+    ): List<Array<Any>>
+
+    @Query("""SELECT p.accountNumber, p.amount FROM Posting p WHERE p.tenantId = :tenantId AND p.accountNumber LIKE '3%' AND p.postingDate BETWEEN :startDate AND :endDate ORDER BY p.postingDate, p.accountNumber""")
+    fun findRevenuePostings(
+        @Param("tenantId") tenantId: Long,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate
+    ): List<Array<Any>>
 }
