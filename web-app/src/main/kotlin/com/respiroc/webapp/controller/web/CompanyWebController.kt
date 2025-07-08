@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import jakarta.validation.Valid
 
 @Controller
@@ -37,7 +38,8 @@ class CompanyWebController(
     fun createCompany(
         @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
         bindingResult: BindingResult,
-        model: Model
+        model: Model,
+        redirectAttributes: RedirectAttributes
     ): String {
         val springUser = springUser()
         val companies = companyApi.findAllCompany()
@@ -63,16 +65,12 @@ class CompanyWebController(
             
             val company = companyApi.createNewCompany(command)
             
-            model.addAttribute("callout", Callout(
-                message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
-                type = MessageType.SUCCESS,
-                link = "/dashboard?tenantId=${company.tenantId}"
+            redirectAttributes.addFlashAttribute("callout", Callout(
+                message = "Company '${company.name}' has been created successfully!",
+                type = MessageType.SUCCESS
             ))
             
-            // Reset form
-            model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-            
-            return "company/create"
+            return "redirect:/dashboard?tenantId=${company.tenantId}"
             
         } catch (e: Exception) {
             model.addAttribute("callout", Callout(
