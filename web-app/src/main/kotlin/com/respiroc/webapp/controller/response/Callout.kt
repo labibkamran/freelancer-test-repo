@@ -1,14 +1,25 @@
 package com.respiroc.webapp.controller.response
 
-data class Callout(
-    val message: String,
-    val type: MessageType,
-    val link: String? = null
-)
+sealed class Callout(
+    open val message: String,
+    open val link: String? = null
+) {
+    data class Success(override val message: String, override val link: String? = null) : Callout(message, link)
+    data class Error(override val message: String, override val link: String? = null) : Callout(message, link)
+    data class Warning(override val message: String, override val link: String? = null) : Callout(message, link)
+    data class Info(override val message: String, override val link: String? = null) : Callout(message, link)
 
-enum class MessageType(val variant: String, val iconName: String) {
-    SUCCESS("success", "circle-check"),
-    ERROR("danger", "circle-exclamation"),
-    WARNING("warning", "triangle-exclamation"),
-    INFO("brand", "circle-info")
-} 
+    fun icon(): String = when (this) {
+        is Success -> "circle-check"
+        is Error -> "circle-exclamation"
+        is Warning -> "triangle-exclamation"
+        is Info -> "circle-info"
+    }
+
+    fun variant(): String = when (this) {
+        is Success -> "success"
+        is Error -> "danger"
+        is Warning -> "warning"
+        is Info -> "brand"
+    }
+}
