@@ -39,9 +39,7 @@
                                 orientation="horizontal"
                                 name="privateCustomer"
                                 th:value="${customer.privateCustomer}"
-                                th:attr="
-                                           hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}
-                                           "
+                                th:attr="hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}"
                                 hx-target="#customerFormFields"
                                 hx-trigger="change"
                         >
