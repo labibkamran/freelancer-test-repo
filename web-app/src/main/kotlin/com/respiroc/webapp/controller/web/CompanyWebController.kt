@@ -6,12 +6,11 @@ import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
 import com.respiroc.webapp.controller.response.Callout
-import com.respiroc.webapp.controller.response.MessageType
+import jakarta.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-import jakarta.validation.Valid
 
 @Controller
 @RequestMapping(value = ["/company"])
@@ -22,14 +21,8 @@ class CompanyWebController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompany()
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Create Company")
+        addCommonAttributes(model, companyApi, "Create Company")
         model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-
         return "company/create"
     }
 
@@ -39,13 +32,7 @@ class CompanyWebController(
         bindingResult: BindingResult,
         model: Model
     ): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompany()
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Create Company")
-
+        addCommonAttributes(model, companyApi, "Create Company")
         if (bindingResult.hasErrors()) {
             model.addAttribute(
                 calloutAttributeNames, Callout.Error(
@@ -73,9 +60,9 @@ class CompanyWebController(
 
             // Reset form
             model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-            
+
             return "company/create"
-            
+
         } catch (e: Exception) {
             model.addAttribute(
                 calloutAttributeNames, Callout.Error(
@@ -93,7 +80,7 @@ class CompanyWebController(
         model: Model
     ): String {
         val query = name.trim()
-        
+
         if (query.length < 2) {
             return "fragments/company-search :: empty"
         }
@@ -103,7 +90,7 @@ class CompanyWebController(
             model.addAttribute("companies", searchResult.companies.take(10))
             return "fragments/company-search :: results"
         } catch (e: Exception) {
-            model.addAttribute("error", "Search failed: ${e.message}")
+            model.addAttribute(errorMessageAttributeName, "Search failed: ${e.message}")
             return "fragments/company-search :: error"
         }
     }

@@ -29,10 +29,7 @@ class AuthWebController(
         // If user is already authenticated, redirect appropriately
         if (isLoggedIn())
             return "redirect:/dashboard"
-        } catch (_: Exception) {
-            // User not authenticated, continue to login page
-        }
-        model.addAttribute("title", "Login")
+        model.addAttribute(titleAttributeName, "Login")
         return "auth/login"
     }
 
@@ -57,7 +54,7 @@ class AuthWebController(
 
             return "redirect:/dashboard"
         } catch (_: Exception) {
-            redirectAttributes.addFlashAttribute("error", "Invalid email or password")
+            redirectAttributes.addFlashAttribute(errorMessageAttributeName, "Invalid email or password")
             return "redirect:/auth/login"
         }
     }
@@ -67,10 +64,7 @@ class AuthWebController(
         // If user is already authenticated, redirect appropriately
         if (isLoggedIn())
             return "redirect:/dashboard"
-        } catch (_: Exception) {
-            // User not authenticated, continue to signup page
-        }
-        model.addAttribute("title", "Sign Up")
+        model.addAttribute(titleAttributeName, "Sign Up")
         return "auth/signup"
     }
 
@@ -84,11 +78,10 @@ class AuthWebController(
                 signupRequest.email,
                 signupRequest.password
             )
-            
-            redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.")
+            redirectAttributes.addFlashAttribute(successMessageAttributeName, "Registration successful. Please login.")
             return "redirect:/auth/login"
         } catch (e: Exception) {
-            redirectAttributes.addFlashAttribute("error", "${e.message}")
+            redirectAttributes.addFlashAttribute(errorMessageAttributeName, e.message)
             return "redirect:/auth/signup"
         }
     }
