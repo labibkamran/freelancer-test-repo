@@ -10,5 +10,11 @@ interface CustomerRepository : CustomJpaRepository<Customer, Long> {
     fun findCustomersByTenantId(tenantId: Long): List<Customer>
     fun findCustomersByNameContainingIgnoreCaseAndTenantId(name: String, tenantId: Long): List<Customer>
     fun existsByIdAndTenantId(id: Long, tenantId: Long): Boolean
+    fun existsCustomersByNameContainingIgnoreCaseOrOrganizationNumberContainingIgnoreCase(
+        name: String,
+        organizationNumber: String
+    ): Boolean
+
+    fun existsCustomersByNameContainingIgnoreCase(name: String): Boolean
 
 }

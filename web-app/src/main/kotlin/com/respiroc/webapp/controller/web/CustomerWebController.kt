@@ -69,8 +69,9 @@ class CustomerWebController(
             privateCustomer = customer.privateCustomer
         )
         val tenantId = user().currentTenant!!.id
+        // TODO: add controller adviser
+        // TODO: Fix callout fragment to display error messages without refresh page
         customerService.createNewCustomer(payload, tenantId)
-
         val headers = HttpHeaders()
         headers.set("HX-Redirect", "/customer?tenantId=${tenantId}")
         return ResponseEntity<Any?>(headers, HttpStatus.OK)
