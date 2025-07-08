@@ -173,14 +173,6 @@ class RCombobox extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        // Set initial display value if value is provided
-        if (this.value) {
-            const item = this.items.find(item => item.value === this.value);
-            if (item) {
-                this.displayValue = item.displayText || `${item.title}${item.subtitle ? ' ' + item.subtitle : ''}`;
-            }
-        }
-
         // Listen for clicks outside to close dropdown
         this._handleOutsideClick = this._handleOutsideClick.bind(this);
         document.addEventListener('click', this._handleOutsideClick);
@@ -189,6 +181,24 @@ class RCombobox extends LitElement {
     disconnectedCallback() {
         super.disconnectedCallback();
         document.removeEventListener('click', this._handleOutsideClick);
+    }
+
+    updated(changedProperties) {
+        // This is the key change: when items or value are updated,
+        // we ensure the display text is correctly set. This solves the race condition.
+        if ((changedProperties.has('items') || changedProperties.has('value')) && this.value) {
+            const item = this.items.find(i => i.value === this.value);
+            if (item) {
+                const newDisplayValue = item.displayText || `${item.title}${item.subtitle ? ' ' + item.subtitle : ''}`;
+                // Only update if it's different to avoid re-rendering loops
+                if (this.displayValue !== newDisplayValue) {
+                    this.displayValue = newDisplayValue;
+                    this.searchQuery = newDisplayValue; // Also update searchQuery to show in input
+                }
+            } else {
+                this.displayValue = ''; // Clear if value is not in items
+            }
+        }
     }
 
     _handleOutsideClick(e) {
