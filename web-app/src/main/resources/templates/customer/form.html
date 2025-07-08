@@ -30,6 +30,7 @@
                           th:attr="hx-post='/customer?tenantId=' + ${user.ctx.currentTenant?.id}"
                           hx-target="#alert-container"
                           hx-indicator="#loading-indicator"
+                          hx-disabled-elt="find #submitButton"
                           hx-swap="innerHTML">
                         <div class="form-group">
                             <wa-select required label="Type" name="type" th:value="${customer.type}" th:field="*{type}">
