@@ -31,73 +31,80 @@ function addPostingLine() {
     const row = document.createElement('tr');
     row.className = 'posting-line-row';
     row.id = 'posting-line-row-' + rowCounter;
+    const initialDate = new Date().toISOString().split('T')[0];
 
     const currencyOptions = supportedCurrencies.map(currency =>
-        `<option value="${currency}" ${currency === companyCurrency ? 'selected' : ''}>${currency}</option>`
+        `<wa-option value="${currency}">${currency}</wa-option>`
     ).join('');
 
     row.innerHTML = `
                 <td>
-                    <input type="date" 
-                           name="postingLines[${rowCounter}].postingDate" 
-                           value="${new Date().toISOString().split('T')[0]}"
-                           onchange="validatePostingLineFields(${rowCounter})"
-                           required>
+                    <wa-input type="date"
+                           size="small"
+                           value="${initialDate}"
+                           onchange="updateHiddenField(${rowCounter}, 'postingDate', this.value)"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].postingDate" id="hidden-postingDate-${rowCounter}" value="${initialDate}">
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                         <r-combobox
                             id="debit-account-${rowCounter}"
-                            name="postingLines[${rowCounter}].debitAccount"
                             placeholder="Search debit account..."
                             style="font-size: 0.8rem;">
                         </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].debitAccount" id="hidden-debitAccount-${rowCounter}">
+                        
                         <r-combobox
                             id="debit-vat-${rowCounter}"
-                            name="postingLines[${rowCounter}].debitVatCode"
                             placeholder="VAT code required"
                             style="font-size: 0.75rem;">
                         </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].debitVatCode" id="hidden-debitVatCode-${rowCounter}">
                     </div>
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                         <r-combobox
                             id="credit-account-${rowCounter}"
-                            name="postingLines[${rowCounter}].creditAccount"
                             placeholder="Search credit account..."
                             style="font-size: 0.8rem;">
                         </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].creditAccount" id="hidden-creditAccount-${rowCounter}">
+                        
                         <r-combobox
                             id="credit-vat-${rowCounter}"
-                            name="postingLines[${rowCounter}].creditVatCode"
                             placeholder="VAT code required"
                             style="font-size: 0.75rem;">
                         </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].creditVatCode" id="hidden-creditVatCode-${rowCounter}">
                     </div>
                 </td>
                 <td>
-                    <input type="number" 
-                           step="0.01" 
-                           name="postingLines[${rowCounter}].amount" 
-                           class="amount-input"
+                    <wa-input type="number"
+                           size="small"
+                           step="0.01"
                            placeholder="0.00"
-                           onchange="handleAmountChange(${rowCounter})"
-                           onblur="validatePostingLineFields(${rowCounter})"
-                           required>
+                           onchange="updateHiddenField(${rowCounter}, 'amount', this.value); handleAmountChange(${rowCounter});"
+                           onblur="validatePostingLineFields(${rowCounter})"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].amount" id="hidden-amount-${rowCounter}">
                     <div id="converted-amount-${rowCounter}" class="converted-amount" style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;"></div>
                 </td>
                 <td>
-                    <select name="postingLines[${rowCounter}].currency" 
+                    <wa-select
+                            size="small"
                             class="currency-select"
-                            onchange="handleCurrencyChange(${rowCounter})">
+                            value="${companyCurrency}"
+                            onchange="updateHiddenField(${rowCounter}, 'currency', this.value); handleCurrencyChange(${rowCounter});">
                         ${currencyOptions}
-                    </select>
+                    </wa-select>
+                    <input type="hidden" name="postingLines[${rowCounter}].currency" id="hidden-currency-${rowCounter}" value="${companyCurrency}">
                 </td>
                 <td>
-                    <input type="text" 
-                           name="postingLines[${rowCounter}].description" 
-                           placeholder="Description">
+                    <wa-input type="text"
+                           size="small"
+                           placeholder="Description"
+                           onchange="updateHiddenField(${rowCounter}, 'description', this.value)"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].description" id="hidden-description-${rowCounter}">
                 </td>
                 <td>
                     <wa-button type="button" size="small" variant="danger" onclick="removePostingLine(${rowCounter})">
@@ -115,6 +122,13 @@ function addPostingLine() {
     updateBalance();
 }
 
+function updateHiddenField(rowId, fieldName, value) {
+    const hiddenInput = document.getElementById(`hidden-${fieldName}-${rowId}`);
+    if (hiddenInput) {
+        hiddenInput.value = value;
+    }
+}
+
 function initializeComboboxes(rowId) {
     // Initialize account comboboxes with accounts data
     const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
@@ -129,6 +143,7 @@ function initializeComboboxes(rowId) {
         }));
         
         debitAccountCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'debitAccount', e.target.value);
             toggleAccountSelection(rowId, 'debit');
             validatePostingLineFields(rowId);
         });
@@ -143,6 +158,7 @@ function initializeComboboxes(rowId) {
         }));
         
         creditAccountCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'creditAccount', e.target.value);
             toggleAccountSelection(rowId, 'credit');
             validatePostingLineFields(rowId);
         });
@@ -165,9 +181,11 @@ function initializeComboboxes(rowId) {
         // Set default VAT code (first one)
         if (vatCodes.length > 0) {
             debitVatCombo.value = vatCodes[0].code;
+            updateHiddenField(rowId, 'debitVatCode', vatCodes[0].code);
         }
         
         debitVatCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'debitVatCode', e.target.value);
             validatePostingLineFields(rowId);
         });
     }
@@ -185,9 +203,11 @@ function initializeComboboxes(rowId) {
         // Set default VAT code (first one)
         if (vatCodes.length > 0) {
             creditVatCombo.value = vatCodes[0].code;
+            updateHiddenField(rowId, 'creditVatCode', vatCodes[0].code);
         }
         
         creditVatCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'creditVatCode', e.target.value);
             validatePostingLineFields(rowId);
         });
     }
@@ -202,10 +222,10 @@ function removePostingLine(id) {
 }
 
 function validatePostingLineFields(rowId) {
-    const dateInput = document.querySelector(`input[name="postingLines[${rowId}].postingDate"]`);
+    const dateInput = document.querySelector(`wa-input[name="postingLines[${rowId}].postingDate"]`);
     const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
     const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
-    const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
+    const amountInput = document.querySelector(`wa-input[name="postingLines[${rowId}].amount"]`);
     const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
     const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
@@ -274,11 +294,12 @@ function updateBalance() {
 
     // Calculate totals from individual posting lines using converted amounts
     document.querySelectorAll('.posting-line-row').forEach((row, index) => {
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
+        const rowId = row.id.replace('posting-line-row-', '');
+        const amountInput = row.querySelector('wa-input[type="number"]');
+        const debitInput = document.getElementById(`debit-account-${rowId}`);
+        const creditInput = document.getElementById(`credit-account-${rowId}`);
+        const dateInput = row.querySelector('wa-input[type="date"]');
+        const currencySelect = row.querySelector('wa-select');
 
         if (amountInput && amountInput.value && dateInput && dateInput.value) {
             const originalAmount = parseFloat(amountInput.value);
@@ -350,8 +371,8 @@ async function handleCurrencyChange(rowId) {
 
 // Update converted amount display
 async function updateConvertedAmount(rowId) {
-    const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
-    const currencySelect = document.querySelector(`select[name="postingLines[${rowId}].currency"]`);
+    const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
+    const currencySelect = document.querySelector(`#posting-line-row-${rowId} wa-select`);
     const convertedAmountDiv = document.getElementById(`converted-amount-${rowId}`);
 
     if (amountInput && currencySelect && convertedAmountDiv) {
@@ -427,10 +448,10 @@ function validateFormFields() {
 
     rows.forEach((row, index) => {
         const rowId = row.id.replace('posting-line-row-', '');
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
+        const dateInput = row.querySelector('wa-input[name*=".postingDate"]');
         const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
         const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
-        const amountInput = row.querySelector('input[name*=".amount"]');
+        const amountInput = row.querySelector('wa-input[name*=".amount"]');
         const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
         const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
@@ -531,9 +552,28 @@ async function validateAndPrepareForm(event) {
         return false;
     }
 
-    // Then prepare form data
-    const isValid = await prepareFormData(event);
-    if (!isValid) {
+    // Submission is allowed, just remove empty rows before submitting
+    const allRows = Array.from(document.querySelectorAll('.posting-line-row'));
+    allRows.forEach(row => {
+        const rowId = row.id.replace('posting-line-row-', '');
+        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+        const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
+
+        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
+        const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+
+        // If a row has no accounts and no amount, it's considered empty and should be removed.
+        if (!hasDebitAccount && !hasCreditAccount && !hasAmount) {
+            row.remove();
+        }
+    });
+
+
+    // Final balance check before allowing submission
+    const saveButton = document.getElementById('saveButton');
+    if (saveButton.disabled) {
         event.preventDefault();
         return false;
     }
@@ -541,121 +581,10 @@ async function validateAndPrepareForm(event) {
     return true;
 }
 
-// Prepare form data before submission
+// Prepare form data before submission - This function is now much simpler.
 async function prepareFormData(event) {
-
-    // First, make sure all conversions are up to date
-    const rows = Array.from(document.querySelectorAll('.posting-line-row'));
-
-    // Update all conversions before validating
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const rowId = row.id.replace('posting-line-row-', '');
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
-
-        if (amountInput && amountInput.value && currencySelect && currencySelect.value) {
-            await updateConvertedAmount(rowId);
-        }
-    }
-
-    // Now validate the balance
-    updateBalance();
-
-    // Remove empty rows and reindex
-    const tbody = document.getElementById('postingLines');
-    const allRows = Array.from(tbody.querySelectorAll('.posting-line-row'));
-
-    // Filter out empty rows and prepare posting lines
-    const validPostingLines = [];
-
-    allRows.forEach(row => {
-        const rowId = row.id.replace('posting-line-row-', '');
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
-        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
-        const descriptionInput = row.querySelector('input[name*=".description"]');
-        const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
-        const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
-
-        const hasDate = dateInput && dateInput.value.trim() !== '';
-        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
-        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
-        const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-
-        if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
-            const baseData = {
-                postingDate: dateInput.value,
-                amount: amountInput.value,
-                currency: currencySelect.value,
-                description: descriptionInput ? descriptionInput.value : ''
-            };
-
-            // Always create one posting line with both debit and credit accounts (backend will handle splitting)
-            validPostingLines.push({
-                ...baseData,
-                debitAccount: hasDebitAccount ? debitAccountCombo.value : '',
-                creditAccount: hasCreditAccount ? creditAccountCombo.value : '',
-                debitVatCode: hasDebitAccount ? (debitVatCombo ? debitVatCombo.value : '') : '',
-                creditVatCode: hasCreditAccount ? (creditVatCombo ? creditVatCombo.value : '') : ''
-            });
-        }
-    });
-
-    // Check balance before submission - use the same logic as backend
-    let totalSignedAmount = 0;
-
-    validPostingLines.forEach(line => {
-        const amount = parseFloat(line.amount);
-        const hasDebit = line.debitAccount.trim() !== '';
-        const hasCredit = line.creditAccount.trim() !== '';
-
-        if (hasDebit && hasCredit) {
-            // Both sides filled - this line is balanced (backend will create +amount and -amount)
-            // No contribution to total (0)
-        } else if (hasDebit) {
-            // Only debit - positive contribution
-            totalSignedAmount += amount;
-        } else if (hasCredit) {
-            // Only credit - negative contribution
-            totalSignedAmount -= amount;
-        }
-    });
-
-    if (Math.abs(totalSignedAmount) >= 0.01) {
-        alert(`Voucher is not balanced! Total signed amount: ${totalSignedAmount.toFixed(2)} ${companyCurrency}`);
-        return false;
-    }
-
-    // Remove all rows
-    allRows.forEach(row => row.remove());
-
-    // Create new rows from validPostingLines
-    validPostingLines.forEach((line, index) => {
-        const newRow = document.createElement('tr');
-        newRow.className = 'posting-line-row';
-        newRow.innerHTML = `
-                    <input type="hidden" name="postingLines[${index}].postingDate" value="${line.postingDate}">
-                    <input type="hidden" name="postingLines[${index}].debitAccount" value="${line.debitAccount || ''}">
-                    <input type="hidden" name="postingLines[${index}].creditAccount" value="${line.creditAccount || ''}">
-                    <input type="hidden" name="postingLines[${index}].amount" value="${line.amount}">
-                    <input type="hidden" name="postingLines[${index}].currency" value="${line.currency}">
-                    <input type="hidden" name="postingLines[${index}].description" value="${line.description || ''}">
-                    <input type="hidden" name="postingLines[${index}].debitVatCode" value="${line.debitVatCode || ''}">
-                    <input type="hidden" name="postingLines[${index}].creditVatCode" value="${line.creditVatCode || ''}">
-                `;
-        tbody.appendChild(newRow);
-    });
-
-    // If no valid posting lines, prevent form submission
-    if (validPostingLines.length === 0) {
-        alert('Please add at least one complete posting line.');
-        return false;
-    }
-
-    // Form is valid, allow submission
+    // This function is now removed, its logic is merged into validateAndPrepareForm
+    // All data is now handled by hidden inputs, updated in real-time.
     return true;
 }
 
