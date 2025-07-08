@@ -23,24 +23,26 @@ class CustomerWebController(
 ) : BaseController() {
 
     @GetMapping("")
-    fun getCustomers(
-        @RequestHeader(value = "HX-Request", required = false) hxRequest: String?,
-        @RequestParam("name", required = false) name: String?,
-        model: Model
-    ): String {
-        val isExistName = !(name == null || name.isBlank())
+    fun getCustomers(model: Model): String {
+        findCustomers(model)
+        return "customer/customer"
+    }
+
+    @GetMapping("/search")
+    fun searchCustomers(@RequestParam("name") name: String, model: Model): String {
+        findCustomers(model, name)
+        return "fragments/customer-table"
+    }
+
+    private fun findCustomers(model: Model, name: String = "") {
         val tenantId = user().currentTenant!!.id
+        val isExistName = !(name.isBlank())
         val customers: List<Customer> = if (isExistName)
             customerService.findByNameContainingAndTenantId(name, tenantId)
         else
             customerService.findAllCustomerByTenantId(tenantId)
         model.addAttribute("customers", customers)
         addCommonAttributes(model, companyApi, "Customer")
-
-        return if ("true".equals(hxRequest, true))
-            "fragments/customer-table"
-        else
-            "customer/customer"
     }
 
     @GetMapping("/new")
