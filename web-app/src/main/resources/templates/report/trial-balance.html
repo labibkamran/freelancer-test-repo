@@ -4,6 +4,16 @@
 <head>
     <link rel="stylesheet" th:href="@{/assets/report/trial-balance.css}">
 </head>
+
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Reports
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        Trial Balance
+    </wa-breadcrumb-item>
+</th:block>
 <body>
 <main layout:fragment="content">
     <div class="container py-4">
@@ -59,16 +69,6 @@
             <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
                 <wa-icon name="exclamation-triangle"></wa-icon>
                 <span th:text="${errorMessage}">Error occurred</span>
-            </div>
-            
-            <!-- Company Selection Required -->
-            <div th:if="${user == null or user.ctx.currentTenant == null}" class="empty-state">
-                <div class="empty-state-icon">
-                    <wa-icon name="building"></wa-icon>
-                </div>
-                <h3>Company Selection Required</h3>
-                <p>Please select a company before viewing the trial balance.</p>
-                <a href="/tenant/select" class="btn btn-primary">Select Company</a>
             </div>
             
             <!-- Trial Balance Content -->
