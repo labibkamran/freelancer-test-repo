@@ -116,10 +116,13 @@ function addPostingLine() {
     tbody.appendChild(row);
 
     // Initialize r-combobox components after adding the row
-    initializeComboboxes(rowCounter);
+    const newRowId = rowCounter;
+    requestAnimationFrame(() => {
+        initializeComboboxes(newRowId);
+        updateBalance();
+    });
 
     rowCounter++;
-    updateBalance();
 }
 
 function updateHiddenField(rowId, fieldName, value) {
@@ -145,7 +148,7 @@ function initializeComboboxes(rowId) {
         debitAccountCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'debitAccount', e.target.value);
             toggleAccountSelection(rowId, 'debit');
-            validatePostingLineFields(rowId);
+            updateBalance();
         });
     }
 
@@ -160,7 +163,7 @@ function initializeComboboxes(rowId) {
         creditAccountCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'creditAccount', e.target.value);
             toggleAccountSelection(rowId, 'credit');
-            validatePostingLineFields(rowId);
+            updateBalance();
         });
     }
 
@@ -187,6 +190,7 @@ function initializeComboboxes(rowId) {
         debitVatCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'debitVatCode', e.target.value);
             validatePostingLineFields(rowId);
+            updateBalance();
         });
     }
 
@@ -209,8 +213,12 @@ function initializeComboboxes(rowId) {
         creditVatCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'creditVatCode', e.target.value);
             validatePostingLineFields(rowId);
+            updateBalance();
         });
     }
+
+    // Validate the line after setting defaults
+    validatePostingLineFields(rowId);
 }
 
 function removePostingLine(id) {
@@ -222,10 +230,10 @@ function removePostingLine(id) {
 }
 
 function validatePostingLineFields(rowId) {
-    const dateInput = document.querySelector(`wa-input[name="postingLines[${rowId}].postingDate"]`);
+    const dateInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="date"]`);
     const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
     const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
-    const amountInput = document.querySelector(`wa-input[name="postingLines[${rowId}].amount"]`);
+    const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
     const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
     const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
@@ -264,6 +272,10 @@ function validatePostingLineFields(rowId) {
             if (creditAccountCombo) {
                 const input = creditAccountCombo.shadowRoot?.querySelector('.combobox-input');
                 if (input) input.classList.add('has-error');
+            }
+            // Also highlight the amount field as it's meaningless without an account
+            if (amountInput) {
+                amountInput.classList.add('field-error');
             }
         }
 
@@ -416,7 +428,6 @@ function toggleAccountSelection(rowId, type) {
     // Both debit and credit sides can be filled
     
     validatePostingLineFields(rowId);
-    updateBalance();
 }
 
 // Old search and dropdown functions removed since we're using r-combobox
