@@ -6,6 +6,8 @@ import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,18 +22,14 @@ class AuthWebController(
     private val userApi: UserInternalApi
 ) : BaseController() {
 
-    private val JWT_TOKEN_PERIOD : Int = 24 * 60 * 60
+    private val JWT_TOKEN_PERIOD: Int = 24 * 60 * 60
 
     @GetMapping("/login")
     fun loginPage(model: Model): String {
         // If user is already authenticated, redirect appropriately
-        try {
-            val springUser = springUser()
+        if (isLoggedIn())
             return "redirect:/dashboard"
-        } catch (_: Exception) {
-            // User not authenticated, continue to login page
-        }
-        addCommonAttributes(model, "Login")
+        model.addAttribute(titleAttributeName, "Login")
         return "auth/login"
     }
 
@@ -56,7 +54,7 @@ class AuthWebController(
 
             return "redirect:/dashboard"
         } catch (_: Exception) {
-            redirectAttributes.addFlashAttribute("error", "Invalid email or password")
+            redirectAttributes.addFlashAttribute(errorMessageAttributeName, "Invalid email or password")
             return "redirect:/auth/login"
         }
     }
@@ -64,14 +62,9 @@ class AuthWebController(
     @GetMapping("/signup")
     fun signupPage(model: Model): String {
         // If user is already authenticated, redirect appropriately
-        try {
-            val springUser = springUser()
-
+        if (isLoggedIn())
             return "redirect:/dashboard"
-        } catch (_: Exception) {
-            // User not authenticated, continue to signup page
-        }
-        addCommonAttributes(model, "Sign Up")
+        model.addAttribute(titleAttributeName, "Sign Up")
         return "auth/signup"
     }
 
@@ -85,11 +78,10 @@ class AuthWebController(
                 signupRequest.email,
                 signupRequest.password
             )
-            
-            redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.")
+            redirectAttributes.addFlashAttribute(successMessageAttributeName, "Registration successful. Please login.")
             return "redirect:/auth/login"
         } catch (e: Exception) {
-            redirectAttributes.addFlashAttribute("error", "${e.message}")
+            redirectAttributes.addFlashAttribute(errorMessageAttributeName, e.message)
             return "redirect:/auth/signup"
         }
     }
@@ -105,4 +97,11 @@ class AuthWebController(
 
         return "redirect:/auth/login"
     }
-} 
+
+    private fun isLoggedIn(): Boolean {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return authentication != null &&
+                authentication.isAuthenticated &&
+                authentication !is AnonymousAuthenticationToken
+    }
+}

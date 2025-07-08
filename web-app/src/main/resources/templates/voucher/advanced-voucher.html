@@ -5,6 +5,16 @@
     <link rel="stylesheet" th:href="@{/assets/voucher/advanced-voucher.css}">
 </head>
 
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item th:href="'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id}">
+        Vouchers
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        Advanced Voucher
+    </wa-breadcrumb-item>
+</th:block>
+
 <body>
 <main layout:fragment="content">
     <div class="container py-4">
