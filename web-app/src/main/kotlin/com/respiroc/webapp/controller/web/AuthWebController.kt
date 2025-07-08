@@ -22,8 +22,7 @@ class AuthWebController(
     @GetMapping("/login")
     fun loginPage(model: Model): String {
         // If user is already authenticated, redirect appropriately
-        try {
-            val springUser = springUser()
+        if (isLoggedIn())
             return "redirect:/dashboard"
         } catch (_: Exception) {
             // User not authenticated, continue to login page
@@ -61,9 +60,7 @@ class AuthWebController(
     @GetMapping("/signup")
     fun signupPage(model: Model): String {
         // If user is already authenticated, redirect appropriately
-        try {
-            val springUser = springUser()
-
+        if (isLoggedIn())
             return "redirect:/dashboard"
         } catch (_: Exception) {
             // User not authenticated, continue to signup page
@@ -101,5 +98,12 @@ class AuthWebController(
         response.addCookie(jwtCookie)
         
         return "redirect:/auth/login"
+    }
+
+    private fun isLoggedIn(): Boolean {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return authentication != null &&
+                authentication.isAuthenticated &&
+                authentication !is AnonymousAuthenticationToken
     }
 } 
