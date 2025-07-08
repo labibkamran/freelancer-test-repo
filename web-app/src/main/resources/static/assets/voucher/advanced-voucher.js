@@ -6,16 +6,12 @@ document.addEventListener('DOMContentLoaded', function () {
     addPostingLine();
 
     if (clearForm) {
-        // Clear all input fields
-        document.querySelectorAll('#voucherForm input, #voucherForm select').forEach(input => {
+        // Clear voucher information fields
+        document.querySelectorAll('#voucherForm input[type="date"], #voucherForm input[type="text"]:not([name*="postingLines"])').forEach(input => {
             if (input.type === 'date') {
                 input.value = new Date().toISOString().split('T')[0];
-            } else if (input.type === 'text' || input.type === 'number') {
+            } else {
                 input.value = '';
-                input.removeAttribute('data-vat-code');
-                input.removeAttribute('data-converted-amount');
-            } else if (input.tagName === 'SELECT') {
-                input.value = companyCurrency;
             }
             input.classList.remove('field-error');
         });
@@ -50,60 +46,34 @@ function addPostingLine() {
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <div class="account-search">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].debitAccount" 
-                                   placeholder="Search debit account..." 
-                                   autocomplete="off"
-                                   onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
-                                   onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
-                                   onblur="validatePostingLineFields(${rowCounter})"
-                                   oninput="toggleAccountSelection(${rowCounter}, 'debit')"
-                                   style="font-size: 0.8rem;">
-                            <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
-                        <div class="vat-search" style="position: relative;">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].debitVatCode" 
-                                   placeholder="VAT code required" 
-                                   autocomplete="off"
-                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'debit')"
-                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'debit')"
-                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'debit')"
-                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'debit')"
-                                   class="vat-field"
-                                   required>
-                            <div id="debit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
+                        <r-combobox
+                            id="debit-account-${rowCounter}"
+                            name="postingLines[${rowCounter}].debitAccount"
+                            placeholder="Search debit account..."
+                            style="font-size: 0.8rem;">
+                        </r-combobox>
+                        <r-combobox
+                            id="debit-vat-${rowCounter}"
+                            name="postingLines[${rowCounter}].debitVatCode"
+                            placeholder="VAT code required"
+                            style="font-size: 0.75rem;">
+                        </r-combobox>
                     </div>
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <div class="account-search">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].creditAccount" 
-                                   placeholder="Search credit account..." 
-                                   autocomplete="off"
-                                   onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
-                                   onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
-                                   onblur="validatePostingLineFields(${rowCounter})"
-                                   oninput="toggleAccountSelection(${rowCounter}, 'credit')"
-                                   style="font-size: 0.8rem;">
-                            <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
-                        <div class="vat-search" style="position: relative;">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].creditVatCode" 
-                                   placeholder="VAT code required" 
-                                   autocomplete="off"
-                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'credit')"
-                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'credit')"
-                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'credit')"
-                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'credit')"
-                                   class="vat-field"
-                                   required>
-                            <div id="credit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
+                        <r-combobox
+                            id="credit-account-${rowCounter}"
+                            name="postingLines[${rowCounter}].creditAccount"
+                            placeholder="Search credit account..."
+                            style="font-size: 0.8rem;">
+                        </r-combobox>
+                        <r-combobox
+                            id="credit-vat-${rowCounter}"
+                            name="postingLines[${rowCounter}].creditVatCode"
+                            placeholder="VAT code required"
+                            style="font-size: 0.75rem;">
+                        </r-combobox>
                     </div>
                 </td>
                 <td>
@@ -138,12 +108,89 @@ function addPostingLine() {
 
     tbody.appendChild(row);
 
-    // Set default VAT codes after adding the row
-    setDefaultVatCode(rowCounter, 'debit');
-    setDefaultVatCode(rowCounter, 'credit');
+    // Initialize r-combobox components after adding the row
+    initializeComboboxes(rowCounter);
 
     rowCounter++;
     updateBalance();
+}
+
+function initializeComboboxes(rowId) {
+    // Initialize account comboboxes with accounts data
+    const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+    const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+    
+    if (debitAccountCombo && accounts) {
+        debitAccountCombo.items = accounts.map(account => ({
+            value: account.noAccountNumber,
+            title: account.noAccountNumber,
+            description: account.accountName,
+            meta: account.accountDescription || ''
+        }));
+        
+        debitAccountCombo.addEventListener('change', (e) => {
+            toggleAccountSelection(rowId, 'debit');
+            validatePostingLineFields(rowId);
+        });
+    }
+
+    if (creditAccountCombo && accounts) {
+        creditAccountCombo.items = accounts.map(account => ({
+            value: account.noAccountNumber,
+            title: account.noAccountNumber,
+            description: account.accountName,
+            meta: account.accountDescription || ''
+        }));
+        
+        creditAccountCombo.addEventListener('change', (e) => {
+            toggleAccountSelection(rowId, 'credit');
+            validatePostingLineFields(rowId);
+        });
+    }
+
+    // Initialize VAT comboboxes with VAT codes data
+    const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+    const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
+    
+    if (debitVatCombo && vatCodes) {
+        debitVatCombo.items = vatCodes.map(vatCode => ({
+            value: vatCode.code,
+            title: vatCode.code,
+            subtitle: `(${vatCode.rate}%)`,
+            description: vatCode.description,
+            meta: `${vatCode.vatType} - ${vatCode.vatCategory}`,
+            displayText: `${vatCode.code} (${vatCode.rate}%)`
+        }));
+        
+        // Set default VAT code (first one)
+        if (vatCodes.length > 0) {
+            debitVatCombo.value = vatCodes[0].code;
+        }
+        
+        debitVatCombo.addEventListener('change', (e) => {
+            validatePostingLineFields(rowId);
+        });
+    }
+
+    if (creditVatCombo && vatCodes) {
+        creditVatCombo.items = vatCodes.map(vatCode => ({
+            value: vatCode.code,
+            title: vatCode.code,
+            subtitle: `(${vatCode.rate}%)`,
+            description: vatCode.description,
+            meta: `${vatCode.vatType} - ${vatCode.vatCategory}`,
+            displayText: `${vatCode.code} (${vatCode.rate}%)`
+        }));
+        
+        // Set default VAT code (first one)
+        if (vatCodes.length > 0) {
+            creditVatCombo.value = vatCodes[0].code;
+        }
+        
+        creditVatCombo.addEventListener('change', (e) => {
+            validatePostingLineFields(rowId);
+        });
+    }
 }
 
 function removePostingLine(id) {
@@ -156,23 +203,31 @@ function removePostingLine(id) {
 
 function validatePostingLineFields(rowId) {
     const dateInput = document.querySelector(`input[name="postingLines[${rowId}].postingDate"]`);
-    const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
-    const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
+    const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+    const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
     const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
-    const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
-    const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
+    const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+    const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
     // Clear previous error states
-    [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
+    [dateInput, amountInput].forEach(input => {
         if (input) input.classList.remove('field-error');
+    });
+    
+    // Clear error styles from comboboxes by removing any error classes
+    [debitAccountCombo, creditAccountCombo, debitVatCombo, creditVatCombo].forEach(combo => {
+        if (combo) {
+            const input = combo.shadowRoot?.querySelector('.combobox-input');
+            if (input) input.classList.remove('has-error');
+        }
     });
 
     const hasDate = dateInput && dateInput.value.trim() !== '';
-    const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-    const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+    const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+    const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
     const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-    const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
-    const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
+    const hasDebitVat = debitVatCombo && debitVatCombo.value.trim() !== '';
+    const hasCreditVat = creditVatCombo && creditVatCombo.value.trim() !== '';
 
     // If any field has data, validate the entire row
     if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
@@ -182,8 +237,14 @@ function validatePostingLineFields(rowId) {
 
         // Must have at least one account (debit or credit, or both)
         if (!hasDebitAccount && !hasCreditAccount) {
-            debitInput.classList.add('field-error');
-            creditInput.classList.add('field-error');
+            if (debitAccountCombo) {
+                const input = debitAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
+            if (creditAccountCombo) {
+                const input = creditAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
         }
 
         if (!hasAmount) {
@@ -192,10 +253,16 @@ function validatePostingLineFields(rowId) {
 
         // VAT validation: if account is filled, VAT must be filled
         if (hasDebitAccount && !hasDebitVat) {
-            debitVatInput.classList.add('field-error');
+            if (debitVatCombo) {
+                const input = debitVatCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
         }
         if (hasCreditAccount && !hasCreditVat) {
-            creditVatInput.classList.add('field-error');
+            if (creditVatCombo) {
+                const input = creditVatCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
         }
     }
 }
@@ -324,184 +391,14 @@ async function updateConvertedAmount(rowId) {
 }
 
 function toggleAccountSelection(rowId, type) {
-    const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
-    const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
-    const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
-    const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
-
-    // Allow both debit and credit to be filled - no disabling logic needed
-    // VAT inputs remain enabled for their respective sides
-
+    // With r-combobox, no need to disable fields anymore
+    // Both debit and credit sides can be filled
+    
     validatePostingLineFields(rowId);
     updateBalance();
 }
 
-function searchAccounts(input, rowId, type) {
-    const query = input.value.toLowerCase();
-    const dropdown = document.getElementById(type + '-dropdown-' + rowId);
-
-    if (query.length < 1) {
-        dropdown.style.display = 'none';
-        return;
-    }
-
-    const filteredAccounts = accounts.filter(account =>
-        account.noAccountNumber.includes(query) ||
-        account.accountName.toLowerCase().includes(query) ||
-        account.accountDescription.toLowerCase().includes(query)
-    );
-
-    if (filteredAccounts.length === 0) {
-        dropdown.style.display = 'none';
-        return;
-    }
-
-    dropdown.innerHTML = filteredAccounts.map(account => `
-                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId}, '${type}')">
-                        <div style="font-weight: 500;">${account.noAccountNumber}</div>
-                        <div style="font-size: 0.8rem; color: #6b7280;">${account.accountName}</div>
-                </div>
-            `).join('');
-
-    dropdown.style.display = 'block';
-}
-
-function selectAccount(accountNumber, accountName, rowId, type) {
-    const input = document.querySelector(`input[name="postingLines[${rowId}].${type}Account"]`);
-    input.value = accountNumber;
-    document.getElementById(type + '-dropdown-' + rowId).style.display = 'none';
-
-    // Trigger toggle function to disable the other input
-    toggleAccountSelection(rowId, type);
-}
-
-function searchVatCodes(input, rowId, type) {
-    const query = input.value.toLowerCase();
-    const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
-
-    // Show all VAT codes when field is focused or query is empty
-    let filteredVatCodes;
-    if (query.length === 0) {
-        filteredVatCodes = vatCodes;
-    } else {
-        filteredVatCodes = vatCodes.filter(vatCode =>
-            vatCode.code.toLowerCase().includes(query) ||
-            vatCode.description.toLowerCase().includes(query) ||
-            vatCode.rate.toString().includes(query) ||
-            vatCode.vatType.toLowerCase().includes(query) ||
-            vatCode.vatCategory.toLowerCase().includes(query)
-        );
-    }
-
-    if (filteredVatCodes.length === 0) {
-        dropdown.innerHTML = `
-                    <div class="account-item" style="color: #9ca3af; font-style: italic;">
-                        <div style="font-size: 0.8rem;">No VAT codes found</div>
-                    </div>
-                `;
-        dropdown.style.display = 'block';
-        return;
-    }
-
-    dropdown.innerHTML = filteredVatCodes.map(vatCode => `
-                <div class="account-item" onclick="selectVatCode('${vatCode.code}', '${vatCode.description}', ${rowId}, '${type}')">
-                        <div style="font-weight: 500; font-size: 0.8rem;">${vatCode.code} - ${vatCode.rate}% (${vatCode.vatCategory})</div>
-                        <div style="font-size: 0.7rem; color: #6b7280;">${vatCode.description}</div>
-                        <div style="font-size: 0.65rem; color: #9ca3af;">${vatCode.vatType}</div>
-                </div>
-            `).join('');
-
-    dropdown.style.display = 'block';
-}
-
-function selectVatCode(vatCode, description, rowId, type) {
-    const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
-    const vatCodeObj = vatCodes.find(vc => vc.code === vatCode);
-
-    // Display the code with rate for better UX
-    if (vatCodeObj) {
-        input.value = `${vatCode} (${vatCodeObj.rate}%)`;
-        input.setAttribute('data-vat-code', vatCode); // Store actual code for form submission
-    } else {
-        input.value = vatCode;
-        input.setAttribute('data-vat-code', vatCode);
-    }
-
-    document.getElementById(type + '-vat-dropdown-' + rowId).style.display = 'none';
-}
-
-function setDefaultVatCode(rowId, type) {
-    // Set the first VAT code as default if VAT codes are available
-    if (vatCodes && vatCodes.length > 0) {
-        const firstVatCode = vatCodes[0];
-        const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
-
-        if (input) {
-            // Set the display value with rate
-            input.value = `${firstVatCode.code} (${firstVatCode.rate}%)`;
-            input.setAttribute('data-vat-code', firstVatCode.code);
-        }
-    }
-}
-
-function showAllVatCodes(input, rowId, type) {
-    // Clear the search and show all codes
-    input.value = '';
-    searchVatCodes(input, rowId, type);
-}
-
-// Enhanced VAT field handlers
-function handleVatFieldClick(input, rowId, type) {
-    // If field is empty or contains display value, show all VAT codes
-    if (!input.value || input.value.includes('(') || input.value.includes('%')) {
-        input.value = '';
-        input.removeAttribute('data-vat-code');
-        searchVatCodes(input, rowId, type);
-    }
-}
-
-function handleVatFieldFocus(input, rowId, type) {
-    // Show dropdown when focused
-    if (!input.value) {
-        searchVatCodes(input, rowId, type);
-    }
-}
-
-function handleVatFieldKeyup(input, rowId, type) {
-    // If user deletes all content, prevent it and restore default
-    if (!input.value || input.value.trim() === '') {
-        setDefaultVatCode(rowId, type);
-        return;
-    }
-
-    // Clear data attribute when user types
-    input.removeAttribute('data-vat-code');
-    searchVatCodes(input, rowId, type);
-}
-
-function handleVatFieldBlur(input, rowId, type) {
-    // Delay hiding dropdown to allow click on items
-    setTimeout(() => {
-        const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
-
-        // If VAT field is empty after blur, set default value
-        if (!input.value || input.value.trim() === '' || !getActualVatCode(input)) {
-            setDefaultVatCode(rowId, type);
-        }
-    }, 150);
-}
-
-// Hide dropdowns when clicking outside
-document.addEventListener('click', function (e) {
-    if (!e.target.closest('.account-search') && !e.target.closest('.vat-search')) {
-        document.querySelectorAll('.account-dropdown').forEach(dropdown => {
-            dropdown.style.display = 'none';
-        });
-    }
-});
+// Old search and dropdown functions removed since we're using r-combobox
 
 
 // Frontend validation functions
@@ -529,24 +426,33 @@ function validateFormFields() {
     let hasValidEntries = false;
 
     rows.forEach((row, index) => {
+        const rowId = row.id.replace('posting-line-row-', '');
         const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
+        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
         const amountInput = row.querySelector('input[name*=".amount"]');
-        const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
-        const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
+        const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+        const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
         // Clear previous errors
-        [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
+        [dateInput, amountInput].forEach(input => {
             if (input) input.classList.remove('field-error');
+        });
+        
+        // Clear error styles from comboboxes
+        [debitAccountCombo, creditAccountCombo, debitVatCombo, creditVatCombo].forEach(combo => {
+            if (combo) {
+                const input = combo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.remove('has-error');
+            }
         });
 
         const hasDate = dateInput && dateInput.value.trim() !== '';
-        const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-        const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
         const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-        const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
-        const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
+        const hasDebitVat = debitVatCombo && debitVatCombo.value.trim() !== '';
+        const hasCreditVat = creditVatCombo && creditVatCombo.value.trim() !== '';
 
         if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
             // This row has some data, validate it completely
@@ -557,8 +463,14 @@ function validateFormFields() {
 
             // Must have at least one account (debit or credit, or both)
             if (!hasDebitAccount && !hasCreditAccount) {
-                debitInput.classList.add('field-error');
-                creditInput.classList.add('field-error');
+                if (debitAccountCombo) {
+                    const input = debitAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
+                if (creditAccountCombo) {
+                    const input = creditAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
 
@@ -569,11 +481,17 @@ function validateFormFields() {
 
             // VAT validation: if account is filled, VAT must be filled
             if (hasDebitAccount && !hasDebitVat) {
-                debitVatInput.classList.add('field-error');
+                if (debitVatCombo) {
+                    const input = debitVatCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
             if (hasCreditAccount && !hasCreditVat) {
-                creditVatInput.classList.add('field-error');
+                if (creditVatCombo) {
+                    const input = creditVatCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
 
@@ -652,18 +570,19 @@ async function prepareFormData(event) {
     const validPostingLines = [];
 
     allRows.forEach(row => {
+        const rowId = row.id.replace('posting-line-row-', '');
         const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
+        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
         const amountInput = row.querySelector('input[name*=".amount"]');
         const currencySelect = row.querySelector('select[name*=".currency"]');
         const descriptionInput = row.querySelector('input[name*=".description"]');
-        const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
-        const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
+        const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+        const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
         const hasDate = dateInput && dateInput.value.trim() !== '';
-        const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-        const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
         const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
 
         if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
@@ -677,10 +596,10 @@ async function prepareFormData(event) {
             // Always create one posting line with both debit and credit accounts (backend will handle splitting)
             validPostingLines.push({
                 ...baseData,
-                debitAccount: hasDebitAccount ? debitInput.value : '',
-                creditAccount: hasCreditAccount ? creditInput.value : '',
-                debitVatCode: hasDebitAccount ? getActualVatCode(debitVatInput) : '',
-                creditVatCode: hasCreditAccount ? getActualVatCode(creditVatInput) : ''
+                debitAccount: hasDebitAccount ? debitAccountCombo.value : '',
+                creditAccount: hasCreditAccount ? creditAccountCombo.value : '',
+                debitVatCode: hasDebitAccount ? (debitVatCombo ? debitVatCombo.value : '') : '',
+                creditVatCode: hasCreditAccount ? (creditVatCombo ? creditVatCombo.value : '') : ''
             });
         }
     });
@@ -740,18 +659,4 @@ async function prepareFormData(event) {
     return true;
 }
 
-function getActualVatCode(vatInput) {
-    if (!vatInput || !vatInput.value) return '';
-
-    const actualCode = vatInput.getAttribute('data-vat-code');
-    if (actualCode) {
-        return actualCode;
-    } else if (vatInput.value.includes('(')) {
-        // Extract code from display value like "1 (25%)"
-        const codeMatch = vatInput.value.match(/^(\w+)\s*\(/);
-        if (codeMatch) {
-            return codeMatch[1];
-        }
-    }
-    return vatInput.value;
-}
+// getActualVatCode function removed since we're using r-combobox
