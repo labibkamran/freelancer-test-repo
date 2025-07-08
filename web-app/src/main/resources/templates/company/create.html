@@ -5,26 +5,21 @@
     <link rel="stylesheet" th:href="@{/assets/company/create.css}">
 </head>
 
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Companies
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        New Company
+    </wa-breadcrumb-item>
+</th:block>
+
 <body>
 <main layout:fragment="content">
-    <div class="container py-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col">
-                <h1 class="h3 mb-2">
-                    Create New Company
-                </h1>
-                <p class="text-muted">Fill out your company details or search the Norwegian business registry for automatic completion</p>
-            </div>
-        </div>
-
+    <div class="container">
         <div>
             <wa-card style="margin-bottom: 1rem;">
-                <div slot="header">
-                    <h5 style="margin: 0;">
-                        🏢 Company Information
-                    </h5>
-                </div>
                 <div style="padding: 2rem;">
                     <form id="createCompanyForm" 
                           th:object="${createCompanyRequest}"
@@ -86,39 +81,10 @@
                         <!-- Submit Button -->
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <wa-button type="submit" variant="success" size="small" id="submitButton">
-                                <wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>
                                 Create Company
-                            </wa-button>
-                            <wa-button type="button" variant="neutral" size="small" onclick="clearForm()">
-                                Clear Form
                             </wa-button>
                         </div>
                     </form>
-                </div>
-            </wa-card>
-
-            <!-- Help Card -->
-            <wa-card>
-                <div slot="header">
-                    <h5 style="margin: 0;">💡 Tips</h5>
-                </div>
-                <div style="padding: 1.5rem;">
-                    <h6>Smart Search Features:</h6>
-                    <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.6;">
-                        <li>Type in the <strong>Company Name</strong> field to search for companies</li>
-                        <li>Click on any suggestion to auto-fill the form</li>
-                        <li>If not found, you can manually enter the details</li>
-                    </ul>
-
-                    <wa-alert variant="primary" open>
-                        <wa-icon slot="icon" name="info-circle"></wa-icon>
-                        <strong>Registry Search:</strong> Data is fetched from Brønnøysundregistrene in real-time.
-                    </wa-alert>
-
-                    <wa-alert variant="warning" open style="margin-top: 1rem;">
-                        <wa-icon slot="icon" name="exclamation-triangle"></wa-icon>
-                        <strong>Note:</strong> All fields are required to create a company.
-                    </wa-alert>
                 </div>
             </wa-card>
         </div>

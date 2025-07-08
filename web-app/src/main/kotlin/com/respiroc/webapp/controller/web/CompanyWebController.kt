@@ -7,10 +7,14 @@ import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
 import com.respiroc.webapp.controller.response.Callout
 import com.respiroc.webapp.controller.response.MessageType
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import jakarta.validation.Valid
 
 @Controller
@@ -38,7 +42,7 @@ class CompanyWebController(
         @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
         bindingResult: BindingResult,
         model: Model
-    ): String {
+    ): Any {
         val springUser = springUser()
         val companies = companyApi.findAllCompany()
 
@@ -62,17 +66,11 @@ class CompanyWebController(
             )
             
             val company = companyApi.createNewCompany(command)
-            
-            model.addAttribute("callout", Callout(
-                message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
-                type = MessageType.SUCCESS,
-                link = "/dashboard?tenantId=${company.tenantId}"
-            ))
-            
-            // Reset form
-            model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-            
-            return "company/create"
+
+            val headers = HttpHeaders()
+            headers.add("HX-Redirect", "/dashboard?tenantId=${company.tenantId}")
+
+            return ResponseEntity<Void>(headers, HttpStatus.OK)
             
         } catch (e: Exception) {
             model.addAttribute("callout", Callout(
