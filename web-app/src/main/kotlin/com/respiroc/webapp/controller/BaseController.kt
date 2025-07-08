@@ -1,6 +1,7 @@
 package com.respiroc.webapp.controller
 
 import com.respiroc.company.api.CompanyInternalApi
+import com.respiroc.company.domain.model.Company
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -9,10 +10,13 @@ import kotlin.reflect.full.memberProperties
 
 open class BaseController {
 
-    private val titleAttributeName: String = "title"
-    private val userAttributeName: String = "user"
-    private val companiesAttributeNames: String = "companies"
-    private val currentCompanyAttributeNames: String = "currentCompany"
+    val titleAttributeName: String = "title"
+    val successMessageAttributeName: String = "success"
+    val errorMessageAttributeName: String = "error"
+    val userAttributeName: String = "user"
+    val companiesAttributeNames: String = "companies"
+    val currentCompanyAttributeNames: String = "currentCompany"
+    val calloutAttributeNames: String = "callout"
 
     fun springUser(): SpringUser {
         return SecurityContextHolder.getContext().authentication.principal as SpringUser
@@ -32,20 +36,28 @@ open class BaseController {
         }
     }
 
-    open fun addCommonAttributes(model: Model, title: String) {
-        model.addAttribute(titleAttributeName, title)
-    }
+    fun addCommonAttributes(
+        model: Model,
+        companyApi: CompanyInternalApi,
+        title: String,
+        useCurrentCompanyAsTitlePrefix: Boolean = false
+    ) {
 
-    fun addCommonAttributes(model: Model, companyApi: CompanyInternalApi, title: String) {
-        addCommonAttributes(model, title)
         val springUser = springUser()
         model.addAttribute(userAttributeName, springUser)
+
         val companies = companyApi.findAllCompany()
         model.addAttribute(companiesAttributeNames, companies)
+
         val tenantId = springUser.ctx.currentTenant?.id
+        var currentCompany: Company? = null
         if (tenantId != null) {
-            val currentCompany = companies.find { it.tenantId == tenantId }
+            currentCompany = companies.find { it.tenantId == tenantId }
             model.addAttribute(currentCompanyAttributeNames, currentCompany)
         }
+        if (useCurrentCompanyAsTitlePrefix && currentCompany != null)
+            model.addAttribute(titleAttributeName, "${currentCompany.name} - ${title}")
+        else
+            model.addAttribute(titleAttributeName, title)
     }
 }

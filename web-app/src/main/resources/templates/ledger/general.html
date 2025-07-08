@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Accounts
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        General Ledger
+    </wa-breadcrumb-item>
+</th:block>
+
+<body>
+<main layout:fragment="content">
+    <div class="wa-container">
+        <div class="wa-stack wa-gap-s">
+            
+            <!-- Filters Card -->
+            <wa-card>
+                <div class="wa-cluster">
+                    <!-- Start Date -->
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500;">Start Date</label>
+                        <wa-input type="date" 
+                                  name="startDate" 
+                                  size="small"
+                                  th:value="${startDate}"
+                                  th:hx-get="'/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  hx-target="#tableContent"
+                                  hx-indicator="#loading-indicator"
+                                  hx-trigger="change"
+                                  hx-include="[name='endDate'], [name='accountNumber']"></wa-input>
+                    </div>
+                    
+                    <!-- End Date -->
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500;">End Date</label>
+                        <wa-input type="date" 
+                                  name="endDate" 
+                                  size="small"
+                                  th:value="${endDate}"
+                                  th:hx-get="'/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  hx-target="#tableContent"
+                                  hx-indicator="#loading-indicator"
+                                  hx-trigger="change"
+                                  hx-include="[name='startDate'], [name='accountNumber']"></wa-input>
+                    </div>
+                </div>
+            </wa-card>
+
+            <!-- Table Content -->
+            <div id="tableContent" th:fragment="tableContent">
+                <wa-card>
+                    <wa-progress-bar id="loading-indicator" indeterminate class="htmx-indicator"></wa-progress-bar>
+                    <div class="wa-stack wa-gap-m">
+                        <!-- Empty State -->
+                        <div th:if="${generalLedgerData.accounts.empty}" class="wa-center">
+                            <div class="wa-stack wa-gap-m wa-center">
+                                <wa-icon name="chart-line" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
+                                <h3 class="wa-heading-m">No Data Found</h3>
+                                <p class="wa-body">No transactions found for the selected period.</p>
+                            </div>
+                        </div>
+
+                        <!-- Data Table in Card -->
+                        <wa-table th:unless="${generalLedgerData.accounts.empty}">
+                            <table id="ledgerTable" style="--wa-table-row-padding: var(--wa-space-xs);">
+                                <thead>
+                                    <tr>
+                                        <th>Closed</th>
+                                        <th>Voucher No</th>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>VAT Code</th>
+                                        <th>Currency</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <th:block th:each="account,accountStat : ${generalLedgerData.accounts}">
+                                        <!-- Account Header with Separator -->
+                                        <tr th:unless="${accountStat.first}" style="height: 0;">
+                                            <td colspan="7" style="padding: 0; border-top: 2px solid var(--wa-color-neutral-200);"></td>
+                                        </tr>
+                                        
+                                        <!-- Account Header -->
+                                        <tr style="background-color: var(--wa-color-gray-90);">
+                                            <td colspan="7" style="font-weight: 600; padding: var(--wa-space-s);">
+                                                <span th:text="${account.accountNumber + ' - ' + account.accountName}">
+                                                    1000 - Cash in Hand
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Opening Balance -->
+                                        <tr style="background-color: var(--wa-color-neutral-25);">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="font-weight: 600;">Opening Balance</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="text-align: right;">
+                                                <wa-format-number type="currency" 
+                                                                   currency="NOK" 
+                                                                   th:attr="value=${account.openingBalance}"
+                                                                   lang="en-US">
+                                                </wa-format-number>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Postings -->
+                                        <tr th:each="posting : ${account.postings}" 
+                                            class="searchable-row"
+                                            th:style="${posting.voucherId != null} ? 'cursor: pointer;' : ''"
+                                            th:onclick="'openVoucher(' + ${posting.voucherId} + ')'">
+                                            <td>
+                                                <wa-icon th:if="${posting.closed}" name="check"></wa-icon>
+                                            </td>
+                                            <td>
+                                                <a th:if="${posting.voucherId != null}"
+                                                   th:href="'/voucher/' + ${posting.voucherId} + '?tenantId=' + ${user.ctx.currentTenant.id}"
+                                                   style="color: var(--wa-color-blue-50); text-decoration: none;"
+                                                   th:text="|${posting.voucherNumber}-${#temporals.format(posting.date,'yyyy')}|">
+                                                    5-2020
+                                                </a>
+                                                <span th:unless="${posting.voucherId != null}">-</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(posting.date, 'dd.MM.yyyy')}">15.01.2024</td>
+                                            <td th:text="${posting.description ?: '-'}">Transaction description</td>
+                                            <td th:text="${posting.vatCode ?: '-'}">25%</td>
+                                            <td>
+                                                <!-- Show original currency and amount if different from base currency -->
+                                                <!-- TODO: Refactor Default NOK with actual company's currency -->
+                                                <div th:if="${posting.originalCurrency != null and posting.originalCurrency != 'NOK'}">
+                                                    <wa-format-number type="currency" 
+                                                                       th:attr="currency=${posting.originalCurrency}, value=${posting.originalAmount}"
+                                                                       lang="en-US">
+                                                    </wa-format-number>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <wa-format-number type="currency" 
+                                                                   currency="NOK"
+                                                                   th:attr="value=${posting.amount}"
+                                                                   lang="en-US">
+                                                </wa-format-number>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Closing Balance -->
+                                        <tr style="background-color: var(--wa-color-neutral-25);">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="font-weight: 600;">Closing Balance</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="text-align: right;">
+                                                <wa-format-number type="currency" 
+                                                                   currency="NOK" 
+                                                                   th:attr="value=${account.closingBalance}"
+                                                                   lang="en-US">
+                                                </wa-format-number>
+                                            </td>
+                                        </tr>
+                                    </th:block>
+                                </tbody>
+                                
+                                <!-- Total Footer -->
+                                <tfoot>
+                                    <tr style="border-top: 2px solid var(--wa-color-neutral-300);">
+                                        <td colspan="6" style="font-weight: 600;">
+                                            Total Amount
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600;">
+                                            <wa-format-number type="currency" 
+                                                               currency="NOK" 
+                                                               th:attr="value=${generalLedgerData.totalAmount}"
+                                                               lang="en-US">
+                                            </wa-format-number>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </wa-table>
+                    </div>
+                </wa-card>
+            </div>
+            
+        </div>
+    </div>
+</main>
+</body>
+</html> 

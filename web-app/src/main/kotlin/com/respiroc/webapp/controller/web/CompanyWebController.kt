@@ -6,12 +6,14 @@ import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
 import com.respiroc.webapp.controller.response.Callout
-import com.respiroc.webapp.controller.response.MessageType
+import jakarta.validation.Valid
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-import jakarta.validation.Valid
 
 @Controller
 @RequestMapping(value = ["/company"])
@@ -22,14 +24,8 @@ class CompanyWebController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompany()
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Create Company")
+        addCommonAttributes(model, companyApi, "Create Company")
         model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-
         return "company/create"
     }
 
@@ -38,19 +34,14 @@ class CompanyWebController(
         @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
         bindingResult: BindingResult,
         model: Model
-    ): String {
-        val springUser = springUser()
-        val companies = companyApi.findAllCompany()
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("title", "Create Company")
-
+    ): Any {
+        addCommonAttributes(model, companyApi, "Create Company")
         if (bindingResult.hasErrors()) {
-            model.addAttribute("callout", Callout(
-                message = "Please fill in all required fields correctly.",
-                type = MessageType.ERROR
-            ))
+            model.addAttribute(
+                calloutAttributeNames, Callout.Error(
+                    message = "Please fill in all required fields correctly."
+                )
+            )
             return "company/create"
         }
 
@@ -62,23 +53,18 @@ class CompanyWebController(
             )
 
             val company = companyApi.createNewCompany(command)
-            
-            model.addAttribute("callout", Callout(
-                message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
-                type = MessageType.SUCCESS,
-                link = "/dashboard?tenantId=${company.tenantId}"
-            ))
 
-            // Reset form
-            model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
+            val headers = HttpHeaders()
+            headers.add("HX-Redirect", "/dashboard?tenantId=${company.tenantId}")
 
-            return "company/create"
-            
+            return ResponseEntity<Void>(headers, HttpStatus.OK)
+
         } catch (e: Exception) {
-            model.addAttribute("callout", Callout(
-                message = "Failed to create company: ${e.message}",
-                type = MessageType.ERROR
-            ))
+            model.addAttribute(
+                calloutAttributeNames, Callout.Error(
+                    message = "Failed to create company: ${e.message}"
+                )
+            )
             return "company/create"
         }
     }
@@ -100,7 +86,7 @@ class CompanyWebController(
             model.addAttribute("companies", searchResult.companies.take(10))
             return "fragments/company-search :: results"
         } catch (e: Exception) {
-            model.addAttribute("error", "Search failed: ${e.message}")
+            model.addAttribute(errorMessageAttributeName, "Search failed: ${e.message}")
             return "fragments/company-search :: error"
         }
     }

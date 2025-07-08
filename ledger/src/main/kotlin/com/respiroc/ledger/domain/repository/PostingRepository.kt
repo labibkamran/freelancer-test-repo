@@ -22,4 +22,39 @@ interface PostingRepository : CustomJpaRepository<Posting, Long> {
     
     @Query("SELECT DISTINCT p.accountNumber FROM Posting p WHERE p.tenantId = :tenantId ORDER BY p.accountNumber")
     fun findDistinctAccountNumbersByTenant(@Param("tenantId") tenantId: Long): List<String>
+
+    @Query("""
+        SELECT p.accountNumber,
+               COALESCE(SUM(CASE WHEN p.postingDate < :startDate THEN p.amount ELSE 0 END), 0) as openingBalance,
+               COALESCE(SUM(CASE WHEN p.postingDate BETWEEN :startDate AND :endDate THEN p.amount ELSE 0 END), 0) as periodMovement,
+               COUNT(CASE WHEN p.postingDate BETWEEN :startDate AND :endDate THEN 1 END) as transactionCount
+        FROM Posting p 
+        WHERE (:accountNumber IS NULL OR p.accountNumber = :accountNumber)
+        AND p.tenantId = :tenantId 
+        GROUP BY p.accountNumber
+        HAVING COALESCE(SUM(CASE WHEN p.postingDate < :startDate THEN p.amount ELSE 0 END), 0) != 0
+            OR COALESCE(SUM(CASE WHEN p.postingDate BETWEEN :startDate AND :endDate THEN p.amount ELSE 0 END), 0) != 0
+        ORDER BY p.accountNumber
+    """)
+    fun getGeneralLedgerSummary(
+        @Param("accountNumber") accountNumber: String?, 
+        @Param("tenantId") tenantId: Long, 
+        @Param("startDate") startDate: LocalDate, 
+        @Param("endDate") endDate: LocalDate
+    ): List<Array<Any>>
+
+    @Query("""
+        SELECT p FROM Posting p 
+        LEFT JOIN FETCH p.voucher v
+        WHERE p.accountNumber = :accountNumber 
+        AND p.tenantId = :tenantId 
+        AND p.postingDate BETWEEN :startDate AND :endDate 
+        ORDER BY p.postingDate, p.id
+    """)
+    fun findPostingsByAccountAndDateRange(
+        @Param("accountNumber") accountNumber: String, 
+        @Param("tenantId") tenantId: Long, 
+        @Param("startDate") startDate: LocalDate, 
+        @Param("endDate") endDate: LocalDate
+    ): List<Posting>
 }
