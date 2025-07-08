@@ -4,7 +4,6 @@ import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.response.MessageType
 import com.respiroc.webapp.controller.response.Callout
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -38,29 +37,22 @@ class LedgerWebController(
         model: Model
     ): String {
         return try {
-            val springUser = springUser()
-
             val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
             val generalLedgerData = postingApi.getGeneralLedger(effectiveStartDate, effectiveEndDate, accountNumber)
 
-            model.addAttribute("user", springUser)
             model.addAttribute("generalLedgerData", generalLedgerData)
             model.addAttribute("startDate", effectiveStartDate)
             model.addAttribute("endDate", effectiveEndDate)
             model.addAttribute("selectedAccountNumber", accountNumber)
 
             if (isHtmxRequest != null) {
+                model.addAttribute(userAttributeName, springUser())
                 "ledger/general :: tableContent"
             } else {
+                addCommonAttributes(model, companyApi, "General Ledger")
                 val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
-                val companies = companyApi.findAllCompany()
-                val currentCompany = companies.find { it.tenantId == tenantId() }
-
-                model.addAttribute("companies", companies)
-                model.addAttribute("currentCompany", currentCompany)
-                model.addAttribute("title", "General Ledger")
                 model.addAttribute("accounts", accounts)
 
                 "ledger/general"

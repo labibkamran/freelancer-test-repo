@@ -4,19 +4,16 @@ import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
-import com.respiroc.util.context.SpringUser
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.response.Callout
-import com.respiroc.webapp.controller.response.MessageType
 import com.respiroc.webapp.service.VoucherWebService
+import jakarta.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
-
-import jakarta.validation.Valid
 
 @Controller
 @RequestMapping(value = ["/voucher"])
@@ -36,47 +33,29 @@ class VoucherWebController(
 
     @GetMapping(value = ["/overview"])
     fun overview(model: Model): String {
-        val springUser = springUser()
         val vouchers = voucherApi.findAllVoucherSummaries()
-        val companies = companyApi.findAllCompany()
-        val currentCompany = companies.find { it.tenantId == tenantId() }
-        
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("currentCompany", currentCompany)
+        addCommonAttributes(model, companyApi, "Voucher Overview")
         model.addAttribute("vouchers", vouchers)
-        model.addAttribute("title", "Voucher Overview")
-        
         return "voucher/overview"
     }
 
     @GetMapping(value = ["/{voucherId}"])
     fun viewVoucher(@PathVariable voucherId: Long, model: Model): String {
-        val springUser = springUser()
         val voucher = voucherApi.findVoucherById(voucherId)
-        
         if (voucher == null) {
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-
-        val companies = companyApi.findAllCompany()
-        val currentCompany = companies.find { it.tenantId == tenantId() }
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("currentCompany", currentCompany)
+        addCommonAttributes(model, companyApi, "Voucher #${voucher.number}")
         model.addAttribute("voucher", voucher)
-        model.addAttribute("title", "Voucher #${voucher.number}")
-        
+
         return "voucher/view"
     }
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun new(model: Model): String {
         tenantId()
-        val springUser = springUser()
-        setupModelAttributes(model, springUser)
+        setupModelAttributes(model)
         return "voucher/advanced-voucher"
     }
 
@@ -86,8 +65,7 @@ class VoucherWebController(
         bindingResult: BindingResult,
         model: Model
     ): String {
-        val springUser = springUser()
-        setupModelAttributes(model, springUser)
+        setupModelAttributes(model)
 
         if (bindingResult.hasErrors()) {
             val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
@@ -97,7 +75,7 @@ class VoucherWebController(
 
         val callout = voucherWebService.processVoucherRequest(
             createVoucherRequest,
-            springUser.ctx
+            user()
         )
 
         model.addAttribute(calloutAttributeNames, callout)
@@ -110,18 +88,13 @@ class VoucherWebController(
     // Private Helper Methods
     // -------------------------------
 
-    private fun setupModelAttributes(model: Model, springUser: SpringUser) {
-        val companies = companyApi.findAllCompany()
-        val currentCompany = companies.find { it.tenantId == tenantId() }
+    private fun setupModelAttributes(model: Model) {
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
         val companyCurrency = currencyService.getCompanyCurrency("NO")
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
-        model.addAttribute("user", springUser)
-        model.addAttribute("companies", companies)
-        model.addAttribute("currentCompany", currentCompany)
-        model.addAttribute("title", "General Ledger")
+        addCommonAttributes(model, companyApi, "General Ledger")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("companyCurrency", companyCurrency)
