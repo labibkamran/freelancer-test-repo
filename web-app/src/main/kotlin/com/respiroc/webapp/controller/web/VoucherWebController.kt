@@ -99,10 +99,5 @@ class VoucherWebController(
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("companyCurrency", companyCurrency)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
-
-        // Form objects
-        model.addAttribute(
-            "createVoucherRequest", CreateVoucherRequest(postingLines = listOf())
-        )
     }
 } 
