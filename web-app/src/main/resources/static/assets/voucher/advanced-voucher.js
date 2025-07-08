@@ -57,9 +57,10 @@ function addPostingLine() {
                         <r-combobox
                             id="debit-vat-${rowCounter}"
                             placeholder="VAT code required"
-                            style="font-size: 0.75rem;">
+                            style="font-size: 0.75rem;"
+                            value="0">
                         </r-combobox>
-                        <input type="hidden" name="postingLines[${rowCounter}].debitVatCode" id="hidden-debitVatCode-${rowCounter}">
+                        <input type="hidden" name="postingLines[${rowCounter}].debitVatCode" id="hidden-debitVatCode-${rowCounter}" value="0">
                     </div>
                 </td>
                 <td>
@@ -74,9 +75,10 @@ function addPostingLine() {
                         <r-combobox
                             id="credit-vat-${rowCounter}"
                             placeholder="VAT code required"
-                            style="font-size: 0.75rem;">
+                            style="font-size: 0.75rem;"
+                            value="0">
                         </r-combobox>
-                        <input type="hidden" name="postingLines[${rowCounter}].creditVatCode" id="hidden-creditVatCode-${rowCounter}">
+                        <input type="hidden" name="postingLines[${rowCounter}].creditVatCode" id="hidden-creditVatCode-${rowCounter}" value="0">
                     </div>
                 </td>
                 <td>
@@ -181,12 +183,6 @@ function initializeComboboxes(rowId) {
             displayText: `${vatCode.code} (${vatCode.rate}%)`
         }));
         
-        // Set default VAT code (first one)
-        if (vatCodes.length > 0) {
-            debitVatCombo.value = vatCodes[0].code;
-            updateHiddenField(rowId, 'debitVatCode', vatCodes[0].code);
-        }
-        
         debitVatCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'debitVatCode', e.target.value);
             validatePostingLineFields(rowId);
@@ -203,12 +199,6 @@ function initializeComboboxes(rowId) {
             meta: `${vatCode.vatType} - ${vatCode.vatCategory}`,
             displayText: `${vatCode.code} (${vatCode.rate}%)`
         }));
-        
-        // Set default VAT code (first one)
-        if (vatCodes.length > 0) {
-            creditVatCombo.value = vatCodes[0].code;
-            updateHiddenField(rowId, 'creditVatCode', vatCodes[0].code);
-        }
         
         creditVatCombo.addEventListener('change', (e) => {
             updateHiddenField(rowId, 'creditVatCode', e.target.value);
