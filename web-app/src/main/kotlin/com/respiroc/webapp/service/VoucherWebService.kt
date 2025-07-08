@@ -1,7 +1,7 @@
 package com.respiroc.webapp.service
 
-import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.VatInternalApi
+import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.util.context.UserContext
@@ -9,7 +9,6 @@ import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
 import com.respiroc.webapp.controller.response.Callout
-import com.respiroc.webapp.controller.response.MessageType
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -41,16 +40,12 @@ class VoucherWebService(
 
             val result = voucherApi.createVoucher(voucherPayload)
 
-            Callout(
+            Callout.Success(
                 message = "New voucher #${result.number} created successfully!",
-                type = MessageType.SUCCESS,
                 link = "/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}"
             )
         } catch (e: Exception) {
-            Callout(
-                message = "Failed to save voucher: ${e.message}",
-                type = MessageType.ERROR
-            )
+            Callout.Error(message = "Failed to save voucher: ${e.message}")
         }
     }
 
@@ -61,32 +56,36 @@ class VoucherWebService(
         return postingLines.flatMap { line ->
             val originalAmount = line.amount!!
             val originalCurrency = line.currency
-            
+
             val hasDebit = line.debitAccount.isNotBlank()
             val hasCredit = line.creditAccount.isNotBlank()
-            
+
             when {
                 hasDebit && hasCredit -> {
                     // Both debit and credit filled - create two postings
                     val debitLine = line.copy(creditAccount = "", creditVatCode = null)
                     val creditLine = line.copy(debitAccount = "", debitVatCode = null)
-                    
-                    val debitCommands = createCommandsForLine(debitLine, originalAmount, originalCurrency, companyCurrency)
-                    val creditCommands = createCommandsForLine(creditLine, originalAmount, originalCurrency, companyCurrency)
-                    
+
+                    val debitCommands =
+                        createCommandsForLine(debitLine, originalAmount, originalCurrency, companyCurrency)
+                    val creditCommands =
+                        createCommandsForLine(creditLine, originalAmount, originalCurrency, companyCurrency)
+
                     debitCommands + creditCommands
                 }
+
                 hasDebit || hasCredit -> {
                     // Only one side filled
                     createCommandsForLine(line, originalAmount, originalCurrency, companyCurrency)
                 }
+
                 else -> {
                     emptyList()
                 }
             }
         }
     }
-    
+
     private fun createCommandsForLine(
         line: PostingLine,
         originalAmount: BigDecimal,
@@ -94,7 +93,7 @@ class VoucherWebService(
         companyCurrency: String
     ): List<CreatePostingPayload> {
         val vatCode = line.getVatCode()
-        
+
         return if (vatCode != null) {
             // Create two postings: one for base amount and one for VAT
             createVatPostings(line, originalAmount, originalCurrency, companyCurrency, vatCode)
@@ -104,7 +103,7 @@ class VoucherWebService(
         }
     }
 
-        private fun createVatPostings(
+    private fun createVatPostings(
         line: PostingLine,
         originalAmount: BigDecimal,
         originalCurrency: String,
@@ -116,10 +115,10 @@ class VoucherWebService(
 
         val totalSignedAmount = calculateConvertedSignedAmount(line, originalCurrency, companyCurrency)
         val totalAbsAmount = totalSignedAmount.abs()
-        
+
         val baseAmount = vatApi.calculateBaseAmountFromVatInclusive(totalAbsAmount, vatCodeEntity)
         val vatAmount = vatApi.calculateVatAmount(baseAmount, vatCodeEntity)
-        
+
         val signedBaseAmount = if (totalSignedAmount < BigDecimal.ZERO) baseAmount.negate() else baseAmount
         val signedVatAmount = if (totalSignedAmount < BigDecimal.ZERO) vatAmount.negate() else vatAmount
 
@@ -128,10 +127,10 @@ class VoucherWebService(
             val originalAbsAmount = originalAmount.abs()
             val originalBase = vatApi.calculateBaseAmountFromVatInclusive(originalAbsAmount, vatCodeEntity)
             val originalVat = vatApi.calculateVatAmount(originalBase, vatCodeEntity)
-            
+
             val signedOriginalBase = if (originalAmount < BigDecimal.ZERO) originalBase.negate() else originalBase
             val signedOriginalVat = if (originalAmount < BigDecimal.ZERO) originalVat.negate() else originalVat
-            
+
             Pair(signedOriginalBase, signedOriginalVat)
         } else {
             Pair(null, null)

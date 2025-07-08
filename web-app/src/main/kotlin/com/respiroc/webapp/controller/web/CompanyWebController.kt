@@ -47,10 +47,11 @@ class CompanyWebController(
         model.addAttribute("title", "Create Company")
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("callout", Callout(
-                message = "Please fill in all required fields correctly.",
-                type = MessageType.ERROR
-            ))
+            model.addAttribute(
+                calloutAttributeNames, Callout.Error(
+                    message = "Please fill in all required fields correctly."
+                )
+            )
             return "company/create"
         }
 
@@ -60,25 +61,27 @@ class CompanyWebController(
                 organizationNumber = createCompanyRequest.organizationNumber,
                 countryCode = createCompanyRequest.countryCode
             )
-            
+
             val company = companyApi.createNewCompany(command)
-            
-            model.addAttribute("callout", Callout(
-                message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
-                type = MessageType.SUCCESS,
-                link = "/dashboard?tenantId=${company.tenantId}"
-            ))
-            
+
+            model.addAttribute(
+                calloutAttributeNames, Callout.Success(
+                    message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
+                    link = "/dashboard?tenantId=${company.tenantId}"
+                )
+            )
+
             // Reset form
             model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
             
             return "company/create"
             
         } catch (e: Exception) {
-            model.addAttribute("callout", Callout(
-                message = "Failed to create company: ${e.message}",
-                type = MessageType.ERROR
-            ))
+            model.addAttribute(
+                calloutAttributeNames, Callout.Error(
+                    message = "Failed to create company: ${e.message}"
+                )
+            )
             return "company/create"
         }
     }
