@@ -91,7 +91,7 @@ class VoucherWebController(
 
         if (bindingResult.hasErrors()) {
             val errorMessages = bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Validation error" }
-            model.addAttribute("callout", Callout(errorMessages, MessageType.ERROR))
+            model.addAttribute(calloutAttributeNames, Callout.Error(errorMessages))
             return "voucher/advanced-voucher"
         }
 
@@ -100,10 +100,9 @@ class VoucherWebController(
             springUser.ctx
         )
 
-        model.addAttribute("callout", callout)
-        if (callout.type == MessageType.SUCCESS) {
+        model.addAttribute(calloutAttributeNames, callout)
+        if (callout is Callout.Success)
             model.addAttribute("clearForm", true)
-        }
         return "voucher/advanced-voucher"
     }
 
