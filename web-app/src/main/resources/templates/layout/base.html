@@ -155,7 +155,7 @@
     </nav>-->
 
     <!-- Aside Sidebar -->
-    <aside slot="aside" class="wa-desktop-only" th:if="${user.ctx.currentTenant != null}" id="aside-panel">
+    <aside slot="aside" class="wa-desktop-only" th:if="${user != null}" id="aside-panel">
         <div layout:fragment="aside" id="aside-content">
             <!-- Aside content will be inserted here -->
         </div>
