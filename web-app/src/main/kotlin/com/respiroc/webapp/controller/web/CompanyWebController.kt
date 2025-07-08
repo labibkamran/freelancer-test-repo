@@ -7,6 +7,9 @@ import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
 import com.respiroc.webapp.controller.response.Callout
 import jakarta.validation.Valid
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -31,7 +34,7 @@ class CompanyWebController(
         @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
         bindingResult: BindingResult,
         model: Model
-    ): String {
+    ): Any {
         addCommonAttributes(model, companyApi, "Create Company")
         if (bindingResult.hasErrors()) {
             model.addAttribute(
@@ -51,17 +54,10 @@ class CompanyWebController(
 
             val company = companyApi.createNewCompany(command)
 
-            model.addAttribute(
-                calloutAttributeNames, Callout.Success(
-                    message = "Company '${company.name}' has been created successfully! Click here to go to dashboard.",
-                    link = "/dashboard?tenantId=${company.tenantId}"
-                )
-            )
+            val headers = HttpHeaders()
+            headers.add("HX-Redirect", "/dashboard?tenantId=${company.tenantId}")
 
-            // Reset form
-            model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-
-            return "company/create"
+            return ResponseEntity<Void>(headers, HttpStatus.OK)
 
         } catch (e: Exception) {
             model.addAttribute(
