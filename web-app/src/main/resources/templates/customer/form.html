@@ -16,108 +16,92 @@
 <body>
 <main layout:fragment="content">
     <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1 class="h3">
-                    Create New Customer/Supplier
-                </h1>
-                <p class="text-muted">Fill out your Customer/Supplier details or search the Norwegian business registry
-                    for automatic completion</p>
-            </div>
-        </div>
-        <div>
-            <div id="alert-container" style="margin-bottom: var(--wa-space-m)"></div>
-            <wa-card style="margin-bottom: var(--wa-space-m);">
-                <div slot="header">
-                    <h5 style="margin: 0;">
-                        🏢 Customer/Supplier Information
-                    </h5>
-                </div>
-                <div style="padding: var(--wa-space-xl)">
-                    <form id="createCustomerForm"
-                          th:object="${customer}"
-                          th:attr="hx-post='/customer?tenantId=' + ${user.ctx.currentTenant?.id}"
-                          hx-target="#alert-container"
-                          hx-indicator="#loading-indicator"
-                          hx-disabled-elt="find #submitButton"
-                          hx-swap="innerHTML">
-                        <div class="form-group">
-                            <wa-select required label="Type" name="type" th:value="${customer.type}" th:field="*{type}">
-                                <wa-option value="CUSTOMER">Customer</wa-option>
-                                <wa-option value="SUPPLIER">Supplier</wa-option>
-                                <wa-option value="customer_supplier">Customer/Supplier</wa-option>
-                            </wa-select>
-                        </div>
-                        <div class="form-group">
-                            <wa-radio-group
-                                    required
-                                    orientation="horizontal"
-                                    name="privateCustomer"
-                                    th:value="${customer.privateCustomer}"
-                                    th:attr="
+        <div id="alert-container" style="margin-bottom: var(--wa-space-m)"></div>
+        <wa-card style="margin-bottom: var(--wa-space-m);">
+            <div style="padding: var(--wa-space-xl)">
+                <form id="createCustomerForm"
+                      th:object="${customer}"
+                      th:attr="hx-post='/customer?tenantId=' + ${user.ctx.currentTenant?.id}"
+                      hx-target="#alert-container"
+                      hx-indicator="#loading-indicator"
+                      hx-disabled-elt="find #submitButton"
+                      hx-swap="innerHTML">
+                    <div class="form-group">
+                        <wa-select required label="Type" name="type" th:value="${customer.type}" th:field="*{type}">
+                            <wa-option value="CUSTOMER">Customer</wa-option>
+                            <wa-option value="SUPPLIER">Supplier</wa-option>
+                            <wa-option value="customer_supplier">Customer/Supplier</wa-option>
+                        </wa-select>
+                    </div>
+                    <div class="form-group">
+                        <wa-radio-group
+                                required
+                                orientation="horizontal"
+                                name="privateCustomer"
+                                th:value="${customer.privateCustomer}"
+                                th:attr="
                                            hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}
                                            "
-                                    hx-target="#customerFormFields"
-                                    hx-trigger="change"
-                            >
-                                <wa-radio value="false">Company</wa-radio>
-                                <wa-radio value="true">Private Person</wa-radio>
-                            </wa-radio-group>
+                                hx-target="#customerFormFields"
+                                hx-trigger="change"
+                        >
+                            <wa-radio value="false">Company</wa-radio>
+                            <wa-radio value="true">Private Person</wa-radio>
+                        </wa-radio-group>
+                    </div>
+                    <div th:fragment="customerFormFields" id="customerFormFields">
+                        <div class="form-group">
+                            <wa-input
+                                    th:unless="${customer.privateCustomer}"
+                                    id="companyName"
+                                    label="Customer Name"
+                                    name="name"
+                                    th:field="*{name}"
+                                    placeholder="Enter company name or search registry..."
+                                    size="medium"
+                                    required
+                                    autocomplete="off"
+                                    hx-get="/company/search"
+                                    hx-trigger="input changed delay:200ms"
+                                    hx-target="#name-dropdown"
+                                    hx-swap="outerHTML">
+                            </wa-input>
+                            <wa-input
+                                    th:if="${customer.privateCustomer}"
+                                    id="companyName"
+                                    label="Customer Name"
+                                    name="name"
+                                    th:field="*{name}"
+                                    placeholder="Enter full name of private person..."
+                                    size="medium"
+                                    required
+                                    autocomplete="off">
+                            </wa-input>
+                            <div id="name-dropdown"></div>
                         </div>
-                        <div th:fragment="customerFormFields" id="customerFormFields">
-                            <div class="form-group">
-                                <wa-input
-                                        th:unless="${customer.privateCustomer}"
-                                        id="companyName"
-                                        label="Customer Name"
-                                        name="name"
-                                        th:field="*{name}"
-                                        placeholder="Enter company name or search registry..."
-                                        size="medium"
-                                        required
-                                        autocomplete="off"
-                                        hx-get="/company/search"
-                                        hx-trigger="input changed delay:200ms"
-                                        hx-target="#name-dropdown"
-                                        hx-swap="outerHTML">
-                                </wa-input>
-                                <wa-input
-                                        th:if="${customer.privateCustomer}"
-                                        id="companyName"
-                                        label="Customer Name"
-                                        name="name"
-                                        th:field="*{name}"
-                                        placeholder="Enter full name of private person..."
-                                        size="medium"
-                                        required
-                                        autocomplete="off">
-                                </wa-input>
-                                <div id="name-dropdown"></div>
-                            </div>
-                            <div th:unless="${customer.privateCustomer}" class="form-group" id="orgNumberGroup">
-                                <wa-input
-                                        id="organizationNumber"
-                                        name="organizationNumber"
-                                        label="Organization Number"
-                                        th:field="*{organizationNumber}"
-                                        placeholder="Enter organization number..."
-                                        size="medium"
-                                        autocomplete="off">
-                                </wa-input>
-                            </div>
+                        <div th:unless="${customer.privateCustomer}" class="form-group" id="orgNumberGroup">
+                            <wa-input
+                                    id="organizationNumber"
+                                    name="organizationNumber"
+                                    label="Organization Number"
+                                    th:field="*{organizationNumber}"
+                                    placeholder="Enter organization number..."
+                                    size="medium"
+                                    autocomplete="off">
+                            </wa-input>
                         </div>
-                        <div style="display: flex; gap: var(--wa-space-m); align-items: center;">
-                            <wa-button type="submit" variant="success" size="small" id="submitButton">
-                                <wa-icon name="plus" style="margin-right:var(--wa-space-x)"></wa-icon>
-                                Create Customer
-                            </wa-button>
-                            <wa-spinner id="loading-indicator" class="htmx-indicator"
-                                        style="font-size: var(--wa-space-xl)"></wa-spinner>
-                        </div>
-                    </form>
-                </div>
-            </wa-card>
-        </div>
+                    </div>
+                    <div style="display: flex; gap: var(--wa-space-m); align-items: center;">
+                        <wa-button type="submit" variant="success" size="small" id="submitButton">
+                            <wa-icon name="plus" style="margin-right:var(--wa-space-x)"></wa-icon>
+                            Create Customer
+                        </wa-button>
+                        <wa-spinner id="loading-indicator" class="htmx-indicator"
+                                    style="font-size: var(--wa-space-xl)"></wa-spinner>
+                    </div>
+                </form>
+            </div>
+        </wa-card>
     </div>
 </main>
 
