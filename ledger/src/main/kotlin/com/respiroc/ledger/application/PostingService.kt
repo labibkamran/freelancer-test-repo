@@ -2,19 +2,12 @@ package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
-import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.TrialBalanceEntry
 import com.respiroc.ledger.api.payload.TrialBalancePayload
 import com.respiroc.ledger.api.payload.GeneralLedgerPayload
 import com.respiroc.ledger.api.payload.GeneralLedgerAccountEntry
 import com.respiroc.ledger.api.payload.GeneralLedgerPostingEntry
-import com.respiroc.ledger.domain.exception.AccountNotFoundException
-import com.respiroc.ledger.domain.exception.InvalidVatCodeException
-import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
-import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.repository.PostingRepository
-import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -24,20 +17,8 @@ import java.time.LocalDate
 @Transactional
 class PostingService(
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi,
-    private val vatApi: VatInternalApi
-) : PostingInternalApi, ContextAwareApi {
-
-    override fun createBatchPostings(postings: List<CreatePostingPayload>): List<Posting> {
-        validatePostingCommands(postings)
-        validateBalance(postings)
-
-        val createdPostings = postings.map { postingData ->
-            createPostingEntity(postingData, currentTenantId())
-        }
-
-        return postingRepository.saveAll(createdPostings)
-    }
+    private val accountApi: AccountInternalApi
+) : PostingInternalApi {
 
     @Transactional(readOnly = true)
     override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload {
@@ -138,52 +119,5 @@ class PostingService(
             accounts = accountEntries,
             totalAmount = totalAmount
         )
-    }
-
-    // -------------------------------
-    // Private Helper Methods
-    // -------------------------------
-
-    private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
-        postings.forEach { postingData ->
-            validateAccount(postingData.accountNumber)
-            validateVatCode(postingData.vatCode)
-        }
-    }
-
-    private fun validateAccount(accountNumber: String) {
-        if (accountApi.findAccountByNumber(accountNumber) == null) {
-            throw AccountNotFoundException(accountNumber)
-        }
-    }
-
-    private fun validateVatCode(vatCode: String?) {
-        if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
-            throw InvalidVatCodeException(vatCode)
-        }
-    }
-
-    private fun validateBalance(postings: List<CreatePostingPayload>) {
-        val totalAmount = postings.sumOf { it.amount }
-        // Round to 2 decimal places for balance validation (currency conversion can introduce extra decimals)
-        val roundedAmount = totalAmount.setScale(2, java.math.RoundingMode.HALF_UP)
-        if (roundedAmount.compareTo(BigDecimal.ZERO) != 0) {
-            throw PostingsNotBalancedException(roundedAmount)
-        }
-    }
-
-    private fun createPostingEntity(postingData: CreatePostingPayload, tenantId: Long): Posting {
-        val posting = Posting()
-        posting.accountNumber = postingData.accountNumber
-        posting.amount = postingData.amount
-        posting.currency = postingData.currency
-        posting.postingDate = postingData.postingDate
-        posting.description = postingData.description
-        posting.tenantId = tenantId
-        posting.originalAmount = postingData.originalAmount
-        posting.originalCurrency = postingData.originalCurrency
-        posting.vatCode = postingData.vatCode
-
-        return posting
     }
 }
