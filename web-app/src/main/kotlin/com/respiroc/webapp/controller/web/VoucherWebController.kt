@@ -46,7 +46,7 @@ class VoucherWebController(
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-        addCommonAttributes(model, companyApi, "Voucher #${voucher.number}")
+        addCommonAttributes(model, companyApi, "Voucher ${voucher.getDisplayNumber()}")
         model.addAttribute("voucher", voucher)
 
         return "voucher/view"
@@ -99,10 +99,5 @@ class VoucherWebController(
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("companyCurrency", companyCurrency)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
-
-        // Form objects
-        model.addAttribute(
-            "createVoucherRequest", CreateVoucherRequest(postingLines = listOf())
-        )
     }
 } 
