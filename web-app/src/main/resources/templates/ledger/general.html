@@ -123,7 +123,7 @@
                                                 <a th:if="${posting.voucherId != null}"
                                                    th:href="'/voucher/' + ${posting.voucherId} + '?tenantId=' + ${user.ctx.currentTenant.id}"
                                                    style="color: var(--wa-color-blue-50); text-decoration: none;"
-                                                   th:text="|${posting.voucherNumber}-${#temporals.format(posting.date,'yyyy')}|">
+                                                   th:text="${posting.voucherNumber}">
                                                     5-2020
                                                 </a>
                                                 <span th:unless="${posting.voucherId != null}">-</span>
