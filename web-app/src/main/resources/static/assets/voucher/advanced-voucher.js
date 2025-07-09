@@ -6,16 +6,12 @@ document.addEventListener('DOMContentLoaded', function () {
     addPostingLine();
 
     if (clearForm) {
-        // Clear all input fields
-        document.querySelectorAll('#voucherForm input, #voucherForm select').forEach(input => {
+        // Clear voucher information fields
+        document.querySelectorAll('#voucherForm input[type="date"], #voucherForm input[type="text"]:not([name*="postingLines"])').forEach(input => {
             if (input.type === 'date') {
                 input.value = new Date().toISOString().split('T')[0];
-            } else if (input.type === 'text' || input.type === 'number') {
+            } else {
                 input.value = '';
-                input.removeAttribute('data-vat-code');
-                input.removeAttribute('data-converted-amount');
-            } else if (input.tagName === 'SELECT') {
-                input.value = companyCurrency;
             }
             input.classList.remove('field-error');
         });
@@ -35,99 +31,82 @@ function addPostingLine() {
     const row = document.createElement('tr');
     row.className = 'posting-line-row';
     row.id = 'posting-line-row-' + rowCounter;
+    const initialDate = new Date().toISOString().split('T')[0];
 
     const currencyOptions = supportedCurrencies.map(currency =>
-        `<option value="${currency}" ${currency === companyCurrency ? 'selected' : ''}>${currency}</option>`
+        `<wa-option value="${currency}">${currency}</wa-option>`
     ).join('');
 
     row.innerHTML = `
                 <td>
-                    <input type="date" 
-                           name="postingLines[${rowCounter}].postingDate" 
-                           value="${new Date().toISOString().split('T')[0]}"
-                           onchange="validatePostingLineFields(${rowCounter})"
-                           required>
+                    <wa-input type="date"
+                           size="small"
+                           value="${initialDate}"
+                           onchange="updateHiddenField(${rowCounter}, 'postingDate', this.value)"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].postingDate" id="hidden-postingDate-${rowCounter}" value="${initialDate}">
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <div class="account-search">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].debitAccount" 
-                                   placeholder="Search debit account..." 
-                                   autocomplete="off"
-                                   onkeyup="searchAccounts(this, ${rowCounter}, 'debit')"
-                                   onfocus="searchAccounts(this, ${rowCounter}, 'debit')"
-                                   onblur="validatePostingLineFields(${rowCounter})"
-                                   oninput="toggleAccountSelection(${rowCounter}, 'debit')"
-                                   style="font-size: 0.8rem;">
-                            <div id="debit-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
-                        <div class="vat-search" style="position: relative;">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].debitVatCode" 
-                                   placeholder="VAT code required" 
-                                   autocomplete="off"
-                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'debit')"
-                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'debit')"
-                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'debit')"
-                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'debit')"
-                                   class="vat-field"
-                                   required>
-                            <div id="debit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
+                        <r-combobox
+                            id="debit-account-${rowCounter}"
+                            placeholder="Search debit account..."
+                            style="font-size: 0.8rem;">
+                        </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].debitAccount" id="hidden-debitAccount-${rowCounter}">
+                        
+                        <r-combobox
+                            id="debit-vat-${rowCounter}"
+                            placeholder="VAT code required"
+                            style="font-size: 0.75rem;"
+                            value="0">
+                        </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].debitVatCode" id="hidden-debitVatCode-${rowCounter}" value="0">
                     </div>
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <div class="account-search">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].creditAccount" 
-                                   placeholder="Search credit account..." 
-                                   autocomplete="off"
-                                   onkeyup="searchAccounts(this, ${rowCounter}, 'credit')"
-                                   onfocus="searchAccounts(this, ${rowCounter}, 'credit')"
-                                   onblur="validatePostingLineFields(${rowCounter})"
-                                   oninput="toggleAccountSelection(${rowCounter}, 'credit')"
-                                   style="font-size: 0.8rem;">
-                            <div id="credit-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
-                        <div class="vat-search" style="position: relative;">
-                            <input type="text" 
-                                   name="postingLines[${rowCounter}].creditVatCode" 
-                                   placeholder="VAT code required" 
-                                   autocomplete="off"
-                                   onclick="handleVatFieldClick(this, ${rowCounter}, 'credit')"
-                                   onfocus="handleVatFieldFocus(this, ${rowCounter}, 'credit')"
-                                   onkeyup="handleVatFieldKeyup(this, ${rowCounter}, 'credit')"
-                                   onblur="handleVatFieldBlur(this, ${rowCounter}, 'credit')"
-                                   class="vat-field"
-                                   required>
-                            <div id="credit-vat-dropdown-${rowCounter}" class="account-dropdown"></div>
-                        </div>
+                        <r-combobox
+                            id="credit-account-${rowCounter}"
+                            placeholder="Search credit account..."
+                            style="font-size: 0.8rem;">
+                        </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].creditAccount" id="hidden-creditAccount-${rowCounter}">
+                        
+                        <r-combobox
+                            id="credit-vat-${rowCounter}"
+                            placeholder="VAT code required"
+                            style="font-size: 0.75rem;"
+                            value="0">
+                        </r-combobox>
+                        <input type="hidden" name="postingLines[${rowCounter}].creditVatCode" id="hidden-creditVatCode-${rowCounter}" value="0">
                     </div>
                 </td>
                 <td>
-                    <input type="number" 
-                           step="0.01" 
-                           name="postingLines[${rowCounter}].amount" 
-                           class="amount-input"
+                    <wa-input type="number"
+                           size="small"
+                           step="0.01"
                            placeholder="0.00"
-                           onchange="handleAmountChange(${rowCounter})"
-                           onblur="validatePostingLineFields(${rowCounter})"
-                           required>
+                           onchange="updateHiddenField(${rowCounter}, 'amount', this.value); handleAmountChange(${rowCounter});"
+                           onblur="validatePostingLineFields(${rowCounter})"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].amount" id="hidden-amount-${rowCounter}">
                     <div id="converted-amount-${rowCounter}" class="converted-amount" style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;"></div>
                 </td>
                 <td>
-                    <select name="postingLines[${rowCounter}].currency" 
-                            class="currency-select"
-                            onchange="handleCurrencyChange(${rowCounter})">
+                    <wa-select
+                            size="small"
+                            style="min-width: 5.6rem"
+                            value="${companyCurrency}"
+                            onchange="updateHiddenField(${rowCounter}, 'currency', this.value); handleCurrencyChange(${rowCounter});">
                         ${currencyOptions}
-                    </select>
+                    </wa-select>
+                    <input type="hidden" name="postingLines[${rowCounter}].currency" id="hidden-currency-${rowCounter}" value="${companyCurrency}">
                 </td>
                 <td>
-                    <input type="text" 
-                           name="postingLines[${rowCounter}].description" 
-                           placeholder="Description">
+                    <wa-input type="text"
+                           size="small"
+                           placeholder="Description"
+                           onchange="updateHiddenField(${rowCounter}, 'description', this.value)"></wa-input>
+                    <input type="hidden" name="postingLines[${rowCounter}].description" id="hidden-description-${rowCounter}">
                 </td>
                 <td>
                     <wa-button type="button" size="small" variant="danger" onclick="removePostingLine(${rowCounter})">
@@ -138,12 +117,98 @@ function addPostingLine() {
 
     tbody.appendChild(row);
 
-    // Set default VAT codes after adding the row
-    setDefaultVatCode(rowCounter, 'debit');
-    setDefaultVatCode(rowCounter, 'credit');
+    // Initialize r-combobox components after adding the row
+    const newRowId = rowCounter;
+    requestAnimationFrame(() => {
+        initializeComboboxes(newRowId);
+        updateBalance();
+    });
 
     rowCounter++;
-    updateBalance();
+}
+
+function updateHiddenField(rowId, fieldName, value) {
+    const hiddenInput = document.getElementById(`hidden-${fieldName}-${rowId}`);
+    if (hiddenInput) {
+        hiddenInput.value = value;
+    }
+}
+
+function initializeComboboxes(rowId) {
+    // Initialize account comboboxes with accounts data
+    const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+    const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+    
+    if (debitAccountCombo && accounts) {
+        debitAccountCombo.items = accounts.map(account => ({
+            value: account.noAccountNumber,
+            title: account.noAccountNumber,
+            description: account.accountName,
+            meta: account.accountDescription || ''
+        }));
+        
+        debitAccountCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'debitAccount', e.target.value);
+            toggleAccountSelection(rowId, 'debit');
+            updateBalance();
+        });
+    }
+
+    if (creditAccountCombo && accounts) {
+        creditAccountCombo.items = accounts.map(account => ({
+            value: account.noAccountNumber,
+            title: account.noAccountNumber,
+            description: account.accountName,
+            meta: account.accountDescription || ''
+        }));
+        
+        creditAccountCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'creditAccount', e.target.value);
+            toggleAccountSelection(rowId, 'credit');
+            updateBalance();
+        });
+    }
+
+    // Initialize VAT comboboxes with VAT codes data
+    const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+    const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
+    
+    if (debitVatCombo && vatCodes) {
+        debitVatCombo.items = vatCodes.map(vatCode => ({
+            value: vatCode.code,
+            title: vatCode.code,
+            subtitle: `(${vatCode.rate}%)`,
+            description: vatCode.description,
+            meta: `${vatCode.vatType} - ${vatCode.vatCategory}`,
+            displayText: `${vatCode.code} (${vatCode.rate}%)`
+        }));
+        
+        debitVatCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'debitVatCode', e.target.value);
+            validatePostingLineFields(rowId);
+            updateBalance();
+        });
+    }
+
+    if (creditVatCombo && vatCodes) {
+        creditVatCombo.items = vatCodes.map(vatCode => ({
+            value: vatCode.code,
+            title: vatCode.code,
+            subtitle: `(${vatCode.rate}%)`,
+            description: vatCode.description,
+            meta: `${vatCode.vatType} - ${vatCode.vatCategory}`,
+            displayText: `${vatCode.code} (${vatCode.rate}%)`
+        }));
+        
+        creditVatCombo.addEventListener('change', (e) => {
+            updateHiddenField(rowId, 'creditVatCode', e.target.value);
+            validatePostingLineFields(rowId);
+            updateBalance();
+        });
+    }
+
+    // Validate the line after setting defaults
+    validatePostingLineFields(rowId);
 }
 
 function removePostingLine(id) {
@@ -155,24 +220,32 @@ function removePostingLine(id) {
 }
 
 function validatePostingLineFields(rowId) {
-    const dateInput = document.querySelector(`input[name="postingLines[${rowId}].postingDate"]`);
-    const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
-    const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
-    const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
-    const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
-    const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
+    const dateInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="date"]`);
+    const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+    const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+    const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
+    const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+    const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
     // Clear previous error states
-    [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
+    [dateInput, amountInput].forEach(input => {
         if (input) input.classList.remove('field-error');
+    });
+    
+    // Clear error styles from comboboxes by removing any error classes
+    [debitAccountCombo, creditAccountCombo, debitVatCombo, creditVatCombo].forEach(combo => {
+        if (combo) {
+            const input = combo.shadowRoot?.querySelector('.combobox-input');
+            if (input) input.classList.remove('has-error');
+        }
     });
 
     const hasDate = dateInput && dateInput.value.trim() !== '';
-    const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-    const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+    const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+    const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
     const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-    const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
-    const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
+    const hasDebitVat = debitVatCombo && debitVatCombo.value.trim() !== '';
+    const hasCreditVat = creditVatCombo && creditVatCombo.value.trim() !== '';
 
     // If any field has data, validate the entire row
     if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
@@ -182,8 +255,18 @@ function validatePostingLineFields(rowId) {
 
         // Must have at least one account (debit or credit, or both)
         if (!hasDebitAccount && !hasCreditAccount) {
-            debitInput.classList.add('field-error');
-            creditInput.classList.add('field-error');
+            if (debitAccountCombo) {
+                const input = debitAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
+            if (creditAccountCombo) {
+                const input = creditAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
+            // Also highlight the amount field as it's meaningless without an account
+            if (amountInput) {
+                amountInput.classList.add('field-error');
+            }
         }
 
         if (!hasAmount) {
@@ -192,10 +275,16 @@ function validatePostingLineFields(rowId) {
 
         // VAT validation: if account is filled, VAT must be filled
         if (hasDebitAccount && !hasDebitVat) {
-            debitVatInput.classList.add('field-error');
+            if (debitVatCombo) {
+                const input = debitVatCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
         }
         if (hasCreditAccount && !hasCreditVat) {
-            creditVatInput.classList.add('field-error');
+            if (creditVatCombo) {
+                const input = creditVatCombo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.add('has-error');
+            }
         }
     }
 }
@@ -207,11 +296,12 @@ function updateBalance() {
 
     // Calculate totals from individual posting lines using converted amounts
     document.querySelectorAll('.posting-line-row').forEach((row, index) => {
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
+        const rowId = row.id.replace('posting-line-row-', '');
+        const amountInput = row.querySelector('wa-input[type="number"]');
+        const debitInput = document.getElementById(`debit-account-${rowId}`);
+        const creditInput = document.getElementById(`credit-account-${rowId}`);
+        const dateInput = row.querySelector('wa-input[type="date"]');
+        const currencySelect = row.querySelector('wa-select');
 
         if (amountInput && amountInput.value && dateInput && dateInput.value) {
             const originalAmount = parseFloat(amountInput.value);
@@ -283,8 +373,8 @@ async function handleCurrencyChange(rowId) {
 
 // Update converted amount display
 async function updateConvertedAmount(rowId) {
-    const amountInput = document.querySelector(`input[name="postingLines[${rowId}].amount"]`);
-    const currencySelect = document.querySelector(`select[name="postingLines[${rowId}].currency"]`);
+    const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
+    const currencySelect = document.querySelector(`#posting-line-row-${rowId} wa-select`);
     const convertedAmountDiv = document.getElementById(`converted-amount-${rowId}`);
 
     if (amountInput && currencySelect && convertedAmountDiv) {
@@ -324,184 +414,13 @@ async function updateConvertedAmount(rowId) {
 }
 
 function toggleAccountSelection(rowId, type) {
-    const debitInput = document.querySelector(`input[name="postingLines[${rowId}].debitAccount"]`);
-    const creditInput = document.querySelector(`input[name="postingLines[${rowId}].creditAccount"]`);
-    const debitVatInput = document.querySelector(`input[name="postingLines[${rowId}].debitVatCode"]`);
-    const creditVatInput = document.querySelector(`input[name="postingLines[${rowId}].creditVatCode"]`);
-
-    // Allow both debit and credit to be filled - no disabling logic needed
-    // VAT inputs remain enabled for their respective sides
-
+    // With r-combobox, no need to disable fields anymore
+    // Both debit and credit sides can be filled
+    
     validatePostingLineFields(rowId);
-    updateBalance();
 }
 
-function searchAccounts(input, rowId, type) {
-    const query = input.value.toLowerCase();
-    const dropdown = document.getElementById(type + '-dropdown-' + rowId);
-
-    if (query.length < 1) {
-        dropdown.style.display = 'none';
-        return;
-    }
-
-    const filteredAccounts = accounts.filter(account =>
-        account.noAccountNumber.includes(query) ||
-        account.accountName.toLowerCase().includes(query) ||
-        account.accountDescription.toLowerCase().includes(query)
-    );
-
-    if (filteredAccounts.length === 0) {
-        dropdown.style.display = 'none';
-        return;
-    }
-
-    dropdown.innerHTML = filteredAccounts.map(account => `
-                <div class="account-item" onclick="selectAccount('${account.noAccountNumber}', '${account.accountName}', ${rowId}, '${type}')">
-                        <div style="font-weight: 500;">${account.noAccountNumber}</div>
-                        <div style="font-size: 0.8rem; color: #6b7280;">${account.accountName}</div>
-                </div>
-            `).join('');
-
-    dropdown.style.display = 'block';
-}
-
-function selectAccount(accountNumber, accountName, rowId, type) {
-    const input = document.querySelector(`input[name="postingLines[${rowId}].${type}Account"]`);
-    input.value = accountNumber;
-    document.getElementById(type + '-dropdown-' + rowId).style.display = 'none';
-
-    // Trigger toggle function to disable the other input
-    toggleAccountSelection(rowId, type);
-}
-
-function searchVatCodes(input, rowId, type) {
-    const query = input.value.toLowerCase();
-    const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
-
-    // Show all VAT codes when field is focused or query is empty
-    let filteredVatCodes;
-    if (query.length === 0) {
-        filteredVatCodes = vatCodes;
-    } else {
-        filteredVatCodes = vatCodes.filter(vatCode =>
-            vatCode.code.toLowerCase().includes(query) ||
-            vatCode.description.toLowerCase().includes(query) ||
-            vatCode.rate.toString().includes(query) ||
-            vatCode.vatType.toLowerCase().includes(query) ||
-            vatCode.vatCategory.toLowerCase().includes(query)
-        );
-    }
-
-    if (filteredVatCodes.length === 0) {
-        dropdown.innerHTML = `
-                    <div class="account-item" style="color: #9ca3af; font-style: italic;">
-                        <div style="font-size: 0.8rem;">No VAT codes found</div>
-                    </div>
-                `;
-        dropdown.style.display = 'block';
-        return;
-    }
-
-    dropdown.innerHTML = filteredVatCodes.map(vatCode => `
-                <div class="account-item" onclick="selectVatCode('${vatCode.code}', '${vatCode.description}', ${rowId}, '${type}')">
-                        <div style="font-weight: 500; font-size: 0.8rem;">${vatCode.code} - ${vatCode.rate}% (${vatCode.vatCategory})</div>
-                        <div style="font-size: 0.7rem; color: #6b7280;">${vatCode.description}</div>
-                        <div style="font-size: 0.65rem; color: #9ca3af;">${vatCode.vatType}</div>
-                </div>
-            `).join('');
-
-    dropdown.style.display = 'block';
-}
-
-function selectVatCode(vatCode, description, rowId, type) {
-    const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
-    const vatCodeObj = vatCodes.find(vc => vc.code === vatCode);
-
-    // Display the code with rate for better UX
-    if (vatCodeObj) {
-        input.value = `${vatCode} (${vatCodeObj.rate}%)`;
-        input.setAttribute('data-vat-code', vatCode); // Store actual code for form submission
-    } else {
-        input.value = vatCode;
-        input.setAttribute('data-vat-code', vatCode);
-    }
-
-    document.getElementById(type + '-vat-dropdown-' + rowId).style.display = 'none';
-}
-
-function setDefaultVatCode(rowId, type) {
-    // Set the first VAT code as default if VAT codes are available
-    if (vatCodes && vatCodes.length > 0) {
-        const firstVatCode = vatCodes[0];
-        const input = document.querySelector(`input[name="postingLines[${rowId}].${type}VatCode"]`);
-
-        if (input) {
-            // Set the display value with rate
-            input.value = `${firstVatCode.code} (${firstVatCode.rate}%)`;
-            input.setAttribute('data-vat-code', firstVatCode.code);
-        }
-    }
-}
-
-function showAllVatCodes(input, rowId, type) {
-    // Clear the search and show all codes
-    input.value = '';
-    searchVatCodes(input, rowId, type);
-}
-
-// Enhanced VAT field handlers
-function handleVatFieldClick(input, rowId, type) {
-    // If field is empty or contains display value, show all VAT codes
-    if (!input.value || input.value.includes('(') || input.value.includes('%')) {
-        input.value = '';
-        input.removeAttribute('data-vat-code');
-        searchVatCodes(input, rowId, type);
-    }
-}
-
-function handleVatFieldFocus(input, rowId, type) {
-    // Show dropdown when focused
-    if (!input.value) {
-        searchVatCodes(input, rowId, type);
-    }
-}
-
-function handleVatFieldKeyup(input, rowId, type) {
-    // If user deletes all content, prevent it and restore default
-    if (!input.value || input.value.trim() === '') {
-        setDefaultVatCode(rowId, type);
-        return;
-    }
-
-    // Clear data attribute when user types
-    input.removeAttribute('data-vat-code');
-    searchVatCodes(input, rowId, type);
-}
-
-function handleVatFieldBlur(input, rowId, type) {
-    // Delay hiding dropdown to allow click on items
-    setTimeout(() => {
-        const dropdown = document.getElementById(type + '-vat-dropdown-' + rowId);
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
-
-        // If VAT field is empty after blur, set default value
-        if (!input.value || input.value.trim() === '' || !getActualVatCode(input)) {
-            setDefaultVatCode(rowId, type);
-        }
-    }, 150);
-}
-
-// Hide dropdowns when clicking outside
-document.addEventListener('click', function (e) {
-    if (!e.target.closest('.account-search') && !e.target.closest('.vat-search')) {
-        document.querySelectorAll('.account-dropdown').forEach(dropdown => {
-            dropdown.style.display = 'none';
-        });
-    }
-});
+// Old search and dropdown functions removed since we're using r-combobox
 
 
 // Frontend validation functions
@@ -529,24 +448,33 @@ function validateFormFields() {
     let hasValidEntries = false;
 
     rows.forEach((row, index) => {
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
-        const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
+        const rowId = row.id.replace('posting-line-row-', '');
+        const dateInput = row.querySelector('wa-input[name*=".postingDate"]');
+        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+        const amountInput = row.querySelector('wa-input[name*=".amount"]');
+        const debitVatCombo = document.getElementById(`debit-vat-${rowId}`);
+        const creditVatCombo = document.getElementById(`credit-vat-${rowId}`);
 
         // Clear previous errors
-        [dateInput, debitInput, creditInput, amountInput, debitVatInput, creditVatInput].forEach(input => {
+        [dateInput, amountInput].forEach(input => {
             if (input) input.classList.remove('field-error');
+        });
+        
+        // Clear error styles from comboboxes
+        [debitAccountCombo, creditAccountCombo, debitVatCombo, creditVatCombo].forEach(combo => {
+            if (combo) {
+                const input = combo.shadowRoot?.querySelector('.combobox-input');
+                if (input) input.classList.remove('has-error');
+            }
         });
 
         const hasDate = dateInput && dateInput.value.trim() !== '';
-        const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-        const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
+        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
         const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-        const hasDebitVat = debitVatInput && getActualVatCode(debitVatInput).trim() !== '';
-        const hasCreditVat = creditVatInput && getActualVatCode(creditVatInput).trim() !== '';
+        const hasDebitVat = debitVatCombo && debitVatCombo.value.trim() !== '';
+        const hasCreditVat = creditVatCombo && creditVatCombo.value.trim() !== '';
 
         if (hasDate || hasDebitAccount || hasCreditAccount || hasAmount) {
             // This row has some data, validate it completely
@@ -557,8 +485,14 @@ function validateFormFields() {
 
             // Must have at least one account (debit or credit, or both)
             if (!hasDebitAccount && !hasCreditAccount) {
-                debitInput.classList.add('field-error');
-                creditInput.classList.add('field-error');
+                if (debitAccountCombo) {
+                    const input = debitAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
+                if (creditAccountCombo) {
+                    const input = creditAccountCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
 
@@ -569,11 +503,17 @@ function validateFormFields() {
 
             // VAT validation: if account is filled, VAT must be filled
             if (hasDebitAccount && !hasDebitVat) {
-                debitVatInput.classList.add('field-error');
+                if (debitVatCombo) {
+                    const input = debitVatCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
             if (hasCreditAccount && !hasCreditVat) {
-                creditVatInput.classList.add('field-error');
+                if (creditVatCombo) {
+                    const input = creditVatCombo.shadowRoot?.querySelector('.combobox-input');
+                    if (input) input.classList.add('has-error');
+                }
                 isValid = false;
             }
 
@@ -613,9 +553,28 @@ async function validateAndPrepareForm(event) {
         return false;
     }
 
-    // Then prepare form data
-    const isValid = await prepareFormData(event);
-    if (!isValid) {
+    // Submission is allowed, just remove empty rows before submitting
+    const allRows = Array.from(document.querySelectorAll('.posting-line-row'));
+    allRows.forEach(row => {
+        const rowId = row.id.replace('posting-line-row-', '');
+        const debitAccountCombo = document.getElementById(`debit-account-${rowId}`);
+        const creditAccountCombo = document.getElementById(`credit-account-${rowId}`);
+        const amountInput = document.querySelector(`#posting-line-row-${rowId} wa-input[type="number"]`);
+
+        const hasDebitAccount = debitAccountCombo && debitAccountCombo.value.trim() !== '';
+        const hasCreditAccount = creditAccountCombo && creditAccountCombo.value.trim() !== '';
+        const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
+
+        // If a row has no accounts and no amount, it's considered empty and should be removed.
+        if (!hasDebitAccount && !hasCreditAccount && !hasAmount) {
+            row.remove();
+        }
+    });
+
+
+    // Final balance check before allowing submission
+    const saveButton = document.getElementById('saveButton');
+    if (saveButton.disabled) {
         event.preventDefault();
         return false;
     }
@@ -623,135 +582,11 @@ async function validateAndPrepareForm(event) {
     return true;
 }
 
-// Prepare form data before submission
+// Prepare form data before submission - This function is now much simpler.
 async function prepareFormData(event) {
-
-    // First, make sure all conversions are up to date
-    const rows = Array.from(document.querySelectorAll('.posting-line-row'));
-
-    // Update all conversions before validating
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const rowId = row.id.replace('posting-line-row-', '');
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
-
-        if (amountInput && amountInput.value && currencySelect && currencySelect.value) {
-            await updateConvertedAmount(rowId);
-        }
-    }
-
-    // Now validate the balance
-    updateBalance();
-
-    // Remove empty rows and reindex
-    const tbody = document.getElementById('postingLines');
-    const allRows = Array.from(tbody.querySelectorAll('.posting-line-row'));
-
-    // Filter out empty rows and prepare posting lines
-    const validPostingLines = [];
-
-    allRows.forEach(row => {
-        const dateInput = row.querySelector('input[name*=".postingDate"]');
-        const debitInput = row.querySelector('input[name*=".debitAccount"]');
-        const creditInput = row.querySelector('input[name*=".creditAccount"]');
-        const amountInput = row.querySelector('input[name*=".amount"]');
-        const currencySelect = row.querySelector('select[name*=".currency"]');
-        const descriptionInput = row.querySelector('input[name*=".description"]');
-        const debitVatInput = row.querySelector('input[name*=".debitVatCode"]');
-        const creditVatInput = row.querySelector('input[name*=".creditVatCode"]');
-
-        const hasDate = dateInput && dateInput.value.trim() !== '';
-        const hasDebitAccount = debitInput && debitInput.value.trim() !== '';
-        const hasCreditAccount = creditInput && creditInput.value.trim() !== '';
-        const hasAmount = amountInput && amountInput.value && parseFloat(amountInput.value) > 0;
-
-        if (hasDate && (hasDebitAccount || hasCreditAccount) && hasAmount) {
-            const baseData = {
-                postingDate: dateInput.value,
-                amount: amountInput.value,
-                currency: currencySelect.value,
-                description: descriptionInput ? descriptionInput.value : ''
-            };
-
-            // Always create one posting line with both debit and credit accounts (backend will handle splitting)
-            validPostingLines.push({
-                ...baseData,
-                debitAccount: hasDebitAccount ? debitInput.value : '',
-                creditAccount: hasCreditAccount ? creditInput.value : '',
-                debitVatCode: hasDebitAccount ? getActualVatCode(debitVatInput) : '',
-                creditVatCode: hasCreditAccount ? getActualVatCode(creditVatInput) : ''
-            });
-        }
-    });
-
-    // Check balance before submission - use the same logic as backend
-    let totalSignedAmount = 0;
-
-    validPostingLines.forEach(line => {
-        const amount = parseFloat(line.amount);
-        const hasDebit = line.debitAccount.trim() !== '';
-        const hasCredit = line.creditAccount.trim() !== '';
-
-        if (hasDebit && hasCredit) {
-            // Both sides filled - this line is balanced (backend will create +amount and -amount)
-            // No contribution to total (0)
-        } else if (hasDebit) {
-            // Only debit - positive contribution
-            totalSignedAmount += amount;
-        } else if (hasCredit) {
-            // Only credit - negative contribution
-            totalSignedAmount -= amount;
-        }
-    });
-
-    if (Math.abs(totalSignedAmount) >= 0.01) {
-        alert(`Voucher is not balanced! Total signed amount: ${totalSignedAmount.toFixed(2)} ${companyCurrency}`);
-        return false;
-    }
-
-    // Remove all rows
-    allRows.forEach(row => row.remove());
-
-    // Create new rows from validPostingLines
-    validPostingLines.forEach((line, index) => {
-        const newRow = document.createElement('tr');
-        newRow.className = 'posting-line-row';
-        newRow.innerHTML = `
-                    <input type="hidden" name="postingLines[${index}].postingDate" value="${line.postingDate}">
-                    <input type="hidden" name="postingLines[${index}].debitAccount" value="${line.debitAccount || ''}">
-                    <input type="hidden" name="postingLines[${index}].creditAccount" value="${line.creditAccount || ''}">
-                    <input type="hidden" name="postingLines[${index}].amount" value="${line.amount}">
-                    <input type="hidden" name="postingLines[${index}].currency" value="${line.currency}">
-                    <input type="hidden" name="postingLines[${index}].description" value="${line.description || ''}">
-                    <input type="hidden" name="postingLines[${index}].debitVatCode" value="${line.debitVatCode || ''}">
-                    <input type="hidden" name="postingLines[${index}].creditVatCode" value="${line.creditVatCode || ''}">
-                `;
-        tbody.appendChild(newRow);
-    });
-
-    // If no valid posting lines, prevent form submission
-    if (validPostingLines.length === 0) {
-        alert('Please add at least one complete posting line.');
-        return false;
-    }
-
-    // Form is valid, allow submission
+    // This function is now removed, its logic is merged into validateAndPrepareForm
+    // All data is now handled by hidden inputs, updated in real-time.
     return true;
 }
 
-function getActualVatCode(vatInput) {
-    if (!vatInput || !vatInput.value) return '';
-
-    const actualCode = vatInput.getAttribute('data-vat-code');
-    if (actualCode) {
-        return actualCode;
-    } else if (vatInput.value.includes('(')) {
-        // Extract code from display value like "1 (25%)"
-        const codeMatch = vatInput.value.match(/^(\w+)\s*\(/);
-        if (codeMatch) {
-            return codeMatch[1];
-        }
-    }
-    return vatInput.value;
-}
+// getActualVatCode function removed since we're using r-combobox

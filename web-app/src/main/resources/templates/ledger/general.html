@@ -2,6 +2,17 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Accounts
+    </wa-breadcrumb-item>
+    <wa-breadcrumb-item>
+        General Ledger
+    </wa-breadcrumb-item>
+</th:block>
+
+<body>
 <main layout:fragment="content">
     <div class="wa-container">
         <div class="wa-stack wa-gap-s">
@@ -112,7 +123,7 @@
                                                 <a th:if="${posting.voucherId != null}"
                                                    th:href="'/voucher/' + ${posting.voucherId} + '?tenantId=' + ${user.ctx.currentTenant.id}"
                                                    style="color: var(--wa-color-blue-50); text-decoration: none;"
-                                                   th:text="|${posting.voucherNumber}-${#temporals.format(posting.date,'yyyy')}|">
+                                                   th:text="${posting.voucherNumber}">
                                                     5-2020
                                                 </a>
                                                 <span th:unless="${posting.voucherId != null}">-</span>
@@ -182,5 +193,5 @@
         </div>
     </div>
 </main>
-
+</body>
 </html> 
