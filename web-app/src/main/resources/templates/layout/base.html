@@ -73,7 +73,7 @@
 
     <!-- Navigation -->
     <nav slot="navigation"
-         th:replace="~{fragments/menu :: menu(sections=${@menuProvider.getMenuSections()},user=${user})}"></nav>
+         th:replace="~{fragments/navigation :: navigation(sections=${@navigationProvider.getNavigationSections()},user=${user})}"></nav>
 
     <!-- Navigation Footer -->
     <!-- <nav slot="navigation-footer">
