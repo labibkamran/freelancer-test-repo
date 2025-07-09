@@ -94,7 +94,7 @@ function addPostingLine() {
                 <td>
                     <wa-select
                             size="small"
-                            class="currency-select"
+                            style="min-width: 5.6rem"
                             value="${companyCurrency}"
                             onchange="updateHiddenField(${rowCounter}, 'currency', this.value); handleCurrencyChange(${rowCounter});">
                         ${currencyOptions}
