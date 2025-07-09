@@ -84,7 +84,7 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun getOperatingRevenue(accountType: AccountType, startDate: LocalDate, endDate: LocalDate): ProfitLossPayload {
+    override fun getPostingsForProfitLoss(accountType: AccountType, startDate: LocalDate, endDate: LocalDate): ProfitLossPayload {
         val tenantId = currentTenantId()
         val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
 

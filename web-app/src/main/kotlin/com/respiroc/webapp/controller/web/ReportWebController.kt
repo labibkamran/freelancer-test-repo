@@ -102,9 +102,9 @@ class ReportWebController(
         val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val assetPostings = postingApi.getOperatingRevenue(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
-        val revenuePostings = postingApi.getOperatingRevenue(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
-        val operatingCostPostings = postingApi.getOperatingRevenue(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
+        val assetPostings = postingApi.getPostingsForProfitLoss(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
+        val revenuePostings = postingApi.getPostingsForProfitLoss(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
+        val operatingCostPostings = postingApi.getPostingsForProfitLoss(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
 
 
         model.addAttribute("user", springUser)
@@ -134,9 +134,9 @@ class ReportWebController(
         val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
 
-        val assetPostings = postingApi.getOperatingRevenue(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
-        val revenuePostings = postingApi.getOperatingRevenue(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
-        val operatingCostPostings = postingApi.getOperatingRevenue(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
+        val assetPostings = postingApi.getPostingsForProfitLoss(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
+        val revenuePostings = postingApi.getPostingsForProfitLoss(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
+        val operatingCostPostings = postingApi.getPostingsForProfitLoss(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
 
 
         model.addAttribute("user", springUser)
