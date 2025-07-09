@@ -52,7 +52,7 @@ class RCombobox extends LitElement {
             width: 100%;
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
-            border: 1px solid #d1d5db;
+            border: 1px solid var(--wa-color-gray-90);
             border-radius: 0.375rem;
             background-color: white;
             transition: all 0.15s ease-in-out;
@@ -61,13 +61,13 @@ class RCombobox extends LitElement {
 
         .combobox-input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--wa-color-blue-70);
+            box-shadow: 0 0 0 3px var(--wa-color-blue-95);
         }
 
         .combobox-input.has-error {
-            border-color: #ef4444;
-            background-color: #fef2f2;
+            border-color: var(--wa-color-red-50);
+            background-color: var(--wa-color-gray-95);
         }
 
         .dropdown {
@@ -77,9 +77,9 @@ class RCombobox extends LitElement {
             right: 0;
             margin-top: 0.25rem;
             background: white;
-            border: 1px solid #d1d5db;
+            border: 1px solid var(--wa-color-gray-90);
             border-radius: 0.375rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px var(--wa-color-gray-95);
             max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
@@ -94,7 +94,7 @@ class RCombobox extends LitElement {
             padding: 0.5rem 0.75rem;
             cursor: pointer;
             transition: background-color 0.15s ease-in-out;
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid var(--wa-color-gray-95);
         }
 
         .dropdown-item:last-child {
@@ -103,36 +103,36 @@ class RCombobox extends LitElement {
 
         .dropdown-item:hover,
         .dropdown-item.highlighted {
-            background-color: #f3f4f6;
+            background-color: var(--wa-color-gray-95);
         }
 
         .dropdown-item.selected {
-            background-color: #e0e7ff;
+            background-color: var(--wa-color-blue-95);
         }
 
         .item-title {
             font-weight: 500;
             font-size: 0.875rem;
-            color: #111827;
+            color: var(--wa-color-gray-10);
             margin-bottom: 0.125rem;
         }
 
         .item-description {
             font-size: 0.75rem;
-            color: #6b7280;
+            color: var(--wa-color-gray-40);
             line-height: 1.4;
         }
 
         .item-meta {
             font-size: 0.7rem;
-            color: #9ca3af;
+            color: var(--wa-color-gray-50);
             margin-top: 0.125rem;
         }
 
         .no-results {
             padding: 1rem;
             text-align: center;
-            color: #9ca3af;
+            color: var(--wa-color-gray-50);
             font-style: italic;
             font-size: 0.875rem;
         }
@@ -144,14 +144,14 @@ class RCombobox extends LitElement {
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #6b7280;
+            color: var(--wa-color-gray-50);
             cursor: pointer;
             padding: 0.25rem;
             display: none;
         }
 
         .clear-button:hover {
-            color: #374151;
+            color: var(--wa-color-gray-30);
         }
 
         .combobox-input:not(:placeholder-shown) ~ .clear-button {
