@@ -70,7 +70,7 @@ class ReportWebController(
             "report/trial-balance :: tableContent"
         } catch (e: Exception) {
             logger.error("Error loading trial balance data via HTMX", e)
-            model.addAttribute(calloutAttributeNames, Callout.Error("Error loading trial balance: ${e.message}"))
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading trial balance: ${e.message}"))
             return "report/trial-balance :: error-message"
         }
     }
