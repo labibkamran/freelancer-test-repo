@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class VoucherSummaryPayload(
     val id: Long,
-    val number: Short,
+    val number: String,
     val date: LocalDate,
     val description: String?,
     val postingCount: Int

@@ -27,7 +27,7 @@ class VoucherService(
     private val postingRepository: PostingRepository,
     private val accountApi: AccountInternalApi,
     private val vatApi: VatInternalApi
-) : VoucherInternalApi, ContextAwareApi {
+) : VoucherInternalApi {
 
     override fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
         val tenantId = currentTenantId()
@@ -47,7 +47,7 @@ class VoucherService(
         
         return VoucherPayload(
             id = savedVoucher.id,
-            number = savedVoucher.number,
+            number = savedVoucher.getDisplayNumber(),
             date = savedVoucher.date
         )
     }
@@ -59,7 +59,7 @@ class VoucherService(
         return vouchers.map { voucher ->
             VoucherSummaryPayload(
                 id = voucher.id,
-                number = voucher.number,
+                number = voucher.getDisplayNumber(),
                 date = voucher.date,
                 description = voucher.description,
                 postingCount = voucher.postings.size
