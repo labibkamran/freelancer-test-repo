@@ -108,7 +108,7 @@ class PostingService(
                             GeneralLedgerPostingEntry(
                                 id = posting.id,
                                 voucherId = posting.voucherId,
-                                voucherNumber = posting.voucher?.number,
+                                voucherNumber = posting.voucher?.getDisplayNumber(),
                                 date = posting.postingDate,
                                 description = posting.description,
                                 vatCode = posting.vatCode,
