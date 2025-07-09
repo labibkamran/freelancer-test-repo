@@ -38,7 +38,7 @@ class CompanyWebController(
         addCommonAttributes(model, companyApi, "Create Company")
         if (bindingResult.hasErrors()) {
             model.addAttribute(
-                calloutAttributeNames, Callout.Error(
+                calloutAttributeName, Callout.Error(
                     message = "Please fill in all required fields correctly."
                 )
             )
@@ -61,7 +61,7 @@ class CompanyWebController(
 
         } catch (e: Exception) {
             model.addAttribute(
-                calloutAttributeNames, Callout.Error(
+                calloutAttributeName, Callout.Error(
                     message = "Failed to create company: ${e.message}"
                 )
             )
