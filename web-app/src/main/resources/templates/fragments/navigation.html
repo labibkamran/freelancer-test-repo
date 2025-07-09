@@ -1,4 +1,4 @@
-<nav slot="navigation" id="nav" th:fragment="menu(sections,user)">
+<nav slot="navigation" id="navigation" th:fragment="navigation(sections,user)">
     <wa-details appearance="outlined" variant="brand"
                 th:each="section : ${sections}">
         <div slot="summary" style="display: flex; align-items: center; gap: 0.5rem;">
