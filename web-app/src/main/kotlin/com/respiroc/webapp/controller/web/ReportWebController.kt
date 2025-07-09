@@ -138,7 +138,7 @@ class ReportWebController(
          "report/profit-loss :: tableContent"
         } catch (e: Exception) {
             logger.error("Error loading profit loss data via HTMX", e)
-            model.addAttribute("callout", Callout("Error loading profit loss: ${e.message}", MessageType.ERROR))
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading profit loss: ${e.message}"))
             return "report/profit-loss :: error-message"
         }
     }
