@@ -46,7 +46,7 @@ class VoucherWebController(
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-        addCommonAttributes(model, companyApi, "Voucher #${voucher.number}")
+        addCommonAttributes(model, companyApi, "Voucher ${voucher.getDisplayNumber()}")
         model.addAttribute("voucher", voucher)
 
         return "voucher/view"

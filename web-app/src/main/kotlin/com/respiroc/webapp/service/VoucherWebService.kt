@@ -41,7 +41,7 @@ class VoucherWebService(
             val result = voucherApi.createVoucher(voucherPayload)
 
             Callout.Success(
-                message = "New voucher #${result.number} created successfully!",
+                message = "New voucher ${result.number} created successfully!",
                 link = "/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}"
             )
         } catch (e: Exception) {
