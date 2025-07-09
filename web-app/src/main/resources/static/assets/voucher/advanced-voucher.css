@@ -58,124 +58,13 @@
     margin-bottom: 1rem;
 }
 
-.posting-table th {
-    background: #f8f9fa;
-    padding: 0.5rem;
-    text-align: left;
-    border: 1px solid #e9ecef;
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-.posting-table td {
-    padding: 0.4rem;
-    border: 1px solid #e9ecef;
-    vertical-align: middle;
-}
-
-.posting-table tr:hover {
-    background-color: #f8f9fa;
-}
-
-.posting-line-row input,
-.posting-line-row select {
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0.2rem;
-    font-size: 0.85rem;
-}
-
-.posting-line-row input:focus,
-.posting-line-row select:focus {
-    outline: 1px solid #3b82f6;
-    outline-offset: -1px;
-    border-radius: 3px;
-}
-
-.posting-line-row input:disabled {
-    background-color: #f5f5f5;
-    color: #9ca3af;
-    cursor: not-allowed;
-}
-
-.currency-select {
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.amount-input {
-    text-align: right;
-    font-size: 0.85rem;
-}
-
-.balance-display {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: #f0f9ff;
-    border: 1px solid #0ea5e9;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.balance-item {
-    text-align: center;
-}
-
-.balance-value {
-    font-size: 1.25rem;
-    font-weight: bold;
-}
-
-.balance-label {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.balance-matched {
-    color: #16a34a;
-}
-
-.balance-unmatched {
-    color: #dc2626;
-}
-
 .form-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.account-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-height: 200px;
-    overflow-y: auto;
-    display: none;
-}
-
-.account-item {
-    padding: 0.75rem;
-    cursor: pointer;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.account-item:hover {
-    background-color: #f8fafc;
-}
-
-.account-search {
-    position: relative;
-}
+/* Old dropdown styles removed since we're using r-combobox */
 
 
 
@@ -204,36 +93,15 @@
     display: block;
 }
 
-.vat-field {
-    font-size: 0.75rem !important;
-    color: #374151 !important;
-    background: #f8f9fa !important;
-    border: 1px solid #e9ecef !important;
-    border-radius: 3px;
-    padding: 2px 4px !important;
-    cursor: pointer;
-    transition: all 0.2s ease;
+/* r-combobox styling for appearance customization */
+r-combobox {
+    font-size: inherit;
 }
 
-.vat-field:focus {
-    outline: 1px solid #3b82f6 !important;
-    outline-offset: -1px;
-    border-color: #3b82f6 !important;
-    background: white !important;
+r-combobox[style*="font-size: 0.75rem"] {
+    --combobox-font-size: 0.75rem;
 }
 
-.vat-field:hover {
-    background: #e9ecef !important;
-    border-color: #ced4da !important;
-}
-
-.vat-field:disabled {
-    background-color: #f5f5f5 !important;
-    color: #9ca3af !important;
-    cursor: not-allowed;
-}
-
-.vat-field::placeholder {
-    color: #9ca3af !important;
-    font-style: italic;
+r-combobox[style*="font-size: 0.8rem"] {
+    --combobox-font-size: 0.8rem;
 }
