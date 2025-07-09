@@ -21,7 +21,7 @@
             <wa-card>
                 <div class="wa-stack wa-gap-m">
                     <div class="wa-split">
-                        <h1 class="wa-heading-l">Voucher <span th:text="|${voucher.number}-${#temporals.format(voucher.date, 'yyyy')}|">1-2025</span></h1>
+                        <h1 class="wa-heading-l">Voucher <span th:text="${voucher.getDisplayNumber()}">1-2025</span></h1>
                         <wa-button size="small" variant="neutral" 
                                    th:onclick="'window.location.href=\'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id} + '\''">
                             Back to Overview

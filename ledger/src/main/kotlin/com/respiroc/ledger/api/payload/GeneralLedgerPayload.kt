@@ -19,7 +19,7 @@ data class GeneralLedgerAccountEntry(
 data class GeneralLedgerPostingEntry(
     val id: Long,
     val voucherId: Long?,
-    val voucherNumber: Short?,
+    val voucherNumber: String?,
     val date: LocalDate,
     val description: String?,
     val vatCode: String?,
