@@ -45,4 +45,8 @@ open class Voucher {
 
     @OneToMany(mappedBy = "voucher")
     open var postings: MutableSet<Posting> = mutableSetOf()
+
+    open fun getDisplayNumber(): String {
+        return "${number}-${date.year}"
+    }
 }

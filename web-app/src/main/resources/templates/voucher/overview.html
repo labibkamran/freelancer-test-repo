@@ -2,6 +2,13 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 
+<!-- Breadcrumb Items -->
+<th:block layout:fragment="breadcrumb-items">
+    <wa-breadcrumb-item>
+        Vouchers
+    </wa-breadcrumb-item>
+</th:block>
+
 <body>
 <main layout:fragment="content">
     <div class="wa-container">
@@ -22,7 +29,7 @@
                             <td>
                                 <a th:href="'/voucher/' + ${voucher.id} + '?tenantId=' + ${user.ctx.currentTenant?.id}"
                                    style="color: var(--wa-color-blue-50); text-decoration: none;">
-                                    <strong th:text="|${voucher.number}-${#temporals.format(voucher.date,'yyyy')}|">1-2025</strong>
+                                    <strong th:text="${voucher.number}">1-2025</strong>
                                 </a>
                             </td>
                             <td th:text="${voucher.description ?: '-'}">Sample voucher description</td>
