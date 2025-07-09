@@ -3,6 +3,8 @@
       layout:decorate="~{layout/base}">
 <head>
     <link rel="stylesheet" th:href="@{/assets/voucher/advanced-voucher.css}">
+    <!-- Include r-combobox dependencies -->
+    <th:block th:replace="~{fragments/r-combobox :: r-combobox-dependencies}"></th:block>
 </head>
 
 <!-- Breadcrumb Items -->
