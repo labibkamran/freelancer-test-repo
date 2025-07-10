@@ -75,6 +75,4 @@ class CompanyHTMXController(
             return "fragments/company-search :: error"
         }
     }
-
-
 } 
