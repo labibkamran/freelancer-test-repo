@@ -20,11 +20,12 @@ class TenantIdFilter(
     ),
     private val excludePaths: List<String> = listOf(
         "/company/create",
-        "/company/search",
         "/assets/**",
         "/errors/**",
         "/error/**",
-        "/htmx/auth/**"
+        "/htmx/auth/**",
+        "/htmx/company/create",
+        "/htmx/company/search",
     ),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {

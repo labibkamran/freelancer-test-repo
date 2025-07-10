@@ -23,9 +23,10 @@
                 <div style="padding: 2rem;">
                     <form id="createCompanyForm" 
                           th:object="${createCompanyRequest}"
-                          hx-post="/company/create"
-                          hx-target="body"
-                          hx-swap="outerHTML">
+                          hx-post="/htmx/company/create"
+                          hx-target="#form-messages"
+                          hx-swap="innerHTML"
+                          hx-ext="redirect">
                         
                         <!-- Company Name Field with Search -->
                         <div class="form-group">
@@ -40,7 +41,7 @@
                                     size="medium"
                                     required
                                     autocomplete="off"
-                                    hx-get="/company/search"
+                                    hx-get="/htmx/company/search"
                                     hx-trigger="input changed delay:200ms"
                                     hx-target="#name-dropdown"
                                     hx-swap="outerHTML"
@@ -79,8 +80,13 @@
                         </div>
 
                         <!-- Submit Button -->
+                        <!-- Form Messages -->
+                        <div id="form-messages" style="margin-bottom: 1rem;"></div>
+
+                        <!-- Submit Button -->
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <wa-button type="submit" variant="success" size="small" id="submitButton">
+                                <wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>
                                 Create Company
                             </wa-button>
                         </div>
