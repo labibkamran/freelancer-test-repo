@@ -14,17 +14,6 @@
         <wa-card style="max-width: 45ch; margin: 0 auto">
             <!-- Messages container for HTMX -->
             <div id="message-container">
-                <!-- Static messages for non-HTMX requests -->
-                <div th:if="${error}" style="margin-bottom: var(--wa-space-m);">
-                    <wa-callout variant="danger" open>
-                        <span th:text="${error}" />
-                    </wa-callout>
-                </div>
-                <div th:if="${success}" style="margin-bottom: var(--wa-space-m);">
-                    <wa-callout variant="success" open>
-                        <span th:text="${success}" />
-                    </wa-callout>
-                </div>
             </div>
 
             <!-- Login Form -->

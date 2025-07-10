@@ -7,21 +7,11 @@ import com.respiroc.user.api.UserInternalApi
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.user.application.jwt.JwtUtils
-import com.respiroc.user.domain.model.Permission
-import com.respiroc.user.domain.model.Role
-import com.respiroc.user.domain.model.User
-import com.respiroc.user.domain.model.UserSession
-import com.respiroc.user.domain.model.UserTenantRole
+import com.respiroc.user.domain.model.*
 import com.respiroc.user.domain.repository.UserRepository
 import com.respiroc.user.domain.repository.UserSessionRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
-import com.respiroc.util.context.PermissionContext
-import com.respiroc.util.context.RoleContext
-import com.respiroc.util.context.SpringUser
-import com.respiroc.util.context.TenantContext
-import com.respiroc.util.context.TenantPermissionContext
-import com.respiroc.util.context.TenantRoleContext
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.*
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -32,7 +22,7 @@ import java.nio.file.attribute.UserPrincipalNotFoundException
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Base64
+import java.util.*
 
 @Service
 @Transactional
@@ -49,7 +39,7 @@ class UserService(
 
     private val JWT_TOKEN_PERIOD : Long = 24 * 60 * 60 * 1000
 
-    override fun signupByEmailPassword(email: String, password: String) {
+    override fun signupByEmailPassword(email: String, password: String): LoginResult {
         val existUser = userRepository.findByEmail(email)
         if (existUser != null) {
             throw IllegalArgumentException("User already exists")
@@ -58,7 +48,7 @@ class UserService(
         val newUser = User()
         newUser.email = email
         newUser.passwordHash = passwordEncoder.encode(password)
-        signup(newUser)
+        return signup(newUser)
     }
 
     override fun loginByEmailPassword(
@@ -133,8 +123,9 @@ class UserService(
     // Private Helper
     // ---------------------------------
 
-    private fun signup(user: User) {
+    private fun signup(user: User): LoginResult {
         val savedUser: User = userRepository.saveAndFlush(user)
+        return login(savedUser)
     }
 
     private fun login(user: User) : LoginResult {
