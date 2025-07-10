@@ -1,5 +1,8 @@
 // Function to select company from search results
 function selectCompanyFromSearch(element) {
+    // Set flag to prevent form submission during selection
+    isSelectingCompany = true;
+    
     const name = element.getAttribute('data-name');
     const orgNumber = element.getAttribute('data-org-number');
     const countryCode = element.getAttribute('data-country-code');
@@ -22,14 +25,18 @@ function selectCompanyFromSearch(element) {
 
     // Hide the dropdown
     document.getElementById('name-dropdown').innerHTML = '';
+    
+    // Force validation update and reset the selection flag
+    setTimeout(() => {
+        orgInput.setCustomValidity('');
+        orgInput.reportValidity();
+        // Reset flag to allow form submission
+        isSelectingCompany = false;
+    }, 100);
 }
 
-// Function to clear form
-function clearForm() {
-    document.getElementById('createCompanyForm').reset();
-    document.getElementById('name-dropdown').innerHTML = '';
-    document.getElementById('form-messages').innerHTML = '';
-}
+// Variable to track if company selection is in progress
+let isSelectingCompany = false;
 
 // Show loading state on form submission
 document.getElementById('createCompanyForm').addEventListener('htmx:beforeRequest', function(e) {
@@ -40,6 +47,14 @@ document.getElementById('createCompanyForm').addEventListener('htmx:beforeReques
             submitButton.disabled = true;
             submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
         }
+    }
+});
+
+// Prevent form submission during company selection
+document.getElementById('createCompanyForm').addEventListener('submit', function(e) {
+    if (isSelectingCompany) {
+        e.preventDefault();
+        return false;
     }
 });
 
@@ -57,6 +72,11 @@ document.getElementById('createCompanyForm').addEventListener('htmx:afterRequest
     }
 });
 
+// Reset selection flag when user types in name field
+document.getElementById('name').addEventListener('input', function() {
+    isSelectingCompany = false;
+});
+
 // Hide dropdown when clicking outside
 document.addEventListener('click', function(e) {
     const nameInput = document.getElementById('name');
@@ -66,5 +86,7 @@ document.addEventListener('click', function(e) {
     if (nameInput && nameDropdown && 
         !nameInput.contains(e.target) && !nameDropdown.contains(e.target)) {
         nameDropdown.innerHTML = '';
+        // Reset selection flag when hiding dropdown
+        isSelectingCompany = false;
     }
 });
