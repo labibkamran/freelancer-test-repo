@@ -71,51 +71,32 @@ interface PostingRepository : CustomJpaRepository<Posting, Long> {
         @Param("endDate") endDate: LocalDate
     ): List<Posting>
 
-    @Query(
-        """
-        SELECT p.accountNumber, SUM(p.amount) as totalAmount 
-        FROM Posting p 
-        WHERE p.tenantId = :tenantId 
-        AND p.accountNumber LIKE '1%' 
-        AND p.postingDate BETWEEN :startDate AND :endDate 
-        GROUP BY p.accountNumber
-        ORDER BY p.accountNumber
-        """
-    )
-    fun findAssetPostings(
-        @Param("tenantId") tenantId: Long,
-        @Param("startDate") startDate: LocalDate,
-        @Param("endDate") endDate: LocalDate
-    ): List<Array<Any>>
-
     @Query("""
-        SELECT p.accountNumber, SUM(p.amount) as totalAmount 
-        FROM Posting p 
-        WHERE p.tenantId = :tenantId 
-        AND (p.accountNumber LIKE '4%' OR p.accountNumber LIKE '5%' OR p.accountNumber LIKE '6%' OR p.accountNumber LIKE '7%') 
-        AND p.postingDate BETWEEN :startDate AND :endDate 
-        GROUP BY p.accountNumber
-        ORDER BY p.accountNumber
-        """
-    )
-    fun findOperatingCostPostings(
-        @Param("tenantId") tenantId: Long,
-        @Param("startDate") startDate: LocalDate,
-        @Param("endDate") endDate: LocalDate
-    ): List<Array<Any>>
-
-    @Query(
-        """
-        SELECT p.accountNumber, SUM(p.amount) as totalAmount 
-        FROM Posting p 
-        WHERE p.tenantId = :tenantId 
-        AND p.accountNumber LIKE '3%' 
-        AND p.postingDate BETWEEN :startDate AND :endDate 
-        GROUP BY p.accountNumber
-        ORDER BY p.accountNumber
-        """
-    )
-    fun findRevenuePostings(
+    SELECT 
+        CASE 
+            WHEN p.accountNumber LIKE '1%' THEN 'ASSET'
+            WHEN p.accountNumber LIKE '3%' THEN 'REVENUE'
+            WHEN p.accountNumber LIKE '4%' OR p.accountNumber LIKE '5%' 
+              OR p.accountNumber LIKE '6%' OR p.accountNumber LIKE '7%' THEN 'EXPENSE'
+            ELSE 'OTHER'
+        END AS accountType,
+        p.accountNumber,
+        SUM(p.amount) as totalAmount 
+    FROM Posting p 
+    WHERE p.tenantId = :tenantId
+      AND (
+            p.accountNumber LIKE '1%' OR 
+            p.accountNumber LIKE '3%' OR 
+            p.accountNumber LIKE '4%' OR 
+            p.accountNumber LIKE '5%' OR 
+            p.accountNumber LIKE '6%' OR 
+            p.accountNumber LIKE '7%'
+          )
+      AND p.postingDate BETWEEN :startDate AND :endDate 
+    GROUP BY accountType, p.accountNumber
+    ORDER BY accountType, p.accountNumber
+""")
+    fun findProfitLossPostings(
         @Param("tenantId") tenantId: Long,
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate
