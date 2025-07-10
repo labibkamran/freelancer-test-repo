@@ -12,7 +12,6 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
 @Controller
 @RequestMapping("/htmx/auth")
@@ -35,13 +34,7 @@ class AuthHTMXController(
                 password = loginRequest.password
             )
 
-            val jwtCookie = Cookie("token", result.token)
-            jwtCookie.isHttpOnly = true
-            jwtCookie.secure = false // Set to true in production with HTTPS
-            jwtCookie.path = "/"
-            jwtCookie.maxAge = JWT_TOKEN_PERIOD
-            response.addCookie(jwtCookie)
-
+            setJwtCookie(result.token, response)
             return "redirect:htmx:/dashboard"
         } catch (_: Exception) {
             model.addAttribute(errorMessageAttributeName, "Invalid email or password")
@@ -53,19 +46,29 @@ class AuthHTMXController(
     @HxRequest
     fun signupHTMX(
         @ModelAttribute signupRequest: SignupRequest,
-        model: Model,
-        redirectAttributes: RedirectAttributes
+        response: HttpServletResponse,
+        model: Model
     ): String {
         try {
-            userApi.signupByEmailPassword(
+            val result = userApi.signupByEmailPassword(
                 signupRequest.email,
                 signupRequest.password
             )
-            redirectAttributes.addFlashAttribute(successMessageAttributeName, "Registration successful. Please login.")
-            return "redirect:htmx:/auth/login"
+
+            setJwtCookie(result.token, response)
+            return "redirect:htmx:/dashboard"
         } catch (e: Exception) {
             model.addAttribute(errorMessageAttributeName, e.message ?: "An error occurred during registration")
             return "fragments/error-message"
         }
+    }
+
+    private fun setJwtCookie(token: String, response: HttpServletResponse) {
+        val jwtCookie = Cookie("token", token)
+        jwtCookie.isHttpOnly = true
+        jwtCookie.secure = false // Set to true in production with HTTPS
+        jwtCookie.path = "/"
+        jwtCookie.maxAge = JWT_TOKEN_PERIOD
+        response.addCookie(jwtCookie)
     }
 } 
