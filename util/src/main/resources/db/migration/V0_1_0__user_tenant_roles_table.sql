@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS user_tenant_roles
 (
-    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id        BIGINT    NOT NULL,
-    tenant_id      BIGINT    NOT NULL,
-    tenant_role_id BIGINT    NOT NULL,
+    id             INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id        INTEGER    NOT NULL,
+    tenant_id      INTEGER    NOT NULL,
+    tenant_role_id INTEGER    NOT NULL,
     created_at     TIMESTAMP NOT NULL,
     updated_at     TIMESTAMP NOT NULL,
 
