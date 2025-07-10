@@ -10,13 +10,21 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/report/**", "/ledger/**"),
+    private val paths: List<String> = listOf(
+        "/dashboard/**",
+        "/voucher/**",
+        "/company/**",
+        "/report/**",
+        "/ledger/**",
+        "/htmx/**"
+    ),
     private val excludePaths: List<String> = listOf(
         "/company/create",
         "/company/search",
         "/assets/**",
         "/errors/**",
-        "/error/**"
+        "/error/**",
+        "/htmx/auth/**"
     ),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {
