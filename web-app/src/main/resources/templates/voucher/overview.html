@@ -18,10 +18,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Number</th>
-                            <th>Description</th>
-                            <th>Date</th>
-                            <th>Postings</th>
+                            <th th:text="#{number}" />
+                            <th th:text="#{description}" />
+                            <th th:text="#{date}" />
+                            <th th:text="#{postings}" />
                         </tr>
                     </thead>
                     <tbody>
@@ -29,11 +29,11 @@
                             <td>
                                 <a th:href="'/voucher/' + ${voucher.id} + '?tenantId=' + ${user.ctx.currentTenant?.id}"
                                    style="color: var(--wa-color-blue-50); text-decoration: none;">
-                                    <strong th:text="${voucher.number}">1-2025</strong>
+                                    <strong th:text="${voucher.number}" />
                                 </a>
                             </td>
-                            <td th:text="${voucher.description ?: '-'}">Sample voucher description</td>
-                            <td th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}">01.01.2025</td>
+                            <td th:text="${voucher.description ?: '-'}" />
+                            <td th:text="${#temporals.format(voucher.date, 'dd.MM.yyyy')}" />
                             <td>
                                 <wa-badge variant="neutral">
                                     <span th:text="${voucher.postingCount}">0</span> postings
@@ -48,7 +48,7 @@
             <div th:if="${#lists.isEmpty(vouchers)}" class="wa-center">
                 <div class="wa-stack wa-gap-m wa-center">
                     <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
-                    <h2 class="wa-heading-m">No vouchers found</h2>
+                    <h2 class="wa-heading-m" th:text="#{no_vouchers_found}" />
                 </div>
             </div>
             
