@@ -65,39 +65,38 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun getPostingsForProfitLoss(accountType: AccountType, startDate: LocalDate, endDate: LocalDate): ProfitLossPayload {
+    override fun getPostingsForProfitLoss(startDate: LocalDate, endDate: LocalDate): Map<AccountType, ProfitLossPayload> {
         val tenantId = currentTenantId()
         val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
 
-        val postings = when (accountType) {
-            AccountType.ASSET -> postingRepository.findAssetPostings(tenantId, startDate, endDate)
-            AccountType.REVENUE -> postingRepository.findRevenuePostings(tenantId, startDate, endDate)
-            AccountType.EXPENSE -> postingRepository.findOperatingCostPostings(tenantId, startDate, endDate)
-            else -> emptyList()
-        }
+        val profitLossPostings = postingRepository.findProfitLossPostings(tenantId, startDate, endDate)
 
-        val profitLossEntries = postings.mapNotNull { postingData ->
-            val accountNumber = postingData[0] as String
-            val amount = postingData[1] as BigDecimal
-            val account = accounts[accountNumber]
-            if (account != null) {
-                ProfitLossEntry(
-                    accountNumber = accountNumber,
-                    accountName = account.accountName,
-                    accountDescription = account.accountDescription,
-                    amount = amount
-                )
-            } else {
-                null
+        val groupedByType = profitLossPostings.groupBy { row ->
+            when (row[0] as String) {
+                "ASSET" -> AccountType.ASSET
+                "REVENUE" -> AccountType.REVENUE
+                else -> AccountType.EXPENSE
             }
         }
-
-        val totalBalance = profitLossEntries.sumOf { it.amount }
-
-        return ProfitLossPayload(
-            entries = profitLossEntries,
-            totalBalance = totalBalance
-        )
+        return groupedByType.mapValues { (_, rows) ->
+            val entries = rows.mapNotNull { postingData ->
+                val accountNumber = postingData[1] as String
+                val amount = postingData[2] as BigDecimal
+                val account = accounts[accountNumber]
+                if (account != null) {
+                    ProfitLossEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        accountDescription = account.accountDescription,
+                        amount = amount
+                    )
+                } else null
+            }
+            ProfitLossPayload(
+                entries = entries,
+                totalBalance = entries.sumOf { it.amount }
+            )
+        }
     }
 
     @Transactional(readOnly = true)

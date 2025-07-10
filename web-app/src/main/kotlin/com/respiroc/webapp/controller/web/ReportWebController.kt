@@ -2,6 +2,7 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.payload.ProfitLossPayload
 import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
@@ -12,6 +13,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Controller
@@ -88,20 +90,17 @@ class ReportWebController(
     ): String {
         val springUser = springUser()
 
-        val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-        val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val assetPostings = postingApi.getPostingsForProfitLoss(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
-        val revenuePostings = postingApi.getPostingsForProfitLoss(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
-        val operatingCostPostings = postingApi.getPostingsForProfitLoss(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
-
+        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
 
         model.addAttribute("user", springUser)
-        model.addAttribute("startDate", effectiveStartDate)
-        model.addAttribute("endDate", effectiveEndDate)
-        model.addAttribute("assetPostings", assetPostings)
-        model.addAttribute("revenuePostings", revenuePostings)
-        model.addAttribute("operatingCostPostings", operatingCostPostings)
+        model.addAttribute("startDate", defaultStartDate)
+        model.addAttribute("endDate", defaultEndDate)
+        model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
 
         return "report/profit-loss"
     }
@@ -119,21 +118,17 @@ class ReportWebController(
         return try {
         val springUser = springUser()
 
-        val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-        val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-
-        val assetPostings = postingApi.getPostingsForProfitLoss(AccountType.ASSET, effectiveStartDate, effectiveEndDate)
-        val revenuePostings = postingApi.getPostingsForProfitLoss(AccountType.REVENUE, effectiveStartDate, effectiveEndDate)
-        val operatingCostPostings = postingApi.getPostingsForProfitLoss(AccountType.EXPENSE, effectiveStartDate, effectiveEndDate)
-
+        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
 
         model.addAttribute("user", springUser)
-        model.addAttribute("startDate", effectiveStartDate)
-        model.addAttribute("endDate", effectiveEndDate)
-        model.addAttribute("assetPostings", assetPostings)
-        model.addAttribute("revenuePostings", revenuePostings)
-        model.addAttribute("operatingCostPostings", operatingCostPostings)
+        model.addAttribute("startDate", defaultStartDate)
+        model.addAttribute("endDate", defaultEndDate)
+        model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
 
          "report/profit-loss :: tableContent"
         } catch (e: Exception) {
