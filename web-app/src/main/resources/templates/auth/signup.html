@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up - Reai</title>
+    <title th:text="#{signup.page.title}" />
     <th:block th:replace="~{layout/libs :: common-libs}"></th:block>
     <link rel="stylesheet" th:href="@{/assets/signup/signup.css}">
 </head>
@@ -16,32 +16,30 @@
             <!-- Messages -->
             <div th:if="${error}" style="margin-bottom: var(--wa-space-m);">
                 <wa-callout variant="danger" open>
-                    <span th:text="${error}">Error message</span>
+                    <span th:text="${error}" />
                 </wa-callout>
             </div>
             <div th:if="${success}" style="margin-bottom: var(--wa-space-m);">
                 <wa-callout variant="success" open>
-                    <span th:text="${success}">Success message</span>
+                    <span th:text="${success}" />
                 </wa-callout>
             </div>
 
             <!-- Signup Form -->
             <form method="post" action="/auth/signup">
                 <div class="wa-stack">
-                    <h2 class="wa-heading-m">Sign Up</h2>
-                    <wa-input label="Email" type="email" id="email" name="email" required></wa-input>
-                    <wa-input label="Password" type="password" id="password" name="password" required></wa-input>
-                    <a href="/auth/login">Already have an account? Login</a>
-                    <wa-button type="submit">Sign Up</wa-button>
+                    <h2 class="wa-heading-m" th:text="#{signup}" />
+                    <wa-input th:label="#{email.label}" type="email" id="email" name="email" required></wa-input>
+                    <wa-input th:label="#{password.label}" type="password" id="password" name="password" required></wa-input>
+                    <a href="/auth/login" th:text="#{signup.form.login.link}" />
+                    <wa-button type="submit" th:text="#{signup}"></wa-button>
                 </div>
             </form>
         </wa-card>
 
         <!-- Footer -->
         <div style="text-align: center; margin-top: 0.5rem">
-            <p class="wa-body-xs">
-                🔐 Your information is protected with the highest level of security
-            </p>
+            <p class="wa-body-xs" th:text="#{signup.footer.security.message}" />
         </div>
     </div>
 </div>
