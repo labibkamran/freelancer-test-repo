@@ -41,6 +41,8 @@ class WebSecurityConfig {
                     .requestMatchers("/assets/**").permitAll()
                     .requestMatchers("/auth/login").permitAll()
                     .requestMatchers("/auth/signup").permitAll()
+                    .requestMatchers("/htmx/auth/login").permitAll()
+                    .requestMatchers("/htmx/auth/signup").permitAll()
                     .requestMatchers("/api/company-lookup/**").permitAll()
                     .requestMatchers("/test/**").permitAll()
                     .requestMatchers("/error/**").permitAll()
