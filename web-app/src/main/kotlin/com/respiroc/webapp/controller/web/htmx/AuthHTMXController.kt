@@ -55,7 +55,7 @@ class AuthHTMXController(
         @ModelAttribute signupRequest: SignupRequest,
         model: Model,
         redirectAttributes: RedirectAttributes
-    ): Any {
+    ): String {
         try {
             userApi.signupByEmailPassword(
                 signupRequest.email,
