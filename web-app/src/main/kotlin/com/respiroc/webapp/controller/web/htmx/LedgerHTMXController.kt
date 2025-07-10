@@ -1,29 +1,26 @@
-package com.respiroc.webapp.controller.web
+package com.respiroc.webapp.controller.web.htmx
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDate
 
 @Controller
-@RequestMapping(value = ["/ledger"])
-class LedgerWebController(
-    private val postingApi: PostingInternalApi,
-    private val accountApi: AccountInternalApi,
-    private val companyApi: CompanyInternalApi
+@RequestMapping("/htmx/ledger")
+class LedgerHTMXController(
+    private val postingApi: PostingInternalApi
 ) : BaseController() {
 
-    @GetMapping(value = ["/general"])
-    fun generalLedger(
+    @GetMapping("/general")
+    @HxRequest
+    fun generalLedgerHTMX(
         @RequestParam(name = "startDate", required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         startDate: LocalDate?,
@@ -44,15 +41,12 @@ class LedgerWebController(
             model.addAttribute("startDate", effectiveStartDate)
             model.addAttribute("endDate", effectiveEndDate)
             model.addAttribute("selectedAccountNumber", accountNumber)
+            model.addAttribute(userAttributeName, springUser())
 
-            addCommonAttributes(model, companyApi, "General Ledger")
-            val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
-            model.addAttribute("accounts", accounts)
-
-            "ledger/general"
+            "ledger/general :: tableContent"
         } catch (e: Exception) {
             model.addAttribute(calloutAttributeName, Callout.Error("Error loading general ledger: ${e.message}"))
-            "ledger/general"
+            "ledger/general :: error-message"
         }
     }
 } 
