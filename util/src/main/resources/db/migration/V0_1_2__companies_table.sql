@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS companies
 (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tenant_id           BIGINT       NOT NULL UNIQUE,
+    id                  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tenant_id           INTEGER       NOT NULL UNIQUE,
     organization_number VARCHAR(50)  NOT NULL,
     name                VARCHAR(255) NOT NULL,
     country_code        VARCHAR(2)   NOT NULL,
