@@ -133,4 +133,64 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
             return "report/profit-loss :: error-message"
         }
     }
+
+    @GetMapping(value = ["/balance-sheet"])
+    fun balanceSheet(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        val springUser = springUser()
+
+        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("startDate", defaultStartDate)
+        model.addAttribute("endDate", defaultEndDate)
+        model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+
+        return "report/balance-sheet"
+    }
+
+    @GetMapping(value = ["/balance-sheet"], headers = ["HX-Request"])
+    fun balanceSheetHtmx(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        return try {
+            val springUser = springUser()
+
+            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+            val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+
+            model.addAttribute("user", springUser)
+            model.addAttribute("startDate", defaultStartDate)
+            model.addAttribute("endDate", defaultEndDate)
+            model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+
+            "report/balance-sheet :: tableContent"
+        } catch (e: Exception) {
+            logger.error("Error loading balance sheet data via HTMX", e)
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading balance sheet: ${e.message}"))
+            return "report/balance-sheet :: error-message"
+        }
+    }
 }
