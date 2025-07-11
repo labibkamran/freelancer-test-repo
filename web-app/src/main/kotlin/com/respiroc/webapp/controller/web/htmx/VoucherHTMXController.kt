@@ -44,7 +44,8 @@ class VoucherHTMXController(
         try {
             val callout = voucherWebService.processVoucherRequest(
                 createVoucherRequest,
-                user()
+                user(),
+                countryCode()
             )
 
             model.addAttribute(calloutAttributeName, callout)
@@ -69,15 +70,13 @@ class VoucherHTMXController(
     ): String {
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
-        val companyCurrencyCode =
-            companyApi.findCurrentCompany()?.currencyCode ?: throw BaseException("Company not found")
         val supportedCurrencies = currencyService.getSupportedCurrencies()
         val initialDate = LocalDate.now()
 
         model.addAttribute("rowCounter", rowCounter)
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
-        model.addAttribute("companyCurrencyCode", companyCurrencyCode)
+        model.addAttribute("companyCurrencyCode", countryCode())
         model.addAttribute("supportedCurrencies", supportedCurrencies)
         model.addAttribute("initialDate", initialDate)
 
@@ -91,7 +90,7 @@ class VoucherHTMXController(
         model: Model
     ): String {
         try {
-            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: throw BaseException("Company not found")
+            val companyCurrency = countryCode()
 
             // Calculate balance using the voucher request
             val (totalDebit, totalCredit, balance, isBalanced, hasValidEntries) = calculateBalance(
@@ -111,7 +110,7 @@ class VoucherHTMXController(
         } catch (_: Exception) {
             // Return original balance on error - use company currency or fallback
             val fallbackCurrency = try {
-                companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
+                countryCode()
             } catch (_: Exception) {
                 "NOK"
             }

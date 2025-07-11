@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
@@ -9,7 +8,6 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDate
@@ -18,8 +16,7 @@ import java.time.LocalDate
 @RequestMapping(value = ["/ledger"])
 class LedgerWebController(
     private val postingApi: PostingInternalApi,
-    private val accountApi: AccountInternalApi,
-    private val companyApi: CompanyInternalApi
+    private val accountApi: AccountInternalApi
 ) : BaseController() {
 
     @GetMapping(value = ["/general"])
@@ -45,12 +42,9 @@ class LedgerWebController(
             model.addAttribute("endDate", effectiveEndDate)
             model.addAttribute("selectedAccountNumber", accountNumber)
 
-            addCommonAttributes(model, companyApi, "General Ledger")
+            addCommonAttributes(model, "General Ledger")
             val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
             model.addAttribute("accounts", accounts)
-            
-            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
-            model.addAttribute("companyCurrency", companyCurrency)
 
             "ledger/general"
         } catch (e: Exception) {

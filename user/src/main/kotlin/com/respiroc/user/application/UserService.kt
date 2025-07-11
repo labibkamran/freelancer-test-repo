@@ -13,6 +13,7 @@ import com.respiroc.user.domain.repository.UserSessionRepository
 import com.respiroc.user.domain.repository.UserTenantRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
 import com.respiroc.util.context.*
+import com.respiroc.util.currency.CurrencyService
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -31,7 +32,8 @@ class UserService(
     private val userSessionRepository: UserSessionRepository,
     private val userTenantRoleRepository: UserTenantRoleRepository,
     private val userTenantRepository: UserTenantRepository,
-    private val jwt: JwtUtils
+    private val jwt: JwtUtils,
+    private val currencyService: CurrencyService
 ) : UserInternalApi {
 
     private val passwordEncoder = BCryptPasswordEncoder()
@@ -181,7 +183,7 @@ class UserService(
     private fun User.getTenantsInfo(): List<TenantInfo> {
         return this.userTenants.map {
             val tenant = it.tenant
-            TenantInfo(tenant.id, tenant.getCompanyName())
+            TenantInfo(tenant.id, tenant.getCompanyName(), currencyService.getCompanyCurrency(tenant.getCompanyCountryCode()))
         }.sortedBy { it.id }
     }
 
