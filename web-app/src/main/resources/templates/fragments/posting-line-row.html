@@ -11,53 +11,41 @@
     </td>
     <td>
         <div style="display: flex; flex-direction: column; gap: 2px;">
-            <select th:name="'postingLines[' + ${rowCounter} + '].debitAccount'"
-                    class="form-control"
-                    style="font-size: 0.8rem;">
-                <option value="">Select debit account...</option>
-                <option th:each="account : ${accounts}" 
-                        th:value="${account.noAccountNumber}"
-                        th:text="${account.noAccountNumber + ' - ' + account.accountName}">
-                </option>
-            </select>
+            <r-combobox
+                th:id="'debit-account-' + ${rowCounter}"
+                th:name="'postingLines[' + ${rowCounter} + '].debitAccount'"
+                placeholder="Select debit account..."
+                style="font-size: 0.8rem;">
+            </r-combobox>
             
-            <select th:name="'postingLines[' + ${rowCounter} + '].debitVatCode'"
-                    class="form-control"
-                    style="font-size: 0.75rem;">
-                <option value="0">Select VAT code...</option>
-                <option th:each="vatCode : ${vatCodes}" 
-                        th:value="${vatCode.code}"
-                        th:text="${vatCode.code + ' (' + vatCode.rate + '%) - ' + vatCode.description}">
-                </option>
-            </select>
+            <r-combobox
+                th:id="'debit-vat-' + ${rowCounter}"
+                th:name="'postingLines[' + ${rowCounter} + '].debitVatCode'"
+                placeholder="Select VAT code..."
+                style="font-size: 0.75rem;">
+            </r-combobox>
         </div>
     </td>
     <td>
         <div style="display: flex; flex-direction: column; gap: 2px;">
-            <select th:name="'postingLines[' + ${rowCounter} + '].creditAccount'"
-                    class="form-control"
-                    style="font-size: 0.8rem;">
-                <option value="">Select credit account...</option>
-                <option th:each="account : ${accounts}" 
-                        th:value="${account.noAccountNumber}"
-                        th:text="${account.noAccountNumber + ' - ' + account.accountName}">
-                </option>
-            </select>
+            <r-combobox
+                th:id="'credit-account-' + ${rowCounter}"
+                th:name="'postingLines[' + ${rowCounter} + '].creditAccount'"
+                placeholder="Select credit account..."
+                style="font-size: 0.8rem;">
+            </r-combobox>
             
-            <select th:name="'postingLines[' + ${rowCounter} + '].creditVatCode'"
-                    class="form-control"
-                    style="font-size: 0.75rem;">
-                <option value="0">Select VAT code...</option>
-                <option th:each="vatCode : ${vatCodes}" 
-                        th:value="${vatCode.code}"
-                        th:text="${vatCode.code + ' (' + vatCode.rate + '%) - ' + vatCode.description}">
-                </option>
-            </select>
+            <r-combobox
+                th:id="'credit-vat-' + ${rowCounter}"
+                th:name="'postingLines[' + ${rowCounter} + '].creditVatCode'"
+                placeholder="Select VAT code..."
+                style="font-size: 0.75rem;">
+            </r-combobox>
         </div>
     </td>
     <td>
         <div style="position: relative;">
-            <wa-input type="number"
+            <wa-input type="number" size="small"
                    th:name="'postingLines[' + ${rowCounter} + '].amount'"
                    th:id="'posting-lines-amount-' + ${rowCounter}"
                    min="0"
@@ -72,7 +60,7 @@
         </div>
     </td>
     <td>
-        <wa-select th:name="'postingLines[' + ${rowCounter} + '].currency'"
+        <wa-select style="width: 5.6rem" size="small" th:name="'postingLines[' + ${rowCounter} + '].currency'"
                    th:id="'posting-lines-currency-' + ${rowCounter}"
                    th:attr="hx-get=@{/htmx/currency/convert(toCurrency=${companyCurrencyCode})},
                             hx-trigger='change',
@@ -102,4 +90,68 @@
             <wa-icon label="Remove posting row" name="trash"></wa-icon>
         </wa-button>
     </td>
-</tr> 
+</tr>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function() {
+    const rowCounter = /*[[${rowCounter}]]*/ 0;
+    const accounts = /*[[${accounts}]]*/ [];
+    const vatCodes = /*[[${vatCodes}]]*/ [];
+    
+    // Wait for components to be defined
+    if (typeof customElements !== 'undefined' && customElements.whenDefined) {
+        customElements.whenDefined('r-combobox').then(() => {
+            setupComboboxes();
+        });
+    } else {
+        // Fallback for older browsers
+        setTimeout(setupComboboxes, 100);
+    }
+    
+    function setupComboboxes() {
+        // Setup account comboboxes
+        const accountItems = accounts.map(account => ({
+            value: account.noAccountNumber,
+            title: account.noAccountNumber,
+            subtitle: account.accountName,
+            displayText: account.noAccountNumber + ' - ' + account.accountName
+        }));
+        
+        // Setup VAT code comboboxes
+        const vatItems = [
+            { value: '0', title: 'No VAT', displayText: 'No VAT' }
+        ].concat(vatCodes.map(vat => ({
+            value: vat.code,
+            title: vat.code,
+            subtitle: '(' + vat.rate + '%) - ' + vat.description,
+            displayText: vat.code + ' (' + vat.rate + '%) - ' + vat.description
+        })));
+        
+        // Get combobox elements
+        const debitAccount = document.getElementById('debit-account-' + rowCounter);
+        const creditAccount = document.getElementById('credit-account-' + rowCounter);
+        const debitVat = document.getElementById('debit-vat-' + rowCounter);
+        const creditVat = document.getElementById('credit-vat-' + rowCounter);
+        
+        // Set items for each combobox
+        if (debitAccount) {
+            debitAccount.items = accountItems;
+            debitAccount.addEventListener('change', () => updateBalance());
+        }
+        if (creditAccount) {
+            creditAccount.items = accountItems;
+            creditAccount.addEventListener('change', () => updateBalance());
+        }
+        if (debitVat) {
+            debitVat.items = vatItems;
+            debitVat.addEventListener('change', () => updateBalance());
+        }
+        if (creditVat) {
+            creditVat.items = vatItems;
+            creditVat.addEventListener('change', () => updateBalance());
+        }
+    }
+})();
+/*]]>*/
+</script> 

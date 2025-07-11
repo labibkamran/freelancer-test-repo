@@ -123,8 +123,16 @@ function validateAndPrepareForm(event) {
     let hasValidData = false;
 
     postingLines.forEach(row => {
+        // Check regular inputs
         const inputs = row.querySelectorAll('input, select, wa-input, wa-select');
-        const hasData = Array.from(inputs).some(input => (input.value || '').trim() !== '');
+        const regularInputsHaveData = Array.from(inputs).some(input => (input.value || '').trim() !== '');
+        
+        // Check r-combobox components
+        const comboboxes = row.querySelectorAll('r-combobox');
+        const comboboxesHaveData = Array.from(comboboxes).some(combobox => (combobox.value || '').trim() !== '');
+        
+        const hasData = regularInputsHaveData || comboboxesHaveData;
+        
         if (hasData) hasValidData = true;
         
         // Remove empty rows
@@ -169,11 +177,21 @@ document.addEventListener('change', (e) => {
     }
 });
 
-// Configure HTMX requests with tenant ID
+// Configure HTMX requests with tenant ID and form data
 document.addEventListener('htmx:configRequest', (e) => {
     const tenantId = new URLSearchParams(window.location.search).get('tenantId');
     if (tenantId && e.detail.path.includes('/htmx/')) {
         e.detail.parameters.tenantId = tenantId;
+    }
+    
+    // Add r-combobox values to form data for all requests
+    if (e.detail.elt && e.detail.elt.tagName === 'FORM') {
+        const comboboxes = e.detail.elt.querySelectorAll('r-combobox');
+        comboboxes.forEach(combobox => {
+            if (combobox.name && combobox.value) {
+                e.detail.parameters[combobox.name] = combobox.value;
+            }
+        });
     }
 });
 
