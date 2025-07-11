@@ -21,16 +21,16 @@
             <!-- Company Selector -->
             <wa-dropdown>
                 <wa-button slot="trigger" size="small" variant="brand" appearance="outlined" with-caret
-                           th:text="${currentCompany != null ? currentCompany.name : 'Select Company'}">
+                           th:text="${currentTenant != null ? currentTenant.companyName : 'Select Company'}">
                     Select Company
                 </wa-button>
-                <wa-dropdown-item th:each="company : ${companies}"
-                                  th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
-                                  th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
-                    <span th:text="${company.name}" />
+                <wa-dropdown-item th:each="tenant : ${tenants}"
+                                  th:onclick="'switchCompany(' + ${tenant.id} + ')'"
+                                  th:class="${currentTenant != null and currentTenant.id == tenant.id} ? 'selected' : ''">
+                    <span th:text="${tenant.companyName}" />
                 </wa-dropdown-item>
                 <wa-divider></wa-divider>
-                <wa-dropdown-item onclick="window.open('/company/create', '_blank')">
+                <wa-dropdown-item onclick="window.open('/tenant/create', '_blank')">
                     <wa-icon slot="icon" name="plus"></wa-icon>
                     <span th:text="#{layout.company.selector.create}" />
                 </wa-dropdown-item>
@@ -60,7 +60,7 @@
             <wa-breadcrumb style="font-size: var(--wa-font-size-s)">
                 <wa-breadcrumb-item
                         th:href="'/dashboard?tenantId=' + ${user.ctx.currentTenant.id}"
-                        th:if="${currentCompany != null}" th:text="${currentCompany.name}">
+                        th:if="${currentTenant != null}" th:text="${currentTenant.companyName}">
                     Company
                 </wa-breadcrumb-item>
                 <!-- Breadcrumb Items from child pages -->
