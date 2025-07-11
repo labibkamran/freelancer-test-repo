@@ -48,6 +48,9 @@ class LedgerWebController(
             addCommonAttributes(model, companyApi, "General Ledger")
             val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
             model.addAttribute("accounts", accounts)
+            
+            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
+            model.addAttribute("companyCurrency", companyCurrency)
 
             "ledger/general"
         } catch (e: Exception) {

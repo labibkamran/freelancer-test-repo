@@ -56,25 +56,35 @@
         </div>
     </td>
     <td>
-        <wa-input type="number"
-               size="small"
-               step="0.01"
-               placeholder="0.00"
-               th:name="'postingLines[' + ${rowCounter} + '].amount'">
-        </wa-input>
-        <div th:id="'converted-amount-' + ${rowCounter}" class="converted-amount" 
-             style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;">
+        <div style="position: relative;">
+            <wa-input type="number"
+                   th:name="'postingLines[' + ${rowCounter} + '].amount'"
+                   th:id="'posting-lines-amount-' + ${rowCounter}"
+                   min="0"
+                   step="0.01"
+                   placeholder="Amount"
+                   th:attr="hx-get=@{/htmx/currency/convert(toCurrency=${companyCurrencyCode})},
+                            hx-trigger='change, keyup delay:500ms',
+                            hx-target=|#converted-amount-${rowCounter}|,
+                            hx-swap='innerHTML',
+                            hx-include=|#posting-lines-amount-${rowCounter}, #posting-lines-currency-${rowCounter}|"></wa-input>
+            <div th:id="'converted-amount-' + ${rowCounter}" class="converted-amount-display"></div>
         </div>
     </td>
     <td>
-        <wa-select size="small"
-                style="min-width: 5.6rem"
-                th:name="'postingLines[' + ${rowCounter} + '].currency'">
-            <wa-option th:each="currency : ${supportedCurrencies}" 
-                       th:value="${currency}" 
-                       th:text="${currency}"
-                       th:selected="${currency == companyCurrency}">
-            </wa-option>
+        <wa-select th:name="'postingLines[' + ${rowCounter} + '].currency'"
+                   th:id="'posting-lines-currency-' + ${rowCounter}"
+                   th:attr="hx-get=@{/htmx/currency/convert(toCurrency=${companyCurrencyCode})},
+                            hx-trigger='change',
+                            hx-target=|#converted-amount-${rowCounter}|,
+                            hx-swap='innerHTML',
+                            hx-include=|#posting-lines-amount-${rowCounter}, #posting-lines-currency-${rowCounter}|">
+            <wa-option
+                th:each="currency : ${supportedCurrencies}"
+                th:value="${currency}"
+                th:text="${currency}"
+                th:selected="${currency == companyCurrencyCode}"
+            ></wa-option>
         </wa-select>
     </td>
     <td>
@@ -89,7 +99,7 @@
                    size="small" 
                    variant="danger"
                    onclick="removePostingLine(this)">
-            <wa-icon name="trash"></wa-icon>
+            <wa-icon label="Remove posting row" name="trash"></wa-icon>
         </wa-button>
     </td>
 </tr> 

@@ -43,7 +43,10 @@ class VoucherWebController(
             return "error/404"
         }
         addCommonAttributes(model, companyApi, "Voucher ${voucher.getDisplayNumber()}")
+        
+        val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
         model.addAttribute("voucher", voucher)
+        model.addAttribute("companyCurrency", companyCurrency)
 
         return "voucher/view"
     }
@@ -62,13 +65,11 @@ class VoucherWebController(
     private fun setupModelAttributes(model: Model) {
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
-        val companyCurrency = currencyService.getCompanyCurrency("NO")
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
         addCommonAttributes(model, companyApi, "General Ledger")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
-        model.addAttribute("companyCurrency", companyCurrency)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
     }
 } 

@@ -1,5 +1,6 @@
 package com.respiroc.webapp.controller.web.htmx
 
+import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
@@ -15,7 +16,8 @@ import java.time.LocalDate
 @Controller
 @RequestMapping("/htmx/ledger")
 class LedgerHTMXController(
-    private val postingApi: PostingInternalApi
+    private val postingApi: PostingInternalApi,
+    private val companyApi: CompanyInternalApi
 ) : BaseController() {
 
     @GetMapping("/general")
@@ -42,6 +44,9 @@ class LedgerHTMXController(
             model.addAttribute("endDate", effectiveEndDate)
             model.addAttribute("selectedAccountNumber", accountNumber)
             model.addAttribute(userAttributeName, springUser())
+            
+            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
+            model.addAttribute("companyCurrency", companyCurrency)
 
             "ledger/general :: tableContent"
         } catch (e: Exception) {

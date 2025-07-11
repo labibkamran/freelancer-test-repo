@@ -85,7 +85,7 @@
                                     <td style="text-align:right"
                                         th:with="totalBalance=${#aggregates.sum(voucher.postings.![amount])}"
                                         th:style="${totalBalance.compareTo(T(java.math.BigDecimal).ZERO) == 0 ? 'color: var(--wa-color-success-500);' : 'color: var(--wa-color-danger-500);'}"
-                                        th:text="${#numbers.formatDecimal(totalBalance, 1, 2)} + ' NOK'">0.00 NOK</td>
+                                        th:text="${#numbers.formatDecimal(totalBalance, 1, 2)} + ' ' + ${companyCurrency}" />
                                 </tr>
                             </tfoot>
                         </table>
