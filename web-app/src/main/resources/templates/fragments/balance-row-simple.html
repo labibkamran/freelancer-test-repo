@@ -1,0 +1,19 @@
+<tr class="balance-row" xmlns:th="http://www.thymeleaf.org">
+    <td></td>
+    <td class="balance-total">
+        <span th:text="${totalDebit}" 
+              th:class="${isBalanced and hasValidEntries} ? 'balance-success' : 'balance-success'"
+              id="totalDebit">0.00 NOK</span>
+    </td>
+    <td class="balance-total">
+        <span th:text="${totalCredit}" 
+              th:class="${isBalanced and hasValidEntries} ? 'balance-success' : 'balance-success'"
+              id="totalCredit">0.00 NOK</span>
+    </td>
+    <td class="balance-total">
+        <span th:text="${balance}" 
+              th:class="${isBalanced and hasValidEntries} ? 'balance-success' : 'balance-error'"
+              id="balanceAmount">0.00 NOK</span>
+    </td>
+    <td colspan="3"></td>
+</tr> 

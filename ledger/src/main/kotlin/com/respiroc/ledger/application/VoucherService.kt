@@ -14,7 +14,6 @@ import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.ledger.domain.repository.VoucherRepository
-import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal

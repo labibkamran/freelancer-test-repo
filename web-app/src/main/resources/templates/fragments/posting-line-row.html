@@ -1,0 +1,95 @@
+<tr class="posting-line-row" 
+    th:id="'posting-line-row-' + ${rowCounter}"
+    xmlns:th="http://www.thymeleaf.org"
+    th:fragment="posting-line-row">
+    <td>
+        <wa-input type="date"
+               size="small"
+               th:value="${initialDate}"
+               th:name="'postingLines[' + ${rowCounter} + '].postingDate'">
+        </wa-input>
+    </td>
+    <td>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+            <select th:name="'postingLines[' + ${rowCounter} + '].debitAccount'"
+                    class="form-control"
+                    style="font-size: 0.8rem;">
+                <option value="">Select debit account...</option>
+                <option th:each="account : ${accounts}" 
+                        th:value="${account.noAccountNumber}"
+                        th:text="${account.noAccountNumber + ' - ' + account.accountName}">
+                </option>
+            </select>
+            
+            <select th:name="'postingLines[' + ${rowCounter} + '].debitVatCode'"
+                    class="form-control"
+                    style="font-size: 0.75rem;">
+                <option value="0">Select VAT code...</option>
+                <option th:each="vatCode : ${vatCodes}" 
+                        th:value="${vatCode.code}"
+                        th:text="${vatCode.code + ' (' + vatCode.rate + '%) - ' + vatCode.description}">
+                </option>
+            </select>
+        </div>
+    </td>
+    <td>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+            <select th:name="'postingLines[' + ${rowCounter} + '].creditAccount'"
+                    class="form-control"
+                    style="font-size: 0.8rem;">
+                <option value="">Select credit account...</option>
+                <option th:each="account : ${accounts}" 
+                        th:value="${account.noAccountNumber}"
+                        th:text="${account.noAccountNumber + ' - ' + account.accountName}">
+                </option>
+            </select>
+            
+            <select th:name="'postingLines[' + ${rowCounter} + '].creditVatCode'"
+                    class="form-control"
+                    style="font-size: 0.75rem;">
+                <option value="0">Select VAT code...</option>
+                <option th:each="vatCode : ${vatCodes}" 
+                        th:value="${vatCode.code}"
+                        th:text="${vatCode.code + ' (' + vatCode.rate + '%) - ' + vatCode.description}">
+                </option>
+            </select>
+        </div>
+    </td>
+    <td>
+        <wa-input type="number"
+               size="small"
+               step="0.01"
+               placeholder="0.00"
+               th:name="'postingLines[' + ${rowCounter} + '].amount'">
+        </wa-input>
+        <div th:id="'converted-amount-' + ${rowCounter}" class="converted-amount" 
+             style="font-size: 0.7rem; color: #6b7280; margin-top: 2px;">
+        </div>
+    </td>
+    <td>
+        <wa-select size="small"
+                style="min-width: 5.6rem"
+                th:name="'postingLines[' + ${rowCounter} + '].currency'">
+            <wa-option th:each="currency : ${supportedCurrencies}" 
+                       th:value="${currency}" 
+                       th:text="${currency}"
+                       th:selected="${currency == companyCurrency}">
+            </wa-option>
+        </wa-select>
+    </td>
+    <td>
+        <wa-input type="text"
+               size="small"
+               placeholder="Description"
+               th:name="'postingLines[' + ${rowCounter} + '].description'">
+        </wa-input>
+    </td>
+    <td>
+        <wa-button type="button" 
+                   size="small" 
+                   variant="danger"
+                   onclick="removePostingLine(this)">
+            <wa-icon name="trash"></wa-icon>
+        </wa-button>
+    </td>
+</tr> 

@@ -3,8 +3,6 @@
       layout:decorate="~{layout/base}">
 <head>
     <link rel="stylesheet" th:href="@{/assets/voucher/advanced-voucher.css}">
-    <!-- Include r-combobox dependencies -->
-    <th:block th:replace="~{fragments/r-combobox :: r-combobox-dependencies}"></th:block>
 </head>
 
 <!-- Breadcrumb Items -->
@@ -35,8 +33,9 @@
         </div>
 
         <!-- Complete Voucher Form -->
-        <form th:attr="action='/voucher/create-voucher?tenantId=' + ${user.ctx.currentTenant?.id}"
-              method="post"
+        <form th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}"
+              hx-target="#form-messages"
+              hx-indicator="#loading-indicator"
               id="voucherForm" 
               onsubmit="return validateAndPrepareForm(event);">
 
@@ -89,14 +88,14 @@
                         </tr>
                     </thead>
                     <tbody id="postingLines">
-                        <!-- Entries will be added dynamically -->
+                        <!-- Initial posting line will be added via HTMX on page load -->
                     </tbody>
-                    <tfoot>
+                    <tfoot id="balanceFooter">
                         <tr class="balance-row">
                             <td></td>
-                            <td class="balance-total"><span id="totalDebit">0.00</span></td>
-                            <td class="balance-total"><span id="totalCredit">0.00</span></td>
-                            <td class="balance-total"><span id="balanceAmount">0.00</span></td>
+                            <td class="balance-total"><span id="totalDebit">0.00 NOK</span></td>
+                            <td class="balance-total"><span id="totalCredit">0.00 NOK</span></td>
+                            <td class="balance-total"><span id="balanceAmount">0.00 NOK</span></td>
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>
@@ -104,11 +103,14 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <wa-button type="button" size="small" variant="neutral" onclick="addPostingLine()">
+                    <wa-button type="button" 
+                               size="small" 
+                               variant="neutral"
+                               onclick="addPostingLine()">
                         New row
                     </wa-button>
                     
-                    <wa-button type="submit" size="small" variant="success" id="saveButton" disabled>
+                    <wa-button type="submit" size="small" variant="success" id="saveButton">
                         Save Voucher
                     </wa-button>
                 </div>
@@ -121,14 +123,8 @@
 
 <th:block layout:fragment="scripts">
     <script th:inline="javascript">
-        // Accounts data for search
-        const accounts = /*[[${accounts}]]*/ [];
-        const vatCodes = /*[[${vatCodes}]]*/ [];
-        const companyCurrency = /*[[${companyCurrency}]]*/ 'NOK';
-        const supportedCurrencies = /*[[${supportedCurrencies}]]*/ ['NOK', 'USD', 'EUR'];
-
         // Clear form if success flag is set
-        const clearForm = /*[[${clearForm}]]*/ false;
+        const clearForm = /*[[${clearForm ?: false}]]*/ false;
     </script>
 
     <script th:src="@{/assets/voucher/advanced-voucher.js}"></script>
