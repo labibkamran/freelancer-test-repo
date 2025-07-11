@@ -13,7 +13,7 @@ class MainWebController() : BaseController() {
         return try {
             val springUser = springUser()
             if (springUser.ctx.tenants.isEmpty()) {
-                "redirect:/company/create"
+                "redirect:/tenant/create"
             } else {
                 "redirect:/dashboard?tenantId=${springUser.ctx.tenants[0].id}"
             }

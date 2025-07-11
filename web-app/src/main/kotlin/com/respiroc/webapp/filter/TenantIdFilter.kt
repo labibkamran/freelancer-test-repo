@@ -17,9 +17,9 @@ import org.springframework.web.filter.OncePerRequestFilter
 class TenantIdFilter(
     val userService: UserInternalApi
 ) : OncePerRequestFilter() {
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/report/**", "/ledger/**")
+    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/tenant/**", "/company/**", "/report/**", "/ledger/**")
     private val excludePaths: List<String> = listOf(
-        "/company/create",
+        "/tenant/create",
         "/company/search",
         "/assets/**",
         "/errors/**",
@@ -65,7 +65,7 @@ class TenantIdFilter(
             }
 
             if (tenants.isEmpty()) {
-                response.sendRedirect("/company/create")
+                response.sendRedirect("/tenant/create")
             } else {
                 response.sendRedirect("/dashboard?tenantId=${tenants[0].id}")
             }
