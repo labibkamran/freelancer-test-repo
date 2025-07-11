@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
-    <link rel="stylesheet" th:href="@{/assets/company/create.css}">
+    <link rel="stylesheet" th:href="@{/assets/tenant/create.css}">
 </head>
 
 <!-- Breadcrumb Items -->
@@ -23,7 +23,7 @@
                 <div style="padding: 2rem;">
                     <form id="createCompanyForm" 
                           th:object="${createCompanyRequest}"
-                          hx-post="/company/create"
+                          hx-post="/tenant/create"
                           hx-target="body"
                           hx-swap="outerHTML">
                         
@@ -92,7 +92,7 @@
 </main>
 
 <th:block layout:fragment="scripts">
-    <script th:src="@{/assets/company/create.js}"></script>
+    <script th:src="@{/assets/tenant/create.js}"></script>
 </th:block>
 </body>
 </html> 
