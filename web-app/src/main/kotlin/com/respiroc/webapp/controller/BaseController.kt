@@ -12,9 +12,9 @@ open class BaseController {
     val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
-    val tenantsAttributeNames: String = "tenants"
-    val currentTenantAttributeNames: String = "currentTenant"
-    val calloutAttributeNames: String = "callout"
+    val tenantsAttributeName: String = "tenants"
+    val currentTenantAttributeName: String = "currentTenant"
+    val calloutAttributeName: String = "callout"
 
     fun springUser(): SpringUser {
         return SecurityContextHolder.getContext().authentication.principal as SpringUser
@@ -42,11 +42,11 @@ open class BaseController {
         val springUser = springUser()
         model.addAttribute(userAttributeName, springUser)
 
-        model.addAttribute(tenantsAttributeNames, springUser.ctx.tenants)
+        model.addAttribute(tenantsAttributeName, springUser.ctx.tenants)
 
         val currentTenant = springUser.ctx.currentTenant
         if (currentTenant != null)
-            model.addAttribute(currentTenantAttributeNames, currentTenant)
+            model.addAttribute(currentTenantAttributeName, currentTenant)
         if (useCurrentCompanyAsTitlePrefix && currentTenant != null)
             model.addAttribute(titleAttributeName, "${currentTenant.companyName} - ${title}")
         else

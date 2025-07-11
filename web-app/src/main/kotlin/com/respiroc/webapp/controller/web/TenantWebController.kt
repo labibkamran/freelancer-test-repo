@@ -42,7 +42,7 @@ class TenantWebController(
         addCommonAttributes(model, "Create Company")
         if (bindingResult.hasErrors()) {
             model.addAttribute(
-                calloutAttributeNames, Callout.Error(
+                calloutAttributeName, Callout.Error(
                     message = "Please fill in all required fields correctly."
                 )
             )
@@ -66,7 +66,7 @@ class TenantWebController(
 
         } catch (e: Exception) {
             model.addAttribute(
-                calloutAttributeNames, Callout.Error(
+                calloutAttributeName, Callout.Error(
                     message = "Failed to create company: ${e.message}"
                 )
             )
