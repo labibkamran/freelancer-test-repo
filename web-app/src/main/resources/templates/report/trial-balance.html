@@ -89,22 +89,22 @@
                                 <tbody>
                                     <tr th:each="entry : ${trialBalanceData.entries}">
                                         <td>
-                                            <span class="account-number" th:text="${entry.accountNumber}">7324</span>
+                                            <span class="account-number" th:text="${entry.accountNumber}" />
                                         </td>
                                         <td>
-                                            <span class="account-name" th:text="${entry.accountName}">Freelance - Consulting</span>
+                                            <span class="account-name" th:text="${entry.accountName}" />
                                         </td>
                                         <td class="amount-cell">
                                             <span th:class="${entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.openingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}">17,904.46</span>
+                                                  th:text="${#numbers.formatDecimal(entry.openingBalance, 1, 2)}" />
                                         </td>
                                         <td class="amount-cell">
                                             <span th:class="${entry.difference.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.difference.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}">123,938.85</span>
+                                                  th:text="${#numbers.formatDecimal(entry.difference, 1, 2)}" />
                                         </td>
                                         <td class="amount-cell">
                                             <span th:class="${entry.closingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'positive-amount' : entry.closingBalance.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'negative-amount' : 'zero-amount'}"
-                                                  th:text="${#numbers.formatDecimal(entry.closingBalance, 1, 2)}">949,240.23</span>
+                                                  th:text="${#numbers.formatDecimal(entry.closingBalance, 1, 2)}" />
                                         </td>
                                     </tr>
                                 </tbody>
@@ -112,13 +112,13 @@
                                     <tr class="total-row">
                                         <td colspan="2"><strong>Total</strong></td>
                                         <td class="amount-cell">
-                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}">-1,350,779.71</strong>
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalOpeningBalance, 1, 2)}" />
                                         </td>
                                         <td class="amount-cell">
-                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}">0.00</strong>
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalDifference, 1, 2)}" />
                                         </td>
                                         <td class="amount-cell">
-                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}">-1,350,779.71</strong>
+                                            <strong th:text="${#numbers.formatDecimal(trialBalanceData.totalClosingBalance, 1, 2)}" />
                                         </td>
                                     </tr>
                                 </tfoot>

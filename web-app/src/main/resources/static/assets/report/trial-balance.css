@@ -1,14 +1,14 @@
 .trial-balance-container {
-    background: white;
+    background: var(--wa-color-surface-default);
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
 .filters-section {
-    background: #f8f9fa;
+    background: var(--wa-color-surface-raised);
     padding: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--wa-color-gray-90);
 }
 
 .filters-form {
@@ -27,12 +27,12 @@
 .filter-label {
     font-weight: 500;
     font-size: 0.875rem;
-    color: #374151;
+    color: var(--wa-color-gray-30);
 }
 
 .filter-input {
     padding: 0.75rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--wa-color-surface-raised);
     border-radius: 8px;
     font-size: 0.875rem;
     min-width: 140px;
@@ -46,8 +46,8 @@
 
 .filter-button {
     padding: 0.75rem 1.5rem;
-    background: #3b82f6;
-    color: white;
+    background: var(--wa-color-blue-70);
+    color: var(--wa-color-surface-default);
     border: none;
     border-radius: 8px;
     font-weight: 500;
@@ -56,7 +56,7 @@
 }
 
 .filter-button:hover {
-    background: #2563eb;
+    background: var(--wa-color-blue-40);
 }
 
 .trial-balance-table {
@@ -66,15 +66,13 @@
 }
 
 .trial-balance-table th {
-    background: #f8f9fa;
+    background: var(--wa-color-surface-raised);
     padding: 1rem 0.75rem;
     text-align: left;
     font-weight: 600;
-    color: #374151;
-    border-bottom: 2px solid #e9ecef;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    color: var(--wa-color-gray-30);
+    border-bottom: 2px solid var(--wa-color-gray-90);
+
 }
 
 .trial-balance-table th.amount-header {
@@ -83,11 +81,11 @@
 
 .trial-balance-table td {
     padding: 0.875rem 0.75rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--wa-color-surface-raised);
 }
 
 .trial-balance-table tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--wa-color-surface-raised);
 }
 
 .amount-cell {
@@ -97,61 +95,62 @@
 }
 
 .account-number {
+    padding-left: var(--wa-space-2xl);
     font-family: 'Monaco', 'Menlo', monospace;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--wa-color-gray-50);
 }
 
 .account-name {
     font-weight: 500;
-    color: #374151;
+    color: var(--wa-color-gray-30);
 }
 
 .total-row {
-    background: #f0f9ff;
-    border-top: 2px solid #3b82f6;
+    background: var(--wa-color-surface-default);
+    border-top: 2px solid var(--wa-color-blue-70);
 }
 
 .total-row td {
     font-weight: 600;
-    color: #1e40af;
+    color: var(--wa-color-blue-40);
     padding: 1rem 0.75rem;
 }
 
 .positive-amount {
-    color: #16a34a;
+    color: var(--wa-color-green-50);
 }
 
 .negative-amount {
-    color: #dc2626;
+    color: var(--wa-color-red-50);
 }
 
 .zero-amount {
-    color: #6b7280;
+    color: var(--wa-color-gray-30);
 }
 
 .period-display {
-    background: #f0f9ff;
+    background: var(--wa-color-surface-default);
     padding: 1rem 1.5rem;
-    border-left: 4px solid #3b82f6;
+    border-left: 4px solid var(--wa-color-blue-70);
     margin-bottom: 1rem;
 }
 
 .period-title {
     font-weight: 600;
-    color: #1e40af;
+    color: var(--wa-color-blue-40);
     margin-bottom: 0.25rem;
 }
 
 .period-subtitle {
-    color: #6b7280;
+    color: var(--wa-color-gray-50);
     font-size: 0.875rem;
 }
 
 .empty-state {
     text-align: center;
     padding: 3rem;
-    color: #6b7280;
+    color: var(--wa-color-gray-50);
 }
 
 .empty-state-icon {
@@ -165,7 +164,7 @@
     justify-content: center;
     align-items: center;
     padding: 2rem;
-    color: #6b7280;
+    color: var(--wa-color-gray-50);
 }
 
 .htmx-indicator {

@@ -26,7 +26,10 @@ class NavigationProvider {
 
             NavigationSection(
                 title = "Reports", icon = "chart-simple",
-                items = listOf(NavigationSectionItem(label = "Trial Balance", url = "/report/trial-balance"))
+                items = listOf(
+                    NavigationSectionItem(label = "Trial Balance", url = "/report/trial-balance"),
+                    NavigationSectionItem(label = "Profit & Loss", url = "/report/profit-loss")
+                )
             )
         )
     }
