@@ -1,26 +1,31 @@
 package com.respiroc.webapp.filter
 
+import com.respiroc.user.api.UserInternalApi
 import com.respiroc.util.context.SpringUser
+import com.respiroc.util.context.UserTenantContext
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/report/**", "/ledger/**"),
+    val userService: UserInternalApi
+) : OncePerRequestFilter() {
+    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/company/**", "/report/**", "/ledger/**")
     private val excludePaths: List<String> = listOf(
         "/company/create",
         "/company/search",
         "/assets/**",
         "/errors/**",
         "/error/**"
-    ),
+    )
     private val paramName: String = "tenantId"
-) : OncePerRequestFilter() {
-
     private val matcher = AntPathMatcher()
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
@@ -48,7 +53,7 @@ class TenantIdFilter(
         val wrappedRequest = createWrappedRequest(request)
 
         if (!tenantId.isNullOrBlank() && isTenantAccessible(tenantId, springUser)) {
-            setCurrentTenant(tenantId, springUser)
+            setCurrentTenant(tenantId, springUser, request)
         } else if (!tenantId.isNullOrBlank()) {
             response.sendRedirect("/error/tenant-access-denied")
             return
@@ -95,10 +100,22 @@ class TenantIdFilter(
         }
     }
 
-    private fun setCurrentTenant(tenantId: String, springUser: SpringUser) {
+    // TODO: find better solution
+    private fun setCurrentTenant(tenantId: String, springUser: SpringUser, request: HttpServletRequest) {
         val tenantIdLong = tenantId.toLong()
-        val tenant = springUser.ctx.tenants.find { it.id == tenantIdLong }
-            ?: return // This shouldn't happen due to prior checks
-        springUser.ctx.currentTenant = tenant
+        val roles = userService.findTenantRoles(springUser.ctx.id, tenantIdLong)
+        val user = springUser.ctx
+        val currentTenant = user.tenants.find { it.id == tenantIdLong }!!
+        user.currentTenant = UserTenantContext(tenantIdLong, currentTenant.companyName, roles)
+        setSecurityContext(SpringUser(user), request)
+    }
+
+    private fun setSecurityContext(springUser: SpringUser, request: HttpServletRequest) {
+        val userDetails: UserDetails = springUser
+        val usernamePasswordAuthenticationToken =
+            UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+        usernamePasswordAuthenticationToken.details =
+            WebAuthenticationDetailsSource().buildDetails(request)
+        SecurityContextHolder.getContext().authentication = usernamePasswordAuthenticationToken
     }
 }
