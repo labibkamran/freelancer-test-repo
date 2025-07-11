@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS postings
     currency       VARCHAR(3)     NOT NULL,
     posting_date   DATE           NOT NULL,
     description    TEXT,
-    tenant_id      BIGINT         NOT NULL,
+    tenant_id      INTEGER         NOT NULL,
     created_at     TIMESTAMP      NOT NULL,
     updated_at     TIMESTAMP      NOT NULL,
 
