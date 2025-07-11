@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title != null ? title + ' - Reai' : 'Reai'}">Reai</title>
+    <title th:text="${title != null ? title + ' - Reai' : 'Reai'}" />
     <th:block th:replace="~{layout/libs :: common-libs}"></th:block>
     <link rel="stylesheet" th:href="@{/assets/base/base.css}">
 
@@ -17,7 +17,7 @@
     <!-- Header -->
     <header slot="header" class="wa-split">
         <div class="wa-cluster">
-            <span class="wa-heading-s wa-desktop-only">Reai - Accounting System</span>
+            <span class="wa-heading-s wa-desktop-only" th:text="#{layout.header.title}" />
             <!-- Company Selector -->
             <wa-dropdown>
                 <wa-button slot="trigger" size="small" variant="brand" appearance="outlined" with-caret
@@ -27,12 +27,12 @@
                 <wa-dropdown-item th:each="company : ${companies}"
                                   th:onclick="'switchCompany(' + ${company.tenantId} + ')'"
                                   th:class="${currentCompany != null and currentCompany.tenantId == company.tenantId} ? 'selected' : ''">
-                    <span th:text="${company.name}">Company Name</span>
+                    <span th:text="${company.name}" />
                 </wa-dropdown-item>
                 <wa-divider></wa-divider>
                 <wa-dropdown-item onclick="window.open('/company/create', '_blank')">
                     <wa-icon slot="icon" name="plus"></wa-icon>
-                    <span>Create New Company</span>
+                    <span th:text="#{layout.company.selector.create}" />
                 </wa-dropdown-item>
             </wa-dropdown>
         </div>

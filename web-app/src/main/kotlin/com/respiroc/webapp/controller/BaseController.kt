@@ -14,9 +14,9 @@ open class BaseController {
     val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
-    val companiesAttributeNames: String = "companies"
-    val currentCompanyAttributeNames: String = "currentCompany"
-    val calloutAttributeNames: String = "callout"
+    val companiesAttributeName: String = "companies"
+    val currentCompanyAttributeName: String = "currentCompany"
+    val calloutAttributeName: String = "callout"
 
     fun springUser(): SpringUser {
         return SecurityContextHolder.getContext().authentication.principal as SpringUser
@@ -47,13 +47,13 @@ open class BaseController {
         model.addAttribute(userAttributeName, springUser)
 
         val companies = companyApi.findAllCompany()
-        model.addAttribute(companiesAttributeNames, companies)
+        model.addAttribute(companiesAttributeName, companies)
 
         val tenantId = springUser.ctx.currentTenant?.id
         var currentCompany: Company? = null
         if (tenantId != null) {
             currentCompany = companies.find { it.tenantId == tenantId }
-            model.addAttribute(currentCompanyAttributeNames, currentCompany)
+            model.addAttribute(currentCompanyAttributeName, currentCompany)
         }
         if (useCurrentCompanyAsTitlePrefix && currentCompany != null)
             model.addAttribute(titleAttributeName, "${currentCompany.name} - ${title}")
