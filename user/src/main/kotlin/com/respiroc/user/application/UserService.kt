@@ -7,21 +7,12 @@ import com.respiroc.user.api.UserInternalApi
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.user.application.jwt.JwtUtils
-import com.respiroc.user.domain.model.Permission
-import com.respiroc.user.domain.model.Role
-import com.respiroc.user.domain.model.User
-import com.respiroc.user.domain.model.UserSession
-import com.respiroc.user.domain.model.UserTenantRole
+import com.respiroc.user.domain.model.*
 import com.respiroc.user.domain.repository.UserRepository
 import com.respiroc.user.domain.repository.UserSessionRepository
+import com.respiroc.user.domain.repository.UserTenantRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
-import com.respiroc.util.context.PermissionContext
-import com.respiroc.util.context.RoleContext
-import com.respiroc.util.context.SpringUser
-import com.respiroc.util.context.TenantContext
-import com.respiroc.util.context.TenantPermissionContext
-import com.respiroc.util.context.TenantRoleContext
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.*
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -29,10 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.nio.file.attribute.UserPrincipalNotFoundException
-import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Base64
 
 @Service
 @Transactional
@@ -40,14 +29,13 @@ class UserService(
     private val userRepository: UserRepository,
     private val userSessionRepository: UserSessionRepository,
     private val userTenantRoleRepository: UserTenantRoleRepository,
+    private val userTenantRepository: UserTenantRepository,
     private val jwt: JwtUtils
 ) : UserInternalApi {
 
-    private val random: SecureRandom = SecureRandom()
-    private val base64Encoder: Base64.Encoder = Base64.getUrlEncoder()
     private val passwordEncoder = BCryptPasswordEncoder()
 
-    private val JWT_TOKEN_PERIOD : Long = 24 * 60 * 60 * 1000
+    private val JWT_TOKEN_PERIOD: Long = 24 * 60 * 60 * 1000
 
     override fun signupByEmailPassword(email: String, password: String) {
         val existUser = userRepository.findByEmail(email)
