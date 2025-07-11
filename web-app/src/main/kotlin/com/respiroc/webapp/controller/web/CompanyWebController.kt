@@ -24,7 +24,7 @@ class CompanyWebController(
 
     @GetMapping("/create")
     fun createCompany(model: Model): String {
-        addCommonAttributes(model, companyApi, "Create Company")
+        addCommonAttributes(model, "Create Company")
         model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
         return "company/create"
     }
@@ -35,7 +35,7 @@ class CompanyWebController(
         bindingResult: BindingResult,
         model: Model
     ): Any {
-        addCommonAttributes(model, companyApi, "Create Company")
+        addCommonAttributes(model, "Create Company")
         if (bindingResult.hasErrors()) {
             model.addAttribute(
                 calloutAttributeNames, Callout.Error(
@@ -52,11 +52,10 @@ class CompanyWebController(
                 countryCode = createCompanyRequest.countryCode
             )
 
-            val company = companyApi.createNewCompany(command)
+            val tenant = companyApi.createNewCompany(command)
 
             val headers = HttpHeaders()
-            headers.add("HX-Redirect", "/dashboard?tenantId=${company.tenantId}")
-
+            headers.add("HX-Redirect", "/dashboard?tenantId=${tenant.id}")
             return ResponseEntity<Void>(headers, HttpStatus.OK)
 
         } catch (e: Exception) {

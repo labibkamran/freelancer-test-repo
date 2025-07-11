@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(value = ["/voucher"])
 class VoucherWebController(
     private val accountApi: AccountInternalApi,
-    private val companyApi: CompanyInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
     private val voucherApi: VoucherInternalApi,
@@ -34,7 +32,7 @@ class VoucherWebController(
     @GetMapping(value = ["/overview"])
     fun overview(model: Model): String {
         val vouchers = voucherApi.findAllVoucherSummaries()
-        addCommonAttributes(model, companyApi, "Voucher Overview")
+        addCommonAttributes(model, "Voucher Overview")
         model.addAttribute("vouchers", vouchers)
         return "voucher/overview"
     }
@@ -46,7 +44,7 @@ class VoucherWebController(
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-        addCommonAttributes(model, companyApi, "Voucher ${voucher.getDisplayNumber()}")
+        addCommonAttributes(model, "Voucher ${voucher.getDisplayNumber()}")
         model.addAttribute("voucher", voucher)
 
         return "voucher/view"
@@ -94,7 +92,7 @@ class VoucherWebController(
         val companyCurrency = currencyService.getCompanyCurrency("NO")
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
-        addCommonAttributes(model, companyApi, "General Ledger")
+        addCommonAttributes(model, "General Ledger")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("companyCurrency", companyCurrency)
