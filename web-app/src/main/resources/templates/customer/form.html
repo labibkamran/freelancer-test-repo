@@ -6,11 +6,10 @@
 </head>
 <!-- Breadcrumb Items -->
 <th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item th:href="'/customer?tenantId=' + ${user.ctx.currentTenant?.id}">
-        Customers
+    <wa-breadcrumb-item th:href="'/customer?tenantId=' + ${user.ctx.currentTenant?.id}" th:text="#{customer.customers}">
+
     </wa-breadcrumb-item>
-    <wa-breadcrumb-item>
-        Create Customer
+    <wa-breadcrumb-item th:text="#{customer.create_customer}">
     </wa-breadcrumb-item>
 </th:block>
 <body>
@@ -28,23 +27,23 @@
                       hx-swap="innerHTML">
                     <div class="form-group">
                         <wa-select required label="Type" name="type" th:value="${customer.type}" th:field="*{type}">
-                            <wa-option value="CUSTOMER">Customer</wa-option>
-                            <wa-option value="SUPPLIER">Supplier</wa-option>
-                            <wa-option value="customer_supplier">Customer/Supplier</wa-option>
+                            <wa-option value="CUSTOMER" th:text="#{customer.customer}"></wa-option>
+                            <wa-option value="SUPPLIER" th:text="#{customer.supplier}"></wa-option>
+                            <wa-option value="customer_supplier" th:text="#{customer.customer_supplier}"></wa-option>
                         </wa-select>
                     </div>
                     <div class="form-group">
                         <wa-radio-group
                                 required
                                 orientation="horizontal"
-                                name="privateCustomer"
+                                th:label="#{customer.private_customer}"
                                 th:value="${customer.privateCustomer}"
                                 th:attr="hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}"
                                 hx-target="#customerFormFields"
                                 hx-trigger="change"
                         >
-                            <wa-radio value="false">Company</wa-radio>
-                            <wa-radio value="true">Private Person</wa-radio>
+                            <wa-radio value="false" th:text="#{customer.company}"></wa-radio>
+                            <wa-radio value="true" th:text="#{customer.private_person}"></wa-radio>
                         </wa-radio-group>
                     </div>
                     <div th:fragment="customerFormFields" id="customerFormFields">
@@ -53,7 +52,7 @@
                                     th:unless="${customer.privateCustomer}"
                                     id="companyName"
                                     label="Customer Name"
-                                    name="name"
+                                    th:label="#{customer.customer_name}"
                                     th:field="*{name}"
                                     placeholder="Enter company name or search registry..."
                                     size="medium"
@@ -67,7 +66,7 @@
                             <wa-input
                                     th:if="${customer.privateCustomer}"
                                     id="companyName"
-                                    label="Customer Name"
+                                    th:label="#{customer.customer_name}"
                                     name="name"
                                     th:field="*{name}"
                                     placeholder="Enter full name of private person..."
@@ -81,7 +80,7 @@
                             <wa-input
                                     id="organizationNumber"
                                     name="organizationNumber"
-                                    label="Organization Number"
+                                    th:label="#{customer.organization_number}"
                                     th:field="*{organizationNumber}"
                                     placeholder="Enter organization number..."
                                     size="medium"
@@ -91,8 +90,7 @@
                     </div>
                     <div style="display: flex; gap: var(--wa-space-m); align-items: center;">
                         <wa-button type="submit" variant="success" size="small" id="submitButton">
-                            <wa-icon name="plus" style="margin-right:var(--wa-space-x)"></wa-icon>
-                            Create Customer
+                            <wa-icon name="plus" style="margin-right:var(--wa-space-x)" th:text="#{customer.create_customer}"></wa-icon>
                         </wa-button>
                         <wa-spinner id="loading-indicator" class="htmx-indicator"
                                     style="font-size: var(--wa-space-xl)"></wa-spinner>
