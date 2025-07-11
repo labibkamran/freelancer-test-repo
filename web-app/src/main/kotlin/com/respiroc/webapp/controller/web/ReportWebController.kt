@@ -36,14 +36,14 @@ class ReportWebController(
         model: Model
     ): String {
         // Default to current month if no dates provided
-        val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-        val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
-        val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
+        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+        val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
 
         addCommonAttributes(model, companyApi, "Trial Balance")
         model.addAttribute("trialBalanceData", trialBalanceData)
-        model.addAttribute("startDate", effectiveStartDate)
-        model.addAttribute("endDate", effectiveEndDate)
+        model.addAttribute("startDate", defaultStartDate)
+        model.addAttribute("endDate", defaultEndDate)
 
         return "report/trial-balance"
     }
@@ -60,15 +60,15 @@ class ReportWebController(
     ): String {
         return try {
             // Default to current month if no dates provided
-            val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-            val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val trialBalanceData = postingApi.getTrialBalance(effectiveStartDate, effectiveEndDate)
+            val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
 
             model.addAttribute(userAttributeName, springUser())
             model.addAttribute("trialBalanceData", trialBalanceData)
-            model.addAttribute("startDate", effectiveStartDate)
-            model.addAttribute("endDate", effectiveEndDate)
+            model.addAttribute("startDate", defaultStartDate)
+            model.addAttribute("endDate", defaultEndDate)
 
             "report/trial-balance :: tableContent"
         } catch (e: Exception) {
