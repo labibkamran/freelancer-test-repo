@@ -15,6 +15,7 @@ interface UserRepository : CustomJpaRepository<User, Long> {
     @Query("""
         SELECT user FROM User user, UserSession userSession 
         LEFT JOIN FETCH user.userTenants userTenants
+        LEFT JOIN FETCH user.roles roles
         LEFT JOIN FETCH userTenants.tenant tenant
         LEFT JOIN FETCH tenant.company company
         WHERE user.id = userSession.userId 
@@ -28,6 +29,7 @@ interface UserRepository : CustomJpaRepository<User, Long> {
     @Query("""
         SELECT user FROM User user
         LEFT JOIN FETCH user.userTenants userTenants
+        LEFT JOIN FETCH user.roles roles
         LEFT JOIN FETCH userTenants.roles userTenantRoles
         LEFT JOIN FETCH userTenantRoles.tenantRole tenantRoles
         LEFT JOIN FETCH tenantRoles.tenantPermissions tenantPermissions
