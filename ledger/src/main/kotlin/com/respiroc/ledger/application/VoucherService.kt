@@ -8,6 +8,7 @@ import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.ledger.api.payload.VoucherPayload
 import com.respiroc.ledger.api.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
+import com.respiroc.ledger.domain.exception.EmptyPostingsException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
 import com.respiroc.ledger.domain.model.Posting
@@ -81,6 +82,7 @@ class VoucherService(
     }
     
     private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
+        if (postings.isEmpty()) throw EmptyPostingsException()
         postings.forEach { postingData ->
             validateAccount(postingData.accountNumber)
             validateVatCode(postingData.vatCode)

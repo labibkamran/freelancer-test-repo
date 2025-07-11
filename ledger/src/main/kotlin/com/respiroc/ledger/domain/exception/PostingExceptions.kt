@@ -7,4 +7,6 @@ class InvalidVatCodeException(vatCode: String) :
     RuntimeException("Invalid VAT code: $vatCode")
 
 class PostingsNotBalancedException(totalAmount: java.math.BigDecimal) : 
-    RuntimeException("Postings must balance: total amount is $totalAmount") 
+    RuntimeException("Postings must balance: total amount is $totalAmount")
+
+class EmptyPostingsException() : RuntimeException("Postings row is empty")
