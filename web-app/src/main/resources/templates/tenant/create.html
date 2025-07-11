@@ -2,17 +2,13 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
-    <link rel="stylesheet" th:href="@{/assets/company/create.css}">
+    <link rel="stylesheet" th:href="@{/assets/tenant/create.css}">
 </head>
 
 <!-- Breadcrumb Items -->
 <th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item>
-        Companies
-    </wa-breadcrumb-item>
-    <wa-breadcrumb-item>
-        New Company
-    </wa-breadcrumb-item>
+    <wa-breadcrumb-item th:text="#{company.breadcrumb.companies}"></wa-breadcrumb-item>
+    <wa-breadcrumb-item th:text="#{company.breadcrumb.new}"></wa-breadcrumb-item>
 </th:block>
 
 <body>
@@ -23,21 +19,19 @@
                 <div style="padding: 2rem;">
                     <form id="createCompanyForm" 
                           th:object="${createCompanyRequest}"
-                          hx-post="/htmx/company/create"
+                          hx-post="/htmx/tenant/create"
                           hx-target="#form-messages"
                           hx-swap="innerHTML"
                           hx-ext="redirect">
                         
                         <!-- Company Name Field with Search -->
                         <div class="form-group">
-                            <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                Company Name *
-                            </label>
+                            <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.name.label}" />
                             <wa-input
                                     id="name"
                                     name="name"
                                     th:field="*{name}"
-                                    placeholder="Enter company name or search registry..."
+                                    th:placeholder="#{company.create.form.name.placeholder}"
                                     size="medium"
                                     required
                                     autocomplete="off"
@@ -52,14 +46,12 @@
 
                         <!-- Organization Number Field -->
                         <div class="form-group">
-                            <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                Organization Number *
-                            </label>
+                            <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.organization.label}" />
                             <wa-input
                                     id="organizationNumber"
                                     name="organizationNumber"
                                     th:field="*{organizationNumber}"
-                                    placeholder="Enter organization number..."
+                                    th:placeholder="#{company.create.form.organization.placeholder}"
                                     size="medium"
                                     required
                                     autocomplete="off">
@@ -68,26 +60,16 @@
 
                         <!-- Country Code Field -->
                         <div class="form-group">
-                            <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-                                Country *
-                            </label>
+                            <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.country.label}" />
                             <wa-select id="countryCode" name="countryCode" th:field="*{countryCode}" required>
-                                <wa-option value="NO">🇳🇴 Norway</wa-option>
+                                <wa-option value="NO" th:text="#{company.create.form.country.norway}"></wa-option>
                             </wa-select>
-                            <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                                Currently, only Norwegian companies are supported
-                            </small>
+                            <small style="color: #6b7280; display: block; margin-top: 0.5rem;" th:text="#{company.create.form.country.help}" />
                         </div>
 
                         <!-- Submit Button -->
-                        <!-- Form Messages -->
-                        <div id="form-messages" style="margin-bottom: 1rem;"></div>
-
-                        <!-- Submit Button -->
                         <div style="display: flex; gap: 1rem; align-items: center;">
-                            <wa-button type="submit" variant="success" size="small" id="submitButton">
-                                Create Company
-                            </wa-button>
+                            <wa-button type="submit" variant="success" size="small" id="submitButton" th:text="#{company.create.form.submit.button}"></wa-button>
                         </div>
                     </form>
                 </div>
@@ -97,7 +79,7 @@
 </main>
 
 <th:block layout:fragment="scripts">
-    <script th:src="@{/assets/company/create.js}"></script>
+    <script th:src="@{/assets/tenant/create.js}"></script>
 </th:block>
 </body>
 </html> 

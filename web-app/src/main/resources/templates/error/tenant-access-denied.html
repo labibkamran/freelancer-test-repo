@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
-    <title>Tenant Access Denied</title>
+    <title th:text="#{tenant.access.denied.page.title}" />
 </head>
 <body>
     <main layout:fragment="content">
@@ -16,15 +16,12 @@
                             <wa-icon name="ban" size="x-large" style="color: var(--wa-color-warning-500); margin-bottom: 1.5rem;"></wa-icon>
                             
                             <!-- Error Message -->
-                            <h2 style="color: var(--wa-color-neutral-700); margin-bottom: 0.75rem; font-size: 1.5rem;">
-                                Access Denied
-                            </h2>
-                            <p style="color: var(--wa-color-neutral-500); margin-bottom: 1rem; font-size: 1rem;" th:text="${errorMessage}">
-                                You don't have access to this company
-                            </p>
-                            <p style="color: var(--wa-color-neutral-500); margin-bottom: 2rem; font-size: 1rem;">
-                                Please select from one of the companies you have access to.
-                            </p>
+                            <h2 style="color: var(--wa-color-neutral-700); margin-bottom: 0.75rem; font-size: 1.5rem;" th:text="#{tenant.access.denied.title}" />
+
+                            <p style="color: var(--wa-color-neutral-500); margin-bottom: 1rem; font-size: 1rem;" th:text="${errorMessage}" />
+
+                            <p style="color: var(--wa-color-neutral-500); margin-bottom: 2rem; font-size: 1rem;" th:text="#{tenant.access.denied.instruction}" />
+
                             
                             <!-- Actions -->
                             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
@@ -33,7 +30,7 @@
                                     Home
                                 </wa-button>
                                 
-                                <wa-button variant="success" onclick="window.location.href='/company/create'">
+                                <wa-button variant="success" onclick="window.location.href='/tenant/create'">
                                     <wa-icon name="plus" slot="prefix"></wa-icon>
                                     Create New Company
                                 </wa-button>

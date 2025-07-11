@@ -35,14 +35,21 @@ class WebSecurityConfig {
     private val publicPaths = arrayOf(
         "/",
         "/assets/**",
+        "/favicon.ico",
         "/auth/login",
         "/auth/signup",
         "/htmx/auth/login",
         "/htmx/auth/signup",
         "/error/**",
-        "/actuator/**",
-        "/api/company-lookup/**"
+        "/actuator/**"
     )
+
+    @Bean
+    fun webSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web ->
+            web.ignoring().requestMatchers("/assets/**", "/favicon.ico")
+        }
+    }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -61,7 +68,7 @@ class WebSecurityConfig {
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterAfter(
-                TenantIdFilter(),
+                TenantIdFilter(userApi),
                 BearerTokenAuthenticationFilter::class.java
             )
             .exceptionHandling {

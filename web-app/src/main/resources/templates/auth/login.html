@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Reai</title>
+    <title th:text="#{login.page.title}" />
     <th:block th:replace="~{layout/libs :: common-libs}"></th:block>
     <link rel="stylesheet" th:href="@{/assets/login/login.css}">
 </head>
@@ -21,20 +21,18 @@
                   hx-target="#message-container"
                   hx-swap="innerHTML">
                 <div class="wa-stack">
-                    <h2 class="wa-heading-m">Login</h2>
-                    <wa-input label="Email" type="email" id="email" name="email" required></wa-input>
-                    <wa-input label="Password" type="password" id="password" name="password" required></wa-input>
-                    <a href="/auth/signup">Don't have an account? Sign Up</a>
-                    <wa-button type="submit">Sign in</wa-button>
+                    <h2 class="wa-heading-m" th:text="#{login.form.title}" />
+                    <wa-input th:label="#{email.label}" type="email" id="email" name="email" required></wa-input>
+                    <wa-input th:label="#{password.label}" type="password" id="password" name="password" required></wa-input>
+                    <a href="/auth/signup" th:text="#{login.form.signup.link}"/>
+                    <wa-button type="submit" th:text="#{login.form.submit.button}"></wa-button>
                 </div>
             </form>
         </wa-card>
 
         <!-- Footer -->
         <div style="text-align: center; margin-top: 0.5rem">
-            <p class="wa-body-xs">
-                🔐 Your information is safe and secure
-            </p>
+            <p class="wa-body-xs" th:text="#{login.footer.security.message}" />
         </div>
     </div>
 </div>

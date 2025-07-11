@@ -59,8 +59,8 @@
                         <div th:if="${generalLedgerData.accounts.empty}" class="wa-center">
                             <div class="wa-stack wa-gap-m wa-center">
                                 <wa-icon name="chart-line" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
-                                <h3 class="wa-heading-m">No Data Found</h3>
-                                <p class="wa-body">No transactions found for the selected period.</p>
+                                <h3 class="wa-heading-m" th:text="#{no_data_found}" />
+                                <p class="wa-body" th:text="#{no_transaction_found}" />
                             </div>
                         </div>
 
@@ -69,13 +69,13 @@
                             <table id="ledgerTable" style="--wa-table-row-padding: var(--wa-space-xs);">
                                 <thead>
                                     <tr>
-                                        <th>Closed</th>
-                                        <th>Voucher No</th>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>VAT Code</th>
-                                        <th>Currency</th>
-                                        <th style="text-align: right;">Amount</th>
+                                        <th th:text="#{closed}" />
+                                        <th th:text="#{voucher_no}" />
+                                        <th th:text="#{date}" />
+                                        <th th:text="#{description}" />
+                                        <th th:text="#{vat_code}" />
+                                        <th th:text="#{currency}" />
+                                        <th th:text="#{amount}" style="text-align: right;" />
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -88,9 +88,8 @@
                                         <!-- Account Header -->
                                         <tr style="background-color: var(--wa-color-gray-90);">
                                             <td colspan="7" style="font-weight: 600; padding: var(--wa-space-s);">
-                                                <span th:text="${account.accountNumber + ' - ' + account.accountName}">
-                                                    1000 - Cash in Hand
-                                                </span>
+                                                <span th:text="${account.accountNumber + ' - ' + account.accountName}" />
+
                                             </td>
                                         </tr>
                                         
@@ -99,7 +98,7 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td style="font-weight: 600;">Opening Balance</td>
+                                            <td style="font-weight: 600;" th:text="#{opening_balance}" />
                                             <td></td>
                                             <td></td>
                                             <td style="text-align: right;">
@@ -127,9 +126,9 @@
                                                 </a>
                                                 <span th:unless="${posting.voucherId != null}">-</span>
                                             </td>
-                                            <td th:text="${#temporals.format(posting.date, 'dd.MM.yyyy')}">15.01.2024</td>
-                                            <td th:text="${posting.description ?: '-'}">Transaction description</td>
-                                            <td th:text="${posting.vatCode ?: '-'}">25%</td>
+                                            <td th:text="${#temporals.format(posting.date, 'dd.MM.yyyy')}" />
+                                            <td th:text="${posting.description ?: '-'}" />
+                                            <td th:text="${posting.vatCode ?: '-'}" />
                                             <td>
                                                 <!-- Show original currency and amount if different from base currency -->
                                                 <div th:if="${posting.originalCurrency != null and posting.originalCurrency != companyCurrency}">
@@ -152,7 +151,7 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td style="font-weight: 600;">Closing Balance</td>
+                                            <td style="font-weight: 600;" th:text="#{closing_balance}" />
                                             <td></td>
                                             <td></td>
                                             <td style="text-align: right;">

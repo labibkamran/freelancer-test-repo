@@ -5,6 +5,7 @@ import com.respiroc.tenant.domain.model.TenantRole
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.util.context.SpringUser
+import com.respiroc.util.context.TenantRoleContext
 import com.respiroc.util.context.UserContext
 
 interface UserInternalApi {
@@ -17,6 +18,7 @@ interface UserInternalApi {
     fun setPassword(user: SpringUser, newPassword: String)
     fun findByToken(token: String): UserContext?
     fun findByEmail(email: String): UserContext?
+    fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext>
     fun generateToken(user: SpringUser): String
     fun addUserTenantRole(tenant: Tenant, role: TenantRole, user: UserContext)
 } 
