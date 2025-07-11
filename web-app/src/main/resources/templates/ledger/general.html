@@ -27,7 +27,7 @@
                                   name="startDate" 
                                   size="small"
                                   th:value="${startDate}"
-                                  th:hx-get="'/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  th:hx-get="'/htmx/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
                                   hx-target="#tableContent"
                                   hx-indicator="#loading-indicator"
                                   hx-trigger="change"
@@ -41,7 +41,7 @@
                                   name="endDate" 
                                   size="small"
                                   th:value="${endDate}"
-                                  th:hx-get="'/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  th:hx-get="'/htmx/ledger/general?tenantId=' + ${user.ctx.currentTenant.id}"
                                   hx-target="#tableContent"
                                   hx-indicator="#loading-indicator"
                                   hx-trigger="change"
@@ -103,8 +103,7 @@
                                             <td></td>
                                             <td style="text-align: right;">
                                                 <wa-format-number type="currency" 
-                                                                   currency="NOK" 
-                                                                   th:attr="value=${account.openingBalance}"
+                                                                   th:attr="currency=${user.ctx.currentTenant.countryCode}, value=${account.openingBalance}"
                                                                    lang="en-US">
                                                 </wa-format-number>
                                             </td>
@@ -132,8 +131,7 @@
                                             <td th:text="${posting.vatCode ?: '-'}" />
                                             <td>
                                                 <!-- Show original currency and amount if different from base currency -->
-                                                <!-- TODO: Refactor Default NOK with actual company's currency -->
-                                                <div th:if="${posting.originalCurrency != null and posting.originalCurrency != 'NOK'}">
+                                                <div th:if="${posting.originalCurrency != null and posting.originalCurrency != user.ctx.currentTenant.countryCode}">
                                                     <wa-format-number type="currency" 
                                                                        th:attr="currency=${posting.originalCurrency}, value=${posting.originalAmount}"
                                                                        lang="en-US">
@@ -142,8 +140,7 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <wa-format-number type="currency" 
-                                                                   currency="NOK"
-                                                                   th:attr="value=${posting.amount}"
+                                                                   th:attr="currency=${user.ctx.currentTenant.countryCode}, value=${posting.amount}"
                                                                    lang="en-US">
                                                 </wa-format-number>
                                             </td>
@@ -159,8 +156,7 @@
                                             <td></td>
                                             <td style="text-align: right;">
                                                 <wa-format-number type="currency" 
-                                                                   currency="NOK" 
-                                                                   th:attr="value=${account.closingBalance}"
+                                                                   th:attr="currency=${user.ctx.currentTenant.countryCode}, value=${account.closingBalance}"
                                                                    lang="en-US">
                                                 </wa-format-number>
                                             </td>
@@ -176,8 +172,7 @@
                                         </td>
                                         <td style="text-align: right; font-weight: 600;">
                                             <wa-format-number type="currency" 
-                                                               currency="NOK" 
-                                                               th:attr="value=${generalLedgerData.totalAmount}"
+                                                               th:attr="currency=${user.ctx.currentTenant.countryCode}, value=${generalLedgerData.totalAmount}"
                                                                lang="en-US">
                                             </wa-format-number>
                                         </td>

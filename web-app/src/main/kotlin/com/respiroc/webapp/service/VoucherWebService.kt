@@ -1,5 +1,6 @@
 package com.respiroc.webapp.service
 
+import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
@@ -25,12 +26,12 @@ class VoucherWebService(
 
     fun processVoucherRequest(
         request: CreateVoucherRequest,
-        userContext: UserContext
+        userContext: UserContext,
+        companyCurrencyCode: String
     ): Callout {
         return try {
-            val companyCurrency = currencyService.getCompanyCurrency("NO") // TODO: Replace with actual country code
             val validPostingLines = request.getValidPostingLines()
-            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrency)
+            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
             val voucherPayload = CreateVoucherPayload(
                 date = request.voucherDate,

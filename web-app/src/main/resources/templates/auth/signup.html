@@ -13,20 +13,14 @@
 <div class="main">
     <div class="wa-center">
         <wa-card style="max-width: 45ch; margin: 0 auto">
-            <!-- Messages -->
-            <div th:if="${error}" style="margin-bottom: var(--wa-space-m);">
-                <wa-callout variant="danger" open>
-                    <span th:text="${error}" />
-                </wa-callout>
-            </div>
-            <div th:if="${success}" style="margin-bottom: var(--wa-space-m);">
-                <wa-callout variant="success" open>
-                    <span th:text="${success}" />
-                </wa-callout>
+            <!-- Messages container for HTMX -->
+            <div id="message-container">
             </div>
 
             <!-- Signup Form -->
-            <form method="post" action="/auth/signup">
+            <form hx-post="/htmx/auth/signup"
+                  hx-target="#message-container"
+                  hx-swap="innerHTML">
                 <div class="wa-stack">
                     <h2 class="wa-heading-m" th:text="#{signup}" />
                     <wa-input th:label="#{email.label}" type="email" id="email" name="email" required></wa-input>
