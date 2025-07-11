@@ -8,8 +8,8 @@
 <div th:fragment="error" th:if="${error}" id="name-dropdown">
     <div class="search-dropdown" style="display: block;">
         <div class="search-item" style="color: #dc2626;">
-            <div class="search-item-name">Search Error</div>
-            <div class="search-item-details" th:text="${error}">Error message</div>
+            <div class="search-item-name" th:text="#{company.search.error.title}" />
+            <div class="search-item-details" th:text="${error}" />
         </div>
     </div>
 </div>
@@ -19,16 +19,16 @@
         <div th:each="company : ${companies}" 
              class="search-item" 
              th:attr="onclick='selectCompany(\'' + ${company.name} + '\', \'' + ${company.registrationNumber} + '\')'">
-            <div class="search-item-name" th:text="${company.name}">Company Name</div>
+            <div class="search-item-name" th:text="${company.name}" />
                     <div class="search-item-details">
-            <span th:if="${!#strings.isEmpty(company.registrationNumber)}" th:text="'Org. Nr: ' + ${company.registrationNumber}">Org Nr</span>
-            <span th:if="${!#strings.isEmpty(company.address) and !#strings.isEmpty(company.registrationNumber)}" th:text="' • ' + ${company.address}"></span>
-            <span th:if="${!#strings.isEmpty(company.address) and #strings.isEmpty(company.registrationNumber)}" th:text="${company.address}"></span>
+            <span th:if="${!#strings.isEmpty(company.registrationNumber)}" th:text="'Org. Nr: ' + ${company.registrationNumber}" />
+            <span th:if="${!#strings.isEmpty(company.address) and !#strings.isEmpty(company.registrationNumber)}" th:text="' • ' + ${company.address}" />
+            <span th:if="${!#strings.isEmpty(company.address) and #strings.isEmpty(company.registrationNumber)}" th:text="${company.address}" />
         </div>
         </div>
         <div th:if="${#lists.isEmpty(companies)}" class="search-item">
-            <div class="search-item-name">No results found</div>
-            <div class="search-item-details">Try a different search term</div>
+            <div class="search-item-name" th:text="#{company.search.no.results.title}" />
+            <div class="search-item-details" th:text="#{company.search.no.results.message}" />
         </div>
     </div>
 </div>

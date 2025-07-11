@@ -26,7 +26,7 @@
                 <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
                     
                     <div class="filter-group">
-                        <label class="filter-label" for="startDate">Start Date</label>
+                        <label class="filter-label" for="startDate" th:text="#{start_date}" />
                         <wa-input type="date"
                                size="small"
                                id="startDate" 
@@ -41,7 +41,7 @@
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label" for="endDate">End Date</label>
+                        <label class="filter-label" for="endDate" th:text="#{end_date}" />
                         <wa-input type="date"
                                size="small"
                                id="endDate" 
@@ -68,7 +68,7 @@
             <!-- Error Message Fragment -->
             <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
                 <wa-icon name="exclamation-triangle"></wa-icon>
-                <span th:text="${errorMessage}">Error occurred</span>
+                <span th:text="${errorMessage}" />
             </div>
             
             <!-- Trial Balance Content -->
@@ -79,11 +79,11 @@
                             <table class="trial-balance-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 15%;">Account</th>
-                                        <th style="width: 35%;">Account Name</th>
-                                        <th class="amount-header" style="width: 16.67%;">Opening Balance</th>
-                                        <th class="amount-header" style="width: 16.67%;">Difference</th>
-                                        <th class="amount-header" style="width: 16.67%;">Closing Balance</th>
+                                        <th style="width: 15%;" th:text="#{account}" />
+                                        <th style="width: 35%;" th:text="#{account_name}" />
+                                        <th class="amount-header" style="width: 16.67%;" th:text="#{opening_balance}" />
+                                        <th class="amount-header" style="width: 16.67%;" th:text="#{difference}" />
+                                        <th class="amount-header" style="width: 16.67%;" th:text="#{closing_balance}" />
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -131,9 +131,9 @@
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
                         </div>
-                        <h3>No Data Available</h3>
-                        <p>No posting data found for the selected period.</p>
-                        <p>Try adjusting the date range or create some postings first.</p>
+                        <h3 th:text="#{no_Data_available}" />
+                        <p th:text="#{no_posting_found}" />
+                        <p th:text="#{try_adjusting_date}" />
                     </div>
                 </div>
             </div>
