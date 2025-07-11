@@ -36,7 +36,6 @@ open class BaseController {
 
     fun addCommonAttributes(
         model: Model,
-        companyApi: CompanyInternalApi,
         title: String,
         useCurrentCompanyAsTitlePrefix: Boolean = false
     ) {
