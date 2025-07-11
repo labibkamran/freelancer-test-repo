@@ -1,7 +1,5 @@
 package com.respiroc.webapp.controller
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.company.domain.model.Company
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -14,8 +12,8 @@ open class BaseController {
     val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
-    val companiesAttributeNames: String = "companies"
-    val currentCompanyAttributeNames: String = "currentCompany"
+    val tenantsAttributeNames: String = "tenants"
+    val currentTenantAttributeNames: String = "currentTenant"
     val calloutAttributeNames: String = "callout"
 
     fun springUser(): SpringUser {
@@ -42,21 +40,16 @@ open class BaseController {
         title: String,
         useCurrentCompanyAsTitlePrefix: Boolean = false
     ) {
-
         val springUser = springUser()
         model.addAttribute(userAttributeName, springUser)
 
-        val companies = companyApi.findAllCompany()
-        model.addAttribute(companiesAttributeNames, companies)
+        model.addAttribute(tenantsAttributeNames, springUser.ctx.tenants)
 
-        val tenantId = springUser.ctx.currentTenant?.id
-        var currentCompany: Company? = null
-        if (tenantId != null) {
-            currentCompany = companies.find { it.tenantId == tenantId }
-            model.addAttribute(currentCompanyAttributeNames, currentCompany)
-        }
-        if (useCurrentCompanyAsTitlePrefix && currentCompany != null)
-            model.addAttribute(titleAttributeName, "${currentCompany.name} - ${title}")
+        val currentTenant = springUser.ctx.currentTenant
+        if (currentTenant != null)
+            model.addAttribute(currentTenantAttributeNames, currentTenant)
+        if (useCurrentCompanyAsTitlePrefix && currentTenant != null)
+            model.addAttribute(titleAttributeName, "${currentTenant.companyName} - ${title}")
         else
             model.addAttribute(titleAttributeName, title)
     }
