@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS vouchers
     number      SMALLINT  NOT NULL,
     date        DATE      NOT NULL,
     description TEXT,
-    tenant_id   BIGINT    NOT NULL,
+    tenant_id   INTEGER    NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP NOT NULL,
 
