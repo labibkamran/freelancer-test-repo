@@ -27,7 +27,7 @@
                 <wa-dropdown-item th:each="tenant : ${tenants}"
                                   th:onclick="'switchCompany(' + ${tenant.id} + ')'"
                                   th:class="${currentTenant != null and currentTenant.id == tenant.id} ? 'selected' : ''">
-                    <span th:text="${company.name}" />
+                    <span th:text="${tenant.companyName}" />
                 </wa-dropdown-item>
                 <wa-divider></wa-divider>
                 <wa-dropdown-item onclick="window.open('/tenant/create', '_blank')">
