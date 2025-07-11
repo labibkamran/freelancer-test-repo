@@ -8,8 +8,7 @@
 </head>
 <!-- Breadcrumb Items -->
 <th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item>
-        Customers
+    <wa-breadcrumb-item th:text="#{customer.customers}">
     </wa-breadcrumb-item>
 </th:block>
 <body>
@@ -21,14 +20,13 @@
                   hx-target="#customer-table"
                   hx-indicator="#loading-indicator"
                   hx-swap="innerHTML">
-                <wa-input placeholder="Search customers..." size="small" name="name" type="text" id="search-input">
+                <wa-input th:placeholder="#{customer.search_customer}" size="small" name="name" type="text" id="search-input">
                     <wa-icon name="search" slot="start"></wa-icon>
                 </wa-input>
                 <input type="hidden" name="tenantId" th:value="${user.ctx.currentTenant.id}"/>
             </form>
             <wa-button size="small" th:href="'/customer/new?tenantId=' + ${user.ctx.currentTenant.id}"
-                       variant="neutral">
-                Create Customer
+                       variant="neutral" th:text="#{customer.create_customer}">
             </wa-button>
         </div>
         <wa-progress-bar id="loading-indicator" indeterminate class="htmx-indicator"
