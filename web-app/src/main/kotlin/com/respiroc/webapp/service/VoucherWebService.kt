@@ -7,7 +7,6 @@ import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.util.context.UserContext
 import com.respiroc.util.currency.CurrencyService
-import com.respiroc.util.exception.BaseException
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
 import com.respiroc.webapp.controller.response.Callout
@@ -18,8 +17,7 @@ import java.math.BigDecimal
 class VoucherWebService(
     private val voucherApi: VoucherInternalApi,
     private val vatApi: VatInternalApi,
-    private val currencyService: CurrencyService,
-    private val companyApi: CompanyInternalApi
+    private val currencyService: CurrencyService
 ) {
 
     companion object {
@@ -28,12 +26,12 @@ class VoucherWebService(
 
     fun processVoucherRequest(
         request: CreateVoucherRequest,
-        userContext: UserContext
+        userContext: UserContext,
+        companyCurrencyCode: String
     ): Callout {
         return try {
-            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: throw BaseException("Company not found")
             val validPostingLines = request.getValidPostingLines()
-            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrency)
+            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
             val voucherPayload = CreateVoucherPayload(
                 date = request.voucherDate,

@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 @RequestMapping(value = ["/voucher"])
 class VoucherWebController(
     private val accountApi: AccountInternalApi,
-    private val companyApi: CompanyInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
     private val voucherApi: VoucherInternalApi
@@ -30,7 +28,7 @@ class VoucherWebController(
     @GetMapping(value = ["/overview"])
     fun overview(model: Model): String {
         val vouchers = voucherApi.findAllVoucherSummaries()
-        addCommonAttributes(model, companyApi, "Voucher Overview")
+        addCommonAttributes(model, "Voucher Overview")
         model.addAttribute("vouchers", vouchers)
         return "voucher/overview"
     }
@@ -42,11 +40,9 @@ class VoucherWebController(
             model.addAttribute("errorMessage", "Voucher not found")
             return "error/404"
         }
-        addCommonAttributes(model, companyApi, "Voucher ${voucher.getDisplayNumber()}")
-        
-        val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
+
+        addCommonAttributes(model, "Voucher ${voucher.getDisplayNumber()}")
         model.addAttribute("voucher", voucher)
-        model.addAttribute("companyCurrency", companyCurrency)
 
         return "voucher/view"
     }
@@ -67,7 +63,7 @@ class VoucherWebController(
         val vatCodes = vatApi.findAllVatCodes()
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
-        addCommonAttributes(model, companyApi, "General Ledger")
+        addCommonAttributes(model, "General Ledger")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
