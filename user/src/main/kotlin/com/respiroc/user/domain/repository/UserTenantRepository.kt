@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserTenantRepository : CustomJpaRepository<UserTenant, Long> {
+    fun findUserTenantByUserIdAndTenantId(userId: Long, tenantId: Long): UserTenant?
 }
