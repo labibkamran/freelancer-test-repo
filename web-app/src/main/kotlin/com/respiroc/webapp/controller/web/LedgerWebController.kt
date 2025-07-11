@@ -57,10 +57,10 @@ class LedgerWebController(
             }
         } catch (e: Exception) {
             if (isHtmxRequest != null) {
-                model.addAttribute(calloutAttributeNames, Callout.Error("Error loading general ledger: ${e.message}"))
+                model.addAttribute(calloutAttributeName, Callout.Error("Error loading general ledger: ${e.message}"))
                 "ledger/general :: error-message"
             } else {
-                model.addAttribute(calloutAttributeNames, Callout.Error("Error loading general ledger: ${e.message}"))
+                model.addAttribute(calloutAttributeName, Callout.Error("Error loading general ledger: ${e.message}"))
                 "ledger/general"
             }
         }
