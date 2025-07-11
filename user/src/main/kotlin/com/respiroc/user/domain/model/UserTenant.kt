@@ -18,15 +18,15 @@ class UserTenant {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id")
-    var user: User? = null
+    open lateinit var user: User
 
     @Column(name = "tenant_id", nullable = false, updatable = false, insertable = false)
     open var tenantId: Long = -1
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tenant_id")
-    var tenant: Tenant? = null
+    open lateinit var tenant: Tenant
 
     @OneToMany(mappedBy = "userTenant", orphanRemoval = true, fetch = FetchType.LAZY)
-    val roles: MutableSet<UserTenantRole> = HashSet()
+    var roles: MutableSet<UserTenantRole> = HashSet()
 }

@@ -53,5 +53,5 @@ open class User : Serializable {
     open var roles: List<Role> = ArrayList()
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    open val userTenants: MutableSet<UserTenant?> = HashSet()
+    open var userTenants: MutableSet<UserTenant> = HashSet()
 }

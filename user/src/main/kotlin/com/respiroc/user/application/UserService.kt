@@ -101,7 +101,7 @@ class UserService(
     }
 
     override fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext> {
-        return userRepository.findUserWithTenantRoles(userId, tenantId)!!.userTenants.single()!!.roles.map {
+        return userRepository.findUserWithTenantRoles(userId, tenantId)!!.userTenants.single().roles.map {
             it.tenantRole.toTenantRoleContext()
         }
     }
@@ -178,7 +178,7 @@ class UserService(
 
     private fun User.getTenantsInfo(): List<TenantInfo> {
         return this.userTenants.map {
-            val tenant = it!!.tenant!!
+            val tenant = it.tenant
             TenantInfo(tenant.id, tenant.getCompanyName())
         }.sortedBy { it.id }
     }
