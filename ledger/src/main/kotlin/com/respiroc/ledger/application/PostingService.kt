@@ -7,6 +7,9 @@ import com.respiroc.ledger.api.payload.TrialBalancePayload
 import com.respiroc.ledger.api.payload.GeneralLedgerPayload
 import com.respiroc.ledger.api.payload.GeneralLedgerAccountEntry
 import com.respiroc.ledger.api.payload.GeneralLedgerPostingEntry
+import com.respiroc.ledger.api.payload.ProfitLossEntry
+import com.respiroc.ledger.api.payload.ProfitLossPayload
+import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.ledger.domain.repository.PostingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -59,6 +62,41 @@ class PostingService(
             totalDifference = totalDifference,
             totalClosingBalance = totalClosingBalance
         )
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPostingsForProfitLoss(startDate: LocalDate, endDate: LocalDate): Map<AccountType, ProfitLossPayload> {
+        val tenantId = currentTenantId()
+        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+
+        val profitLossPostings = postingRepository.findProfitLossPostings(tenantId, startDate, endDate)
+
+        val groupedByType = profitLossPostings.groupBy { row ->
+            when (row[0] as String) {
+                "ASSET" -> AccountType.ASSET
+                "REVENUE" -> AccountType.REVENUE
+                else -> AccountType.EXPENSE
+            }
+        }
+        return groupedByType.mapValues { (_, rows) ->
+            val entries = rows.mapNotNull { postingData ->
+                val accountNumber = postingData[1] as String
+                val amount = postingData[2] as BigDecimal
+                val account = accounts[accountNumber]
+                if (account != null) {
+                    ProfitLossEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        accountDescription = account.accountDescription,
+                        amount = amount
+                    )
+                } else null
+            }
+            ProfitLossPayload(
+                entries = entries,
+                totalBalance = entries.sumOf { it.amount }
+            )
+        }
     }
 
     @Transactional(readOnly = true)
