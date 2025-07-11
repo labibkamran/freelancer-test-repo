@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.ledger.api.payload.ProfitLossPayload
 import com.respiroc.ledger.domain.model.AccountType
@@ -18,10 +17,7 @@ import java.time.LocalDate
 
 @Controller
 @RequestMapping(value = ["/report"])
-class ReportWebController(
-    private val postingApi: PostingInternalApi,
-    private val companyApi: CompanyInternalApi
-) : BaseController() {
+class ReportWebController(private val postingApi: PostingInternalApi) : BaseController() {
 
     private val logger = LoggerFactory.getLogger(ReportWebController::class.java)
 
@@ -40,7 +36,7 @@ class ReportWebController(
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
         val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
 
-        addCommonAttributes(model, companyApi, "Trial Balance")
+        addCommonAttributes(model, "Trial Balance")
         model.addAttribute("trialBalanceData", trialBalanceData)
         model.addAttribute("startDate", defaultStartDate)
         model.addAttribute("endDate", defaultEndDate)
