@@ -37,4 +37,7 @@ open class Company : Serializable {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     open lateinit var updatedAt: Instant
+
+    @Transient
+    open lateinit var currencyCode: String
 }

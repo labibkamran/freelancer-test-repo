@@ -13,6 +13,7 @@ import com.respiroc.user.domain.repository.UserSessionRepository
 import com.respiroc.user.domain.repository.UserTenantRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
 import com.respiroc.util.context.*
+import com.respiroc.util.currency.CurrencyService
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.nio.file.attribute.UserPrincipalNotFoundException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Base64
 
 @Service
 @Transactional
@@ -30,14 +32,15 @@ class UserService(
     private val userSessionRepository: UserSessionRepository,
     private val userTenantRoleRepository: UserTenantRoleRepository,
     private val userTenantRepository: UserTenantRepository,
-    private val jwt: JwtUtils
+    private val jwt: JwtUtils,
+    private val currencyService: CurrencyService
 ) : UserInternalApi {
 
     private val passwordEncoder = BCryptPasswordEncoder()
 
     private val JWT_TOKEN_PERIOD: Long = 24 * 60 * 60 * 1000
 
-    override fun signupByEmailPassword(email: String, password: String) {
+    override fun signupByEmailPassword(email: String, password: String): LoginResult {
         val existUser = userRepository.findByEmail(email)
         if (existUser != null) {
             throw IllegalArgumentException("User already exists")
@@ -46,7 +49,7 @@ class UserService(
         val newUser = User()
         newUser.email = email
         newUser.passwordHash = passwordEncoder.encode(password)
-        signup(newUser)
+        return signup(newUser)
     }
 
     override fun loginByEmailPassword(
@@ -140,8 +143,9 @@ class UserService(
     // Private Helper
     // ---------------------------------
 
-    private fun signup(user: User) {
+    private fun signup(user: User): LoginResult {
         val savedUser: User = userRepository.saveAndFlush(user)
+        return login(savedUser)
     }
 
     private fun login(user: User): LoginResult {
@@ -179,7 +183,7 @@ class UserService(
     private fun User.getTenantsInfo(): List<TenantInfo> {
         return this.userTenants.map {
             val tenant = it.tenant
-            TenantInfo(tenant.id, tenant.getCompanyName())
+            TenantInfo(tenant.id, tenant.getCompanyName(), currencyService.getCompanyCurrency(tenant.getCompanyCountryCode()))
         }.sortedBy { it.id }
     }
 

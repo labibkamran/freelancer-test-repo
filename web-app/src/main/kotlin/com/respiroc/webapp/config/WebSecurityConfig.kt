@@ -15,7 +15,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.SecurityFilterChain
@@ -33,28 +32,24 @@ class WebSecurityConfig {
     @Autowired
     lateinit var userApi: UserInternalApi
 
-    @Bean
-    fun webSecurityCustomizer(): WebSecurityCustomizer {
-        return WebSecurityCustomizer { web ->
-            web.ignoring().requestMatchers("/assets/**", "/favicon.ico")
-        }
-    }
+    private val publicPaths = arrayOf(
+        "/",
+        "/assets/**",
+        "/favicon.ico",
+        "/auth/login",
+        "/auth/signup",
+        "/htmx/auth/login",
+        "/htmx/auth/signup",
+        "/error/**",
+        "/actuator/**"
+    )
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers("/").permitAll()
-                    .requestMatchers("/assets/**", "/favicon.ico").permitAll()
-                    .requestMatchers("/auth/login").permitAll()
-                    .requestMatchers("/auth/signup").permitAll()
-                    .requestMatchers("/api/company-lookup/**").permitAll()
-                    .requestMatchers("/test/**").permitAll()
-                    .requestMatchers("/error/**").permitAll()
-                    .requestMatchers("/swagger-ui/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**").permitAll()
-                    .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers(*publicPaths).permitAll()
                     .anyRequest().authenticated()
             }
             .cors { }
