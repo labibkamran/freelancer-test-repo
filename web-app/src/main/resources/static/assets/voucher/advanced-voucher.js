@@ -3,19 +3,16 @@ let rowCounter = 0;
 
 // Initialize form on page load
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded, initializing voucher form...');
     addPostingLine();
 
     // Clear form if requested
     if (typeof clearForm !== 'undefined' && clearForm) {
-        console.log('Clearing form as requested');
         clearVoucherForm();
     }
 });
 
 // Add new posting line
 function addPostingLine() {
-    console.log('Adding posting line, rowCounter:', rowCounter);
     const tbody = document.getElementById('postingLines');
     if (!tbody) {
         console.error('Could not find postingLines tbody element');
@@ -27,8 +24,7 @@ function addPostingLine() {
     const url = tenantId ? 
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}&tenantId=${tenantId}` :
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}`;
-    
-    console.log('Requesting URL:', url);
+
 
     // Use HTMX to fetch the new posting line
     htmx.ajax('GET', url, {
@@ -38,7 +34,6 @@ function addPostingLine() {
             'HX-Request': 'true'
         }
     }).then(() => {
-        console.log('Successfully added posting line');
         rowCounter++;
         updateBalance();
     }).catch(error => {
@@ -81,15 +76,15 @@ function clearVoucherForm() {
 
 // Reset balance display to initial state
 function resetBalanceDisplay() {
-    const companyCurrency = 'NOK'; // Default currency
-    document.getElementById('totalDebit').textContent = `0.00 ${companyCurrency}`;
-    document.getElementById('totalCredit').textContent = `0.00 ${companyCurrency}`;
-    document.getElementById('balanceAmount').textContent = `0.00 ${companyCurrency}`;
-    
-    // Reset button state
+    // Reset to server-provided values or fallback
+    document.getElementById('totalDebit').textContent = '0.00';
+    document.getElementById('totalCredit').textContent = '0.00';
+    document.getElementById('balanceAmount').textContent = '0.00';
+
+    // Ensure the save button remains enabled
     const saveButton = document.getElementById('saveButton');
     if (saveButton) {
-        saveButton.disabled = true;
+        saveButton.disabled = false;
     }
 }
 
@@ -118,19 +113,8 @@ function updateSaveButtonState() {
     const saveButton = document.getElementById('saveButton');
     if (!saveButton) return;
 
-    const balanceAmount = document.getElementById('balanceAmount');
-    const totalDebit = document.getElementById('totalDebit');
-    
-    if (balanceAmount && totalDebit) {
-        const balanceText = balanceAmount.textContent || '';
-        const debitText = totalDebit.textContent || '';
-        
-        // Check if balanced and has valid entries
-        const isBalanced = balanceText.includes('0.00');
-        const hasEntries = !debitText.includes('0.00');
-        
-        saveButton.disabled = !(isBalanced && hasEntries);
-    }
+    // Per new requirement, the button should always be enabled.
+    saveButton.disabled = false;
 }
 
 // Handle form validation before submission

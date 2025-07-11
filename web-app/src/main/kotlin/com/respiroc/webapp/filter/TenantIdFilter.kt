@@ -26,6 +26,7 @@ class TenantIdFilter(
         "/htmx/auth/**",
         "/htmx/company/create",
         "/htmx/company/search",
+        "/htmx/currency/**"
     ),
     private val paramName: String = "tenantId"
 ) : OncePerRequestFilter() {

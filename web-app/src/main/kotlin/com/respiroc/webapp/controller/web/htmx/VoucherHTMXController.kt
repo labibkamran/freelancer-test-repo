@@ -1,8 +1,10 @@
 package com.respiroc.webapp.controller.web.htmx
 
+import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.util.currency.CurrencyService
+import com.respiroc.util.exception.BaseException
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.response.Callout
@@ -22,6 +24,7 @@ class VoucherHTMXController(
     private val accountApi: AccountInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
+    private val companyApi: CompanyInternalApi,
     private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
@@ -66,14 +69,15 @@ class VoucherHTMXController(
     ): String {
         val accounts = accountApi.findAllAccounts()
         val vatCodes = vatApi.findAllVatCodes()
-        val companyCurrency = currencyService.getCompanyCurrency("NO")
+        val companyCurrencyCode =
+            companyApi.findCurrentCompany()?.currencyCode ?: throw BaseException("Company not found")
         val supportedCurrencies = currencyService.getSupportedCurrencies()
         val initialDate = LocalDate.now()
 
         model.addAttribute("rowCounter", rowCounter)
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
-        model.addAttribute("companyCurrency", companyCurrency)
+        model.addAttribute("companyCurrencyCode", companyCurrencyCode)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
         model.addAttribute("initialDate", initialDate)
 
@@ -87,7 +91,7 @@ class VoucherHTMXController(
         model: Model
     ): String {
         try {
-            val companyCurrency = currencyService.getCompanyCurrency("NO")
+            val companyCurrency = companyApi.findCurrentCompany()?.currencyCode ?: throw BaseException("Company not found")
 
             // Calculate balance using the voucher request
             val (totalDebit, totalCredit, balance, isBalanced, hasValidEntries) = calculateBalance(
@@ -96,19 +100,24 @@ class VoucherHTMXController(
             )
 
             // Simple balance calculation result
-            model.addAttribute("totalDebit", "$totalDebit $companyCurrency")
-            model.addAttribute("totalCredit", "$totalCredit $companyCurrency")
-            model.addAttribute("balance", "$balance $companyCurrency")
+            model.addAttribute("totalDebit", "%.2f %s".format(totalDebit, companyCurrency))
+            model.addAttribute("totalCredit", "%.2f %s".format(totalCredit, companyCurrency))
+            model.addAttribute("balance", "%.2f %s".format(balance, companyCurrency))
             model.addAttribute("isBalanced", isBalanced)
             model.addAttribute("hasValidEntries", hasValidEntries)
 
             // Return simple balance row fragment
             return "fragments/balance-row-simple"
         } catch (_: Exception) {
-            // Return original balance on error
-            model.addAttribute("totalDebit", "0.00 NOK")
-            model.addAttribute("totalCredit", "0.00 NOK")
-            model.addAttribute("balance", "0.00 NOK")
+            // Return original balance on error - use company currency or fallback
+            val fallbackCurrency = try {
+                companyApi.findCurrentCompany()?.currencyCode ?: "NOK"
+            } catch (_: Exception) {
+                "NOK"
+            }
+            model.addAttribute("totalDebit", "0.00 $fallbackCurrency")
+            model.addAttribute("totalCredit", "0.00 $fallbackCurrency")
+            model.addAttribute("balance", "0.00 $fallbackCurrency")
             return "fragments/balance-row-simple"
         }
     }
