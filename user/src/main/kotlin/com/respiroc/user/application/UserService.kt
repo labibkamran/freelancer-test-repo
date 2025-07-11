@@ -7,21 +7,12 @@ import com.respiroc.user.api.UserInternalApi
 import com.respiroc.user.api.result.ForgotResult
 import com.respiroc.user.api.result.LoginResult
 import com.respiroc.user.application.jwt.JwtUtils
-import com.respiroc.user.domain.model.Permission
-import com.respiroc.user.domain.model.Role
-import com.respiroc.user.domain.model.User
-import com.respiroc.user.domain.model.UserSession
-import com.respiroc.user.domain.model.UserTenantRole
+import com.respiroc.user.domain.model.*
 import com.respiroc.user.domain.repository.UserRepository
 import com.respiroc.user.domain.repository.UserSessionRepository
+import com.respiroc.user.domain.repository.UserTenantRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
-import com.respiroc.util.context.PermissionContext
-import com.respiroc.util.context.RoleContext
-import com.respiroc.util.context.SpringUser
-import com.respiroc.util.context.TenantContext
-import com.respiroc.util.context.TenantPermissionContext
-import com.respiroc.util.context.TenantRoleContext
-import com.respiroc.util.context.UserContext
+import com.respiroc.util.context.*
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -29,10 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.nio.file.attribute.UserPrincipalNotFoundException
-import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Base64
 
 @Service
 @Transactional
@@ -40,14 +29,13 @@ class UserService(
     private val userRepository: UserRepository,
     private val userSessionRepository: UserSessionRepository,
     private val userTenantRoleRepository: UserTenantRoleRepository,
+    private val userTenantRepository: UserTenantRepository,
     private val jwt: JwtUtils
 ) : UserInternalApi {
 
-    private val random: SecureRandom = SecureRandom()
-    private val base64Encoder: Base64.Encoder = Base64.getUrlEncoder()
     private val passwordEncoder = BCryptPasswordEncoder()
 
-    private val JWT_TOKEN_PERIOD : Long = 24 * 60 * 60 * 1000
+    private val JWT_TOKEN_PERIOD: Long = 24 * 60 * 60 * 1000
 
     override fun signupByEmailPassword(email: String, password: String) {
         val existUser = userRepository.findByEmail(email)
@@ -112,6 +100,12 @@ class UserService(
         TODO("Not yet implemented")
     }
 
+    override fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext> {
+        return userRepository.findUserWithTenantRoles(userId, tenantId)!!.userTenants.single().roles.map {
+            it.tenantRole.toTenantRoleContext()
+        }
+    }
+
     override fun generateToken(user: SpringUser): String {
         TODO("Not yet implemented")
     }
@@ -121,12 +115,25 @@ class UserService(
         role: TenantRole,
         user: UserContext
     ) {
-        val existUser = userRepository.findByEmail(user.email)  ?: throw UserPrincipalNotFoundException("User not found")
-        val utr = UserTenantRole()
-        utr.user = existUser
-        utr.tenant = tenant
-        utr.tenantRole = role
-        userTenantRoleRepository.save(utr)
+        val existUser = userRepository.findByEmail(user.email) ?: throw UserPrincipalNotFoundException("User not found")
+        val userTenant = getOrCreateUserTenant(existUser.id, tenant.id)
+        val userTenantRoleId = UserTenantRoleId(tenant.id, existUser.id)
+        val userTenantRole = UserTenantRole(userTenantRoleId, userTenant, role)
+        userTenantRoleRepository.save(userTenantRole)
+    }
+
+    fun getOrCreateUserTenant(userId: Long, tenantId: Long): UserTenant {
+        return userTenantRepository.findUserTenantByUserIdAndTenantId(userId, tenantId)
+            ?: run {
+                val tenant = Tenant()
+                tenant.id = tenantId
+                val user = User()
+                user.id = userId
+                val userTenant = UserTenant()
+                userTenant.tenant = tenant
+                userTenant.user = user
+                userTenantRepository.save(userTenant)
+            }
     }
 
     // ---------------------------------
@@ -137,7 +144,7 @@ class UserService(
         val savedUser: User = userRepository.saveAndFlush(user)
     }
 
-    private fun login(user: User) : LoginResult {
+    private fun login(user: User): LoginResult {
         val springUser = SpringUser(user.toUserContext())
         AccountStatusUserDetailsChecker().check(springUser)
 
@@ -158,23 +165,22 @@ class UserService(
 
     private fun User.toUserContext(): UserContext {
         return UserContext(
+            id = this.id,
             email = this.email,
             password = this.passwordHash,
             isEnabled = this.isEnabled,
             isLocked = this.isLocked,
             currentTenant = null, // Should be set on tenant filter process
-            tenants = this.getTenantContexts(),
+            tenants = this.getTenantsInfo(),
             roles = this.roles.map { it -> it.toRoleContext() }.toList()
         )
     }
 
-    private fun User.getTenantContexts(): List<TenantContext> {
-        return rolesPerTenant.map { (tenantId, tenantRoles) ->
-            TenantContext(
-                tenantId,
-                tenantRoles.map { it.toTenantRoleContext() }
-            )
-        }
+    private fun User.getTenantsInfo(): List<TenantInfo> {
+        return this.userTenants.map {
+            val tenant = it.tenant
+            TenantInfo(tenant.id, tenant.getCompanyName())
+        }.sortedBy { it.id }
     }
 
     private fun TenantRole.toTenantRoleContext(): TenantRoleContext {

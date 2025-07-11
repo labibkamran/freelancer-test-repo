@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.SecurityFilterChain
@@ -33,12 +34,19 @@ class WebSecurityConfig {
     lateinit var userApi: UserInternalApi
 
     @Bean
+    fun webSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web ->
+            web.ignoring().requestMatchers("/assets/**", "/favicon.ico")
+        }
+    }
+
+    @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers("/").permitAll()
-                    .requestMatchers("/assets/**").permitAll()
+                    .requestMatchers("/assets/**", "/favicon.ico").permitAll()
                     .requestMatchers("/auth/login").permitAll()
                     .requestMatchers("/auth/signup").permitAll()
                     .requestMatchers("/api/company-lookup/**").permitAll()
@@ -58,7 +66,7 @@ class WebSecurityConfig {
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterAfter(
-                TenantIdFilter(),
+                TenantIdFilter(userApi),
                 BearerTokenAuthenticationFilter::class.java
             )
             .exceptionHandling {

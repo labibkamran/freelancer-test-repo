@@ -1,7 +1,5 @@
 package com.respiroc.webapp.controller
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.company.domain.model.Company
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -14,8 +12,8 @@ open class BaseController {
     val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
-    val companiesAttributeName: String = "companies"
-    val currentCompanyAttributeName: String = "currentCompany"
+    val tenantsAttributeName: String = "tenants"
+    val currentTenantAttributeName: String = "currentTenant"
     val calloutAttributeName: String = "callout"
 
     fun springUser(): SpringUser {
@@ -38,25 +36,19 @@ open class BaseController {
 
     fun addCommonAttributes(
         model: Model,
-        companyApi: CompanyInternalApi,
         title: String,
         useCurrentCompanyAsTitlePrefix: Boolean = false
     ) {
-
         val springUser = springUser()
         model.addAttribute(userAttributeName, springUser)
 
-        val companies = companyApi.findAllCompany()
-        model.addAttribute(companiesAttributeName, companies)
+        model.addAttribute(tenantsAttributeName, springUser.ctx.tenants)
 
-        val tenantId = springUser.ctx.currentTenant?.id
-        var currentCompany: Company? = null
-        if (tenantId != null) {
-            currentCompany = companies.find { it.tenantId == tenantId }
-            model.addAttribute(currentCompanyAttributeName, currentCompany)
-        }
-        if (useCurrentCompanyAsTitlePrefix && currentCompany != null)
-            model.addAttribute(titleAttributeName, "${currentCompany.name} - ${title}")
+        val currentTenant = springUser.ctx.currentTenant
+        if (currentTenant != null)
+            model.addAttribute(currentTenantAttributeName, currentTenant)
+        if (useCurrentCompanyAsTitlePrefix && currentTenant != null)
+            model.addAttribute(titleAttributeName, "${currentTenant.companyName} - ${title}")
         else
             model.addAttribute(titleAttributeName, title)
     }

@@ -1,73 +1,16 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
-import com.respiroc.webapp.controller.request.CreateCompanyRequest
-import com.respiroc.webapp.controller.response.Callout
-import jakarta.validation.Valid
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.validation.BindingResult
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
 @RequestMapping(value = ["/company"])
-class CompanyWebController(
-    private val companyApi: CompanyInternalApi,
-    private val companyLookupApi: CompanyLookupInternalApi
-) : BaseController() {
-
-    @GetMapping("/create")
-    fun createCompany(model: Model): String {
-        addCommonAttributes(model, companyApi, "Create Company")
-        model.addAttribute("createCompanyRequest", CreateCompanyRequest("", "", "NO"))
-        return "company/create"
-    }
-
-    @PostMapping("/create")
-    fun createCompany(
-        @Valid @ModelAttribute createCompanyRequest: CreateCompanyRequest,
-        bindingResult: BindingResult,
-        model: Model
-    ): Any {
-        addCommonAttributes(model, companyApi, "Create Company")
-        if (bindingResult.hasErrors()) {
-            model.addAttribute(
-                calloutAttributeName, Callout.Error(
-                    message = "Please fill in all required fields correctly."
-                )
-            )
-            return "company/create"
-        }
-
-        try {
-            val command = CreateCompanyCommand(
-                name = createCompanyRequest.name,
-                organizationNumber = createCompanyRequest.organizationNumber,
-                countryCode = createCompanyRequest.countryCode
-            )
-
-            val company = companyApi.createNewCompany(command)
-
-            val headers = HttpHeaders()
-            headers.add("HX-Redirect", "/dashboard?tenantId=${company.tenantId}")
-
-            return ResponseEntity<Void>(headers, HttpStatus.OK)
-
-        } catch (e: Exception) {
-            model.addAttribute(
-                calloutAttributeName, Callout.Error(
-                    message = "Failed to create company: ${e.message}"
-                )
-            )
-            return "company/create"
-        }
-    }
+class CompanyWebController(private val companyLookupApi: CompanyLookupInternalApi) : BaseController() {
 
     @GetMapping("/search")
     fun searchCompanies(
