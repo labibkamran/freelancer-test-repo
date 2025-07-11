@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
 import com.respiroc.webapp.controller.BaseController
@@ -18,8 +17,7 @@ import java.time.LocalDate
 @RequestMapping(value = ["/ledger"])
 class LedgerWebController(
     private val postingApi: PostingInternalApi,
-    private val accountApi: AccountInternalApi,
-    private val companyApi: CompanyInternalApi
+    private val accountApi: AccountInternalApi
 ) : BaseController() {
 
     @GetMapping(value = ["/general"])
@@ -51,7 +49,7 @@ class LedgerWebController(
                 model.addAttribute(userAttributeName, springUser())
                 "ledger/general :: tableContent"
             } else {
-                addCommonAttributes(model, companyApi, "General Ledger")
+                addCommonAttributes(model, "General Ledger")
                 val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
                 model.addAttribute("accounts", accounts)
 
