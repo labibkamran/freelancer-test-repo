@@ -9,4 +9,4 @@ class InvalidVatCodeException(vatCode: String) :
 class PostingsNotBalancedException(totalAmount: java.math.BigDecimal) : 
     RuntimeException("Postings must balance: total amount is $totalAmount")
 
-class EmptyPostingsException() : RuntimeException("Postings row is empty")
+class InvalidPostingsException() : RuntimeException("There must be at least two postings and the total of debits must be equal to credits.")
