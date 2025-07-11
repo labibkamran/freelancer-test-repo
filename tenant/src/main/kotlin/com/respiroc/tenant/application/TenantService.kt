@@ -1,5 +1,6 @@
 package com.respiroc.tenant.application
 
+import com.respiroc.company.domain.model.Company
 import com.respiroc.tenant.api.TenantInternalApi
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantRole
@@ -16,9 +17,11 @@ class TenantService(
     private val tenantRoleRepository: TenantRoleRepository
 ) : TenantInternalApi {
 
-    override fun createNewTenant(name: String): Tenant {
-       val tenant = Tenant()
-        tenant.name = name
+    override fun createNewTenant(companyId: Long): Tenant {
+        val tenant = Tenant()
+        val company = Company()
+        company.id = companyId
+        tenant.company = company
         return tenantRepository.saveAndFlush(tenant)
     }
 
