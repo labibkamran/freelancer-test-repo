@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CompanyRepository : CustomJpaRepository<Company, Long> {
-
+    fun findCompanyByOrganizationNumberAndName(organizationNumber: String, name: String): Company?
 }

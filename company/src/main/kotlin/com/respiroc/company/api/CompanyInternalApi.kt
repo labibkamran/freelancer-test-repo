@@ -1,9 +1,9 @@
 package com.respiroc.company.api
 
 import com.respiroc.company.api.command.CreateCompanyCommand
-import com.respiroc.tenant.domain.model.Tenant
+import com.respiroc.company.domain.model.Company
 import com.respiroc.util.context.ContextAwareApi
 
 interface CompanyInternalApi : ContextAwareApi {
-    fun createNewCompany(command: CreateCompanyCommand): Tenant
+    fun getOrCreateCompany(command: CreateCompanyCommand): Company
 }
