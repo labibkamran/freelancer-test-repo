@@ -146,7 +146,7 @@ class UserService(
         val savedUser: User = userRepository.saveAndFlush(user)
     }
 
-    private fun login(user: User) : LoginResult {
+    private fun login(user: User): LoginResult {
         val springUser = SpringUser(user.toUserContext())
         AccountStatusUserDetailsChecker().check(springUser)
 
@@ -167,23 +167,22 @@ class UserService(
 
     private fun User.toUserContext(): UserContext {
         return UserContext(
+            id = this.id,
             email = this.email,
             password = this.passwordHash,
             isEnabled = this.isEnabled,
             isLocked = this.isLocked,
             currentTenant = null, // Should be set on tenant filter process
-            tenants = this.getTenantContexts(),
+            tenants = this.getTenantsInfo(),
             roles = this.roles.map { it -> it.toRoleContext() }.toList()
         )
     }
 
-    private fun User.getTenantContexts(): List<TenantContext> {
-        return rolesPerTenant.map { (tenantId, tenantRoles) ->
-            TenantContext(
-                tenantId,
-                tenantRoles.map { it.toTenantRoleContext() }
-            )
-        }
+    private fun User.getTenantsInfo(): List<TenantInfo> {
+        return this.userTenants.map {
+            val tenant = it!!.tenant!!
+            TenantInfo(tenant.id, tenant.getCompanyName())
+        }.sortedBy { it.id }
     }
 
     private fun TenantRole.toTenantRoleContext(): TenantRoleContext {
