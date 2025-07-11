@@ -112,6 +112,12 @@ class UserService(
         TODO("Not yet implemented")
     }
 
+    override fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext> {
+        return userRepository.findUserWithTenantRoles(userId, tenantId)!!.userTenants.single()!!.roles.map {
+            it.tenantRole.toTenantRoleContext()
+        }
+    }
+
     override fun generateToken(user: SpringUser): String {
         TODO("Not yet implemented")
     }
@@ -121,11 +127,14 @@ class UserService(
         role: TenantRole,
         user: UserContext
     ) {
-        val existUser = userRepository.findByEmail(user.email)  ?: throw UserPrincipalNotFoundException("User not found")
-        val utr = UserTenantRole()
-        utr.user = existUser
-        utr.tenant = tenant
-        utr.tenantRole = role
+        // TODO: add role to exist relation
+        val existUser = userRepository.findByEmail(user.email) ?: throw UserPrincipalNotFoundException("User not found")
+        val userTenant = UserTenant()
+        userTenant.tenant = tenant
+        userTenant.user = existUser
+        userTenantRepository.save(userTenant)
+        val userTenantRoleId = UserTenantRoleId(tenant.id, user.id)
+        val utr = UserTenantRole(userTenantRoleId, userTenant, role)
         userTenantRoleRepository.save(utr)
     }
 
