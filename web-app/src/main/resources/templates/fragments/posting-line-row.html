@@ -5,6 +5,7 @@
     <td>
         <wa-input type="date"
                size="small"
+               th:tabindex="${rowCounter * 10 + 1}"
                th:value="${initialDate}"
                th:name="'postingLines[' + ${rowCounter} + '].postingDate'">
         </wa-input>
@@ -15,6 +16,7 @@
                 th:id="'debit-account-' + ${rowCounter}"
                 th:name="'postingLines[' + ${rowCounter} + '].debitAccount'"
                 placeholder="Select debit account..."
+                th:tabindex="${rowCounter * 10 + 3}"
                 style="font-size: 0.8rem;">
             </r-combobox>
             
@@ -22,6 +24,7 @@
                 th:id="'debit-vat-' + ${rowCounter}"
                 th:name="'postingLines[' + ${rowCounter} + '].debitVatCode'"
                 placeholder="Select VAT code..."
+                th:tabindex="${rowCounter * 10 + 8}"
                 style="font-size: 0.75rem;">
             </r-combobox>
         </div>
@@ -32,6 +35,7 @@
                 th:id="'credit-account-' + ${rowCounter}"
                 th:name="'postingLines[' + ${rowCounter} + '].creditAccount'"
                 placeholder="Select credit account..."
+                th:tabindex="${rowCounter * 10 + 2}"
                 style="font-size: 0.8rem;">
             </r-combobox>
             
@@ -39,6 +43,7 @@
                 th:id="'credit-vat-' + ${rowCounter}"
                 th:name="'postingLines[' + ${rowCounter} + '].creditVatCode'"
                 placeholder="Select VAT code..."
+                th:tabindex="${rowCounter * 10 + 7}"
                 style="font-size: 0.75rem;">
             </r-combobox>
         </div>
@@ -46,6 +51,7 @@
     <td>
         <div style="position: relative;">
             <wa-input type="number" size="small"
+                   th:tabindex="${rowCounter * 10 + 4}"
                    th:name="'postingLines[' + ${rowCounter} + '].amount'"
                    th:id="'posting-lines-amount-' + ${rowCounter}"
                    min="0"
@@ -60,7 +66,9 @@
         </div>
     </td>
     <td>
-        <wa-select style="width: 5.6rem" size="small" th:name="'postingLines[' + ${rowCounter} + '].currency'"
+        <wa-select style="width: 5.6rem" size="small" 
+                   th:tabindex="${rowCounter * 10 + 5}"
+                   th:name="'postingLines[' + ${rowCounter} + '].currency'"
                    th:id="'posting-lines-currency-' + ${rowCounter}"
                    th:attr="hx-get=@{/htmx/currency/convert(toCurrency=${companyCurrencyCode})},
                             hx-trigger='change',
@@ -78,6 +86,7 @@
     <td>
         <wa-input type="text"
                size="small"
+               th:tabindex="${rowCounter * 10 + 6}"
                placeholder="Description"
                th:name="'postingLines[' + ${rowCounter} + '].description'">
         </wa-input>
@@ -86,6 +95,7 @@
         <wa-button type="button" 
                    size="small" 
                    variant="danger"
+                   tabindex="-1"
                    onclick="removePostingLine(this)">
             <wa-icon label="Remove posting row" name="trash"></wa-icon>
         </wa-button>
