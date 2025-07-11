@@ -74,9 +74,9 @@
             <!-- Profit & Loss Content -->
             <div id="content-area">
                 <div th:fragment="tableContent">
-                    <div th:unless="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}">
+                    <div th:unless="${assetPostings.entries.empty && equityPostings.entries.empty && liabilityPostings.entries.empty}">
                         <div style="overflow-x: auto;">
-                            <!-- Operating revenues  -->
+                            <!-- Assets  -->
                             <table class="trial-balance-table">
                                 <thead>
 
@@ -95,7 +95,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="entry : ${revenuePostings.entries}">
+                                <tr th:each="entry : ${assetPostings.entries}">
                                     <td>
                                         <span class="account-number"  th:text="${entry.accountNumber}" />
                                     </td>
@@ -122,12 +122,12 @@
 
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(revenuePostings.totalBalance, 1, 2)}" />
+                                        <strong th:text="${#numbers.formatDecimal(assetPostings.totalBalance, 1, 2)}" />
                                     </td>
                                 </tr>
                                 </tfoot>
                             </table>
-                            <!-- Operating expenses  -->
+                            <!-- Equity  -->
                             <table class="trial-balance-table">
                                 <thead>
                                 <tr>
@@ -139,7 +139,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="entry : ${operatingCostPostings.entries}">
+                                <tr th:each="entry : ${equityPostings.entries}">
                                     <td>
                                         <span class="account-number" th:text="${entry.accountNumber}" />
                                     </td>
@@ -166,7 +166,7 @@
 
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(operatingCostPostings.totalBalance, 1, 2)}" />
+                                        <strong th:text="${#numbers.formatDecimal(equityPostings.totalBalance, 1, 2)}" />
                                     </td>
                                 </tr>
                                 </tfoot>
@@ -183,7 +183,7 @@
 
                                 </thead>
                                 <tbody>
-                                <tr th:each="entry : ${assetPostings.entries}">
+                                <tr th:each="entry : ${liabilityPostings.entries}">
                                     <td>
                                         <span class="account-number" th:text="${entry.accountNumber}" />
                                     </td>
@@ -210,7 +210,7 @@
 
                                     </td>
                                     <td class="amount-cell">
-                                        <strong th:text="${#numbers.formatDecimal(assetPostings.totalBalance, 1, 2)}" />
+                                        <strong th:text="${#numbers.formatDecimal(liabilityPostings.totalBalance, 1, 2)}" />
                                     </td>
                                 </tr>
                                 </tfoot>
@@ -221,7 +221,7 @@
                     </div>
 
                     <!-- Empty State -->
-                    <div th:if="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}" class="empty-state">
+                    <div th:if="${assetPostings.entries.empty && equityPostings.entries.empty && liabilityPostings.entries.empty}" class="empty-state">
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
                         </div>

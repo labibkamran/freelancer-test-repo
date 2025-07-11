@@ -101,4 +101,31 @@ interface PostingRepository : CustomJpaRepository<Posting, Long> {
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate
     ): List<Array<Any>>
+
+    @Query("""
+    SELECT 
+        CASE 
+            WHEN p.accountNumber LIKE '1%' THEN 'ASSET'
+            WHEN p.accountNumber LIKE '20%' THEN 'EQUITY'
+            WHEN p.accountNumber LIKE '2%' AND p.accountNumber NOT LIKE '20%' THEN 'LIABILITY'
+            ELSE 'OTHER'
+        END AS accountType,
+        p.accountNumber,
+        SUM(p.amount) as totalAmount 
+    FROM Posting p 
+    WHERE p.tenantId = :tenantId
+      AND (
+            p.accountNumber LIKE '1%' OR 
+            p.accountNumber LIKE '20%' OR
+            (p.accountNumber LIKE '2%' AND p.accountNumber NOT LIKE '20%')
+          )
+      AND p.postingDate BETWEEN :startDate AND :endDate 
+    GROUP BY accountType, p.accountNumber
+    ORDER BY accountType, p.accountNumber
+""")
+    fun findBalanceSheetPostings(
+        @Param("tenantId") tenantId: Long,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate
+    ): List<Array<Any>>
 }

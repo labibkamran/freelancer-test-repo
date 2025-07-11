@@ -1,6 +1,7 @@
 package com.respiroc.webapp.controller.web
 
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.payload.BalanceSheetPayload
 import com.respiroc.ledger.api.payload.ProfitLossPayload
 import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.webapp.controller.BaseController
@@ -149,14 +150,14 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+        val postingsForBalanceSheet = postingApi.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
 
         model.addAttribute("user", springUser)
         model.addAttribute("startDate", defaultStartDate)
         model.addAttribute("endDate", defaultEndDate)
-        model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-        model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-        model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetPayload(emptyList(),BigDecimal.ZERO))
+        model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
 
         return "report/balance-sheet"
     }
@@ -177,14 +178,14 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
             val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+            val postingsForBalanceSheet = postingApi.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
 
             model.addAttribute("user", springUser)
             model.addAttribute("startDate", defaultStartDate)
             model.addAttribute("endDate", defaultEndDate)
-            model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-            model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-            model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetPayload(emptyList(),BigDecimal.ZERO))
+            model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
 
             "report/balance-sheet :: tableContent"
         } catch (e: Exception) {

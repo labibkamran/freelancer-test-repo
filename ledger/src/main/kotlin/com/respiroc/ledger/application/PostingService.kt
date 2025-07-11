@@ -2,6 +2,8 @@ package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.api.payload.BalanceSheetEntry
+import com.respiroc.ledger.api.payload.BalanceSheetPayload
 import com.respiroc.ledger.api.payload.TrialBalanceEntry
 import com.respiroc.ledger.api.payload.TrialBalancePayload
 import com.respiroc.ledger.api.payload.GeneralLedgerPayload
@@ -93,6 +95,41 @@ class PostingService(
                 } else null
             }
             ProfitLossPayload(
+                entries = entries,
+                totalBalance = entries.sumOf { it.amount }
+            )
+        }
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPostingsForBalanceSheet(startDate: LocalDate, endDate: LocalDate): Map<AccountType, BalanceSheetPayload> {
+        val tenantId = currentTenantId()
+        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+
+        val balanceSheetPostings = postingRepository.findBalanceSheetPostings(tenantId, startDate, endDate)
+
+        val groupedByType = balanceSheetPostings.groupBy { row ->
+            when (row[0] as String) {
+                "ASSET" -> AccountType.ASSET
+                "EQUITY" -> AccountType.EQUITY
+                else -> AccountType.LIABILITY
+            }
+        }
+        return groupedByType.mapValues { (_, rows) ->
+            val entries = rows.mapNotNull { postingData ->
+                val accountNumber = postingData[1] as String
+                val amount = postingData[2] as BigDecimal
+                val account = accounts[accountNumber]
+                if (account != null) {
+                    BalanceSheetEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        accountDescription = account.accountDescription,
+                        amount = amount
+                    )
+                } else null
+            }
+            BalanceSheetPayload(
                 entries = entries,
                 totalBalance = entries.sumOf { it.amount }
             )
