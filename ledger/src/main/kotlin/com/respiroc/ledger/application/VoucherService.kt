@@ -8,13 +8,13 @@ import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.ledger.api.payload.VoucherPayload
 import com.respiroc.ledger.api.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
+import com.respiroc.ledger.domain.exception.InvalidPostingsException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
 import com.respiroc.ledger.domain.exception.PostingsNotBalancedException
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.ledger.domain.repository.VoucherRepository
-import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -40,10 +40,7 @@ class VoucherService(
         val voucher = createVoucherEntity(payload, tenantId, voucherNumber)
         val savedVoucher = voucherRepository.save(voucher)
 
-        val postings = payload.postings.map { postingData ->
-            createPostingEntity(postingData, tenantId, savedVoucher.id)
-        }
-        postingRepository.saveAll(postings)
+        saveNonZeroPostings(payload.postings, tenantId, savedVoucher.id)
         
         return VoucherPayload(
             id = savedVoucher.id,
@@ -82,6 +79,12 @@ class VoucherService(
     }
     
     private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
+        // Ensure there are at least 2 non-zero postings for valid double-entry bookkeeping
+        val nonZeroPostingsCount = postings.count { it.amount.compareTo(BigDecimal.ZERO) != 0 }
+        if (nonZeroPostingsCount < 2) {
+            throw InvalidPostingsException()
+        }
+        
         postings.forEach { postingData ->
             validateAccount(postingData.accountNumber)
             validateVatCode(postingData.vatCode)
@@ -136,5 +139,22 @@ class VoucherService(
         posting.voucherId = voucherId
         
         return posting
+    }
+    
+    private fun saveNonZeroPostings(
+        postings: List<CreatePostingPayload>,
+        tenantId: Long,
+        voucherId: Long
+    ) {
+        val nonZeroPostings = postings
+            .filter { it.amount.compareTo(BigDecimal.ZERO) != 0 }
+            .map { postingData ->
+                createPostingEntity(postingData, tenantId, voucherId)
+            }
+        
+        // Save only non-zero postings to optimize storage
+        if (nonZeroPostings.isNotEmpty()) {
+            postingRepository.saveAll(nonZeroPostings)
+        }
     }
 }

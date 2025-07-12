@@ -9,7 +9,7 @@ import com.respiroc.util.context.TenantRoleContext
 import com.respiroc.util.context.UserContext
 
 interface UserInternalApi {
-    fun signupByEmailPassword(email: String, password: String)
+    fun signupByEmailPassword(email: String, password: String): LoginResult
     fun loginByEmailPassword(email: String, password: String): LoginResult
     fun changePassword(user: SpringUser, oldPassword: String, newPassword: String)
     fun logout(token: String)

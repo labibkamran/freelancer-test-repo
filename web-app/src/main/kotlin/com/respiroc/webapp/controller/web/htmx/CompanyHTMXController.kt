@@ -1,7 +1,8 @@
-package com.respiroc.webapp.controller.web
+package com.respiroc.webapp.controller.web.htmx
 
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -9,11 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
-@RequestMapping(value = ["/company"])
-class CompanyWebController(private val companyLookupApi: CompanyLookupInternalApi) : BaseController() {
+@RequestMapping("/htmx/company")
+class CompanyHTMXController(
+    private val companyLookupApi: CompanyLookupInternalApi
+) : BaseController() {
 
     @GetMapping("/search")
-    fun searchCompanies(
+    @HxRequest
+    fun searchCompaniesHTMX(
         @RequestParam name: String,
         @RequestParam(defaultValue = "NO") countryCode: String,
         model: Model
@@ -33,4 +37,4 @@ class CompanyWebController(private val companyLookupApi: CompanyLookupInternalAp
             return "fragments/company-search :: error"
         }
     }
-}
+} 
