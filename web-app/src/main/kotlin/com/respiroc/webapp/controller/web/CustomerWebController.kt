@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.customer.api.CustomerInternalApi
 import com.respiroc.customer.api.payload.NewCustomerPayload
 import com.respiroc.customer.domain.model.Customer
@@ -18,8 +17,7 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping(value = ["/customer"])
 class CustomerWebController(
-    private val customerService: CustomerInternalApi,
-    private val companyApi: CompanyInternalApi
+    private val customerService: CustomerInternalApi
 ) : BaseController() {
 
     @GetMapping("")
@@ -42,7 +40,7 @@ class CustomerWebController(
         else
             customerService.findAllCustomerByTenantId(tenantId)
         model.addAttribute("customers", customers)
-        addCommonAttributes(model, companyApi, "Customer")
+        addCommonAttributes(model, "Customer")
     }
 
     @GetMapping("/new")
@@ -52,7 +50,7 @@ class CustomerWebController(
         @RequestHeader(value = "HX-Request", required = false) hxRequest: String?
     ): String {
         model.addAttribute("customer", CreateCustomerRequest("", "", CustomerType.CUSTOMER.name, privateCustomer))
-        addCommonAttributes(model, companyApi, "New Customer")
+        addCommonAttributes(model, "New Customer")
 
         return if ("true".equals(hxRequest, true))
             "customer/form :: customerFormFields"
