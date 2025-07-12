@@ -23,7 +23,7 @@
                       th:attr="hx-post='/customer?tenantId=' + ${user.ctx.currentTenant?.id}"
                       hx-target="#alert-container"
                       hx-indicator="#loading-indicator"
-                      hx-disabled-elt="find #submitButton"
+                      hx-disabled-elt="#submitButton"
                       hx-swap="innerHTML">
                     <div class="form-group">
                         <wa-select required label="Type" name="type" th:value="${customer.type}" th:field="*{type}">
@@ -36,6 +36,7 @@
                         <wa-radio-group
                                 required
                                 orientation="horizontal"
+                                name="privateCustomer"
                                 th:label="#{customer.private_customer}"
                                 th:value="${customer.privateCustomer}"
                                 th:attr="hx-get='/customer/new?tenantId=' + ${user.ctx.currentTenant.id}"
@@ -53,6 +54,7 @@
                                     id="companyName"
                                     label="Customer Name"
                                     th:label="#{customer.customer_name}"
+                                    name="name"
                                     th:field="*{name}"
                                     placeholder="Enter company name or search registry..."
                                     size="medium"
@@ -89,8 +91,7 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: var(--wa-space-m); align-items: center;">
-                        <wa-button type="submit" variant="success" size="small" id="submitButton">
-                            <wa-icon name="plus" style="margin-right:var(--wa-space-x)" th:text="#{customer.create_customer}"></wa-icon>
+                        <wa-button type="submit" variant="success" size="small" id="submitButton" th:text="#{customer.create_customer}">
                         </wa-button>
                         <wa-spinner id="loading-indicator" class="htmx-indicator"
                                     style="font-size: var(--wa-space-xl)"></wa-spinner>
