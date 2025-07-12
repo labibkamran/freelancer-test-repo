@@ -1,6 +1,7 @@
 package com.respiroc.webapp.controller.web.htmx
 
 import com.respiroc.company.api.command.CreateCompanyCommand
+import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.tenant.api.TenantInternalApi
 import com.respiroc.user.api.UserInternalApi
 import com.respiroc.util.constant.TenantRoleCode
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 @RequestMapping("/htmx/tenant")
 class TenantHTMXController(
     private val tenantApi: TenantInternalApi,
-    private val userApi: UserInternalApi
+    private val userApi: UserInternalApi,
+    private val companyLookupApi: CompanyLookupInternalApi
 ) : BaseController() {
 
     @PostMapping("/create")
@@ -38,10 +40,19 @@ class TenantHTMXController(
         }
 
         try {
+            val companyInfo =
+                companyLookupApi.getInfo(createCompanyRequest.organizationNumber, createCompanyRequest.countryCode)
+            val companyAddress = companyInfo.address
             val command = CreateCompanyCommand(
-                name = createCompanyRequest.name,
-                organizationNumber = createCompanyRequest.organizationNumber,
-                countryCode = createCompanyRequest.countryCode
+                name = companyInfo.name,
+                organizationNumber = companyInfo.registrationNumber!!,
+                countryCode = companyInfo.countryCode,
+                addressCountryCode = companyAddress?.countryCode,
+                postalCode = companyAddress?.postalCode,
+                city = companyAddress?.city,
+                primaryAddress = companyAddress?.address,
+                secondaryAddress = null,
+                administrativeDivisionCode = null
             )
 
             // TODO: check for exist user tenant company

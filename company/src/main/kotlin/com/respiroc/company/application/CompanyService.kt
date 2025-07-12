@@ -1,5 +1,8 @@
 package com.respiroc.company.application
 
+import com.respiroc.address.api.AddressInternalApi
+import com.respiroc.address.api.payload.CreateAddressPayload
+import com.respiroc.address.domain.model.Address
 import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.company.api.command.CreateCompanyCommand
 import com.respiroc.company.domain.model.Company
@@ -12,24 +15,46 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class CompanyService(
     private val companyRepository: CompanyRepository,
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val addressService: AddressInternalApi
 ) : CompanyInternalApi {
 
     override fun getOrCreateCompany(command: CreateCompanyCommand): Company {
-        return companyRepository
-            .findCompanyByOrganizationNumberAndName(command.organizationNumber, command.name)
-            ?.let {
-                it.currencyCode = currencyService.getCompanyCurrency(it.countryCode)
-                it
-            }
-            ?: run {
-                val company = Company()
-                company.name = command.name
-                company.organizationNumber = command.organizationNumber
-                company.countryCode = command.countryCode
-                val savedCompany = companyRepository.save(company)
-                savedCompany.currencyCode = currencyService.getCompanyCurrency(savedCompany.countryCode)
-                savedCompany
-            }
+        var company = companyRepository.findCompanyByOrganizationNumberAndName(command.organizationNumber, command.name)
+        if (company == null)
+            company =  createCompany(command)
+        else if (company.addressId == null) {
+            company.address = getOrCreateAddress(command)
+            company = companyRepository.save(company)
+        }
+        company.currencyCode = currencyService.getCompanyCurrency(company.countryCode)
+        return company
+    }
+
+    fun createCompany(command: CreateCompanyCommand): Company {
+        val address = getOrCreateAddress(command)
+        val company = Company()
+        company.name = command.name
+        company.organizationNumber = command.organizationNumber
+        company.countryCode = command.countryCode
+        company.address = address
+        return companyRepository.save(company)
+    }
+
+    fun getOrCreateAddress(command: CreateCompanyCommand): Address? {
+        if (!isValidAddress(command)) return null
+        val payload = CreateAddressPayload(
+            city = command.city!!,
+            primaryAddress = command.primaryAddress!!,
+            postalCode = command.postalCode!!,
+            countryIsoCode = command.addressCountryCode!!,
+            secondaryAddress = command.secondaryAddress,
+            administrativeDivisionCode = command.administrativeDivisionCode
+        )
+        return addressService.getOrCreateAddress(payload)
+    }
+
+    fun isValidAddress(command: CreateCompanyCommand): Boolean {
+        return !(command.primaryAddress == null || command.city == null || command.postalCode == null || command.addressCountryCode == null)
     }
 }
