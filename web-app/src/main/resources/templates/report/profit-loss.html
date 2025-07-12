@@ -37,7 +37,7 @@
                                   id="endDate"
                                   name="endDate"
                                   th:value="${endDate}"
-                                  th:hx-get="'/report/profit-loss?tenantId=' + ${user.ctx.currentTenant.id}"
+                                  th:hx-get="'/htmx/report/profit-loss?tenantId=' + ${user.ctx.currentTenant.id}"
                                   hx-target="#content-area"
                                   hx-indicator="#loading-indicator"
                                   hx-swap="innerHTML"

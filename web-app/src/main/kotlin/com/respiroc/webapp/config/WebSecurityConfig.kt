@@ -33,6 +33,18 @@ class WebSecurityConfig {
     @Autowired
     lateinit var userApi: UserInternalApi
 
+    private val publicPaths = arrayOf(
+        "/",
+        "/assets/**",
+        "/favicon.ico",
+        "/auth/login",
+        "/auth/signup",
+        "/htmx/auth/login",
+        "/htmx/auth/signup",
+        "/error/**",
+        "/actuator/**"
+    )
+
     @Bean
     fun webSecurityCustomizer(): WebSecurityCustomizer {
         return WebSecurityCustomizer { web ->
@@ -45,16 +57,7 @@ class WebSecurityConfig {
         return http
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers("/").permitAll()
-                    .requestMatchers("/assets/**", "/favicon.ico").permitAll()
-                    .requestMatchers("/auth/login").permitAll()
-                    .requestMatchers("/auth/signup").permitAll()
-                    .requestMatchers("/api/company-lookup/**").permitAll()
-                    .requestMatchers("/test/**").permitAll()
-                    .requestMatchers("/error/**").permitAll()
-                    .requestMatchers("/swagger-ui/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**").permitAll()
-                    .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers(*publicPaths).permitAll()
                     .anyRequest().authenticated()
             }
             .cors { }

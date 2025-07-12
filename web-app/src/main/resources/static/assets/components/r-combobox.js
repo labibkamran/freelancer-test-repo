@@ -30,6 +30,7 @@ class RCombobox extends LitElement {
         placeholder: { type: String },
         value: { type: String },
         name: { type: String },
+        tabindex: { type: String },
         items: { type: Array },
         isOpen: { type: Boolean, state: true },
         searchQuery: { type: String, state: true },
@@ -164,6 +165,7 @@ class RCombobox extends LitElement {
         this.placeholder = 'Search...';
         this.value = '';
         this.name = '';
+        this.tabindex = '';
         this.items = [];
         this.isOpen = false;
         this.searchQuery = '';
@@ -346,6 +348,7 @@ class RCombobox extends LitElement {
                     type="text"
                     class="combobox-input"
                     placeholder="${this.placeholder}"
+                    tabindex="${this.tabindex || ''}"
                     @input="${this._handleInput}"
                     @keydown="${this._handleKeyDown}"
                     @focus="${this._handleFocus}"
@@ -353,7 +356,7 @@ class RCombobox extends LitElement {
                     .value="${this.searchQuery}"
                 />
                 ${this.searchQuery ? html`
-                    <button class="clear-button" @click="${this._clearValue}" type="button">
+                    <button class="clear-button" @click="${this._clearValue}" type="button" tabindex="-1">
                         ✕
                     </button>
                 ` : ''}

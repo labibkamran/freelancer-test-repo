@@ -7,7 +7,7 @@
     <wa-breadcrumb-item th:href="'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id}">
         Vouchers
     </wa-breadcrumb-item>
-    <wa-breadcrumb-item th:text="|${voucher.number}-${#temporals.format(voucher.date, 'yyyy')}|">
+    <wa-breadcrumb-item th:text="${voucher.getDisplayNumber()}">
         Voucher
     </wa-breadcrumb-item>
 </th:block>
