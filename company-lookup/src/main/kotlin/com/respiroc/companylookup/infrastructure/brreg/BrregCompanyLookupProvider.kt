@@ -73,4 +73,21 @@ class BrregCompanyLookupProvider(
             financialInfo = null // TODO : Check from Brreg API
         )
     }
-} 
+
+    private fun extractPostalCode(address: BrregAddress?): String? {
+        if (address == null) return null
+        if (address.postalCode != null && address.postalCode.isNotEmpty()) return address.postalCode
+        if (address.countryCode?.equals("NO") == true) return null
+        if (address.city == null) return null
+        val match = countryCodeRegexMap[address.countryCode]?.find(address.city)
+        return match?.groupValues?.get(1)
+    }
+    // TODO: find better solution and add other countries
+    private val countryCodeRegexMap = mapOf(
+        "DE" to Regex("(?i)\\s*(\\d{5})\\b"),                            // Germany
+        "GB" to Regex("(?i)\\s*+([A-Z]{1,2}\\d{1,2}[A-Z]?\\s\\d[A-Z]{2})\\b"), // UK
+        "AT" to Regex("(?i)\\s*(\\d{4})\\b"),                   // Australia
+        "FR" to Regex("(?i)\\s*(\\d{5})\\b"),                   // France
+        "DK" to Regex("(?i)\\s*(\\d{4})\\b"),                   // Denmark
+    )
+}
