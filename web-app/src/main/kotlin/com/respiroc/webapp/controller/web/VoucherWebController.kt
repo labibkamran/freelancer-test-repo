@@ -2,8 +2,8 @@ package com.respiroc.webapp.controller.web
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
+import com.respiroc.ledger.application.VoucherService
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
@@ -24,7 +24,7 @@ class VoucherWebController(
     private val accountApi: AccountInternalApi,
     private val currencyService: CurrencyService,
     private val vatApi: VatInternalApi,
-    private val voucherApi: VoucherInternalApi
+    private val voucherApi: VoucherService
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -106,7 +106,6 @@ class VoucherHTMXController(
             val callout = voucherWebService.updateVoucherWithPostings(
                 voucherId,
                 createVoucherRequest,
-                user(),
                 countryCode()
             )
 
