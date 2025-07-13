@@ -9,10 +9,8 @@
 <main layout:fragment="content">
     <div class="container py-4">
         
-        <!-- Trial Balance Container -->
         <div class="trial-balance-container">
             
-            <!-- Filters Section -->
             <div class="filters-section">
                 <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
                     
@@ -62,7 +60,6 @@
                 <span th:text="${errorMessage}" />
             </div>
             
-            <!-- Trial Balance Content -->
             <div id="content-area">
                 <div th:fragment="tableContent">
                     <div th:unless="${trialBalanceData.entries.empty}">
@@ -117,7 +114,6 @@
                         </div>
                     </div>
                     
-                    <!-- Empty State -->
                     <div th:if="${trialBalanceData.entries.empty}" class="empty-state">
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
