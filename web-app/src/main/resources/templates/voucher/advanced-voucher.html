@@ -24,7 +24,7 @@
               hx-target="#form-messages"
               id="voucherForm"
               onsubmit="return validateAndPrepareForm(event);"
-              th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}">
+              th:hx-post="@{/htmx/voucher/create(tenantId=${user.ctx.currentTenant?.id})}">
 
             <div class="posting-form">
                 <div class="form-header">
