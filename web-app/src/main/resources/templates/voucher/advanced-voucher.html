@@ -36,7 +36,7 @@
                     <div>
                         <label for="voucherDate" th:utext="#{voucher_date_label}">Date <span>*</span></label>
                         <wa-input id="voucherDate" name="voucherDate" required size="small"
-                                  th:value="${voucher != null ? #temporals.format(voucher.date, 'yyyy-MM-dd') : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                                  th:value="${voucherDate}"
                                   type="date"/>
                     </div>
                     <div>

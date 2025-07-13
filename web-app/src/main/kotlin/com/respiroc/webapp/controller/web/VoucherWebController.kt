@@ -59,6 +59,7 @@ class VoucherWebController(
         setupModelAttributes(model)
         model.addAttribute("voucher", voucher)
         model.addAttribute("voucherId", id)
+        model.addAttribute("voucherDate", voucher.date.toString())
         return "voucher/advanced-voucher"
     }
 
