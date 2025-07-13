@@ -22,13 +22,13 @@
 
         <form hx-indicator="#loading-indicator"
               hx-target="#form-messages"
+              th:hx-post="@{/htmx/voucher/update/{voucherId}(voucherId=${voucherId}, tenantId=${user.ctx.currentTenant?.id})}"
               id="voucherForm"
-              onsubmit="return validateAndPrepareForm(event);"
-              th:hx-post="@{/htmx/voucher/update/{voucherId}(voucherId=${voucherId}, tenantId=${user.ctx.currentTenant?.id})}">
+        >
 
             <div class="posting-form">
                 <div class="form-header">
-                    <h4 style="margin: 0;" th:text="${voucher != null ? 'Voucher ' + voucher.displayNumber : 'New Voucher'}"/>
+                    <h4 style="margin: 0;" th:text="${'Voucher ' + voucher.displayNumber}"/>
                     <wa-button th:text="#{voucher_upload_files}"/>
                 </div>
 
@@ -70,10 +70,10 @@
                     </thead>
                     <tbody id="postingLines">
                     <!-- Render existing postings when editing a voucher -->
-                    <tr th:if="${voucher != null}" th:each="posting, iterStat : ${voucher.postings}" class="posting-line-row" 
+                    <tr th:if="${voucher != null}" th:each="posting, iterStat : ${voucher.postings}" class="posting-line-row"
                         th:id="'posting-line-row-' + ${iterStat.index}">
                         <td>
-                            <wa-input type="date" size="small" 
+                            <wa-input type="date" size="small"
                                    th:tabindex="${iterStat.index * 10 + 1}"
                                    th:value="${posting.postingDate}"
                                    th:name="'postingLines[' + ${iterStat.index} + '].postingDate'">
@@ -128,7 +128,7 @@
                             </div>
                         </td>
                         <td>
-                            <wa-select style="width: 5.6rem" size="small" 
+                            <wa-select style="width: 5.6rem" size="small"
                                      th:tabindex="${iterStat.index * 10 + 5}"
                                      th:name="'postingLines[' + ${iterStat.index} + '].currency'"
                                      th:id="'posting-lines-currency-' + ${iterStat.index}">
@@ -173,8 +173,11 @@
                                type="button"
                                variant="neutral"/>
 
-                    <wa-button id="saveButton" size="small" th:text="${voucherId != null ? 'Update Voucher' : '#{voucher_create}'}" type="submit"
-                               variant="success"/>
+                    <wa-button id="saveButton"
+                               size="small"
+                               th:text="#{voucher_update}" type="submit"
+                               variant="success"
+                    />
                 </div>
             </div>
         </form>

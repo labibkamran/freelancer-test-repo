@@ -117,45 +117,8 @@ function updateBalance() {
     });
 }
 
-// Update save button state based on balance
-function updateSaveButtonState() {
-    const saveButton = document.getElementById('saveButton');
-    if (!saveButton) return;
-
-    // Per new requirement, the button should always be enabled.
-    saveButton.disabled = false;
-}
 
 // Handle form validation before submission
-function validateAndPrepareForm(event) {
-    const postingLines = document.querySelectorAll('.posting-line-row');
-    let hasValidData = false;
-
-    postingLines.forEach(row => {
-        // Check regular inputs
-        const inputs = row.querySelectorAll('input, select, wa-input, wa-select');
-        const regularInputsHaveData = Array.from(inputs).some(input => (input.value || '').trim() !== '');
-
-        // Check r-combobox components
-        const comboboxes = row.querySelectorAll('r-combobox');
-        const comboboxesHaveData = Array.from(comboboxes).some(combobox => (combobox.value || '').trim() !== '');
-
-        const hasData = regularInputsHaveData || comboboxesHaveData;
-
-        if (hasData) hasValidData = true;
-
-        // Remove empty rows
-        if (!hasData) row.remove();
-    });
-
-    if (!hasValidData) {
-        showValidationError('Please add at least one posting line with data.');
-        event.preventDefault();
-        return false;
-    }
-    return true;
-}
-
 // Show validation error message
 function showValidationError(message) {
     const messagesDiv = document.getElementById('form-messages');
