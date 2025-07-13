@@ -50,6 +50,26 @@ class VoucherWebService(
         }
     }
 
+    fun updateVoucherWithPostings(
+        voucherId: Long,
+        request: CreateVoucherRequest,
+        userContext: UserContext,
+        companyCurrencyCode: String
+    ): Callout {
+        return try {
+            val validPostingLines = request.getValidPostingLines()
+            val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
+
+            val result = voucherApi.updateVoucherWithPostings(voucherId, postingCommands)
+
+            Callout.Success(
+                message = "Voucher ${result.number} updated successfully!"
+            )
+        } catch (e: Exception) {
+            Callout.Error(message = "Failed to update voucher: ${e.message}")
+        }
+    }
+
     private fun convertToPostingCommands(
         postingLines: List<PostingLine>,
         companyCurrency: String

@@ -3,6 +3,7 @@ package com.respiroc.webapp.controller.web
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
 import com.respiroc.ledger.api.VoucherInternalApi
+import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
@@ -40,9 +41,24 @@ class VoucherWebController(
     }
 
     @GetMapping(value = ["/new-advanced-voucher"])
-    fun new(model: Model): String {
-        tenantId()
+    fun newAdvancedVoucher(): String {
+        val emptyVoucherPayload = CreateVoucherPayload(
+            date = LocalDate.now(),
+            description = null,
+            postings = emptyList()
+        )
+        val createdVoucher = voucherApi.createVoucher(emptyVoucherPayload)
+        return "redirect:/voucher/${createdVoucher.id}?tenantId=${tenantId()}"
+    }
+
+    @GetMapping(value = ["/{id}"])
+    fun editVoucher(@PathVariable id: Long, model: Model): String {
+        val voucher = voucherApi.findVoucherById(id)
+            ?: throw IllegalArgumentException("Voucher not found")
+
         setupModelAttributes(model)
+        model.addAttribute("voucher", voucher)
+        model.addAttribute("voucherId", id)
         return "voucher/advanced-voucher"
     }
 
@@ -72,9 +88,10 @@ class VoucherHTMXController(
     private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
-    @PostMapping("/create")
+    @PostMapping("/update/{voucherId}")
     @HxRequest
-    fun createVoucherHTMX(
+    fun updateVoucherHTMX(
+        @PathVariable voucherId: Long,
         @Valid @ModelAttribute createVoucherRequest: CreateVoucherRequest,
         bindingResult: BindingResult,
         model: Model
@@ -86,7 +103,8 @@ class VoucherHTMXController(
         }
 
         try {
-            val callout = voucherWebService.processVoucherRequest(
+            val callout = voucherWebService.updateVoucherWithPostings(
+                voucherId,
                 createVoucherRequest,
                 user(),
                 countryCode()
@@ -94,14 +112,9 @@ class VoucherHTMXController(
 
             model.addAttribute(calloutAttributeName, callout)
 
-            // Add clearForm attribute to trigger form reset in JavaScript for success case
-            if (callout is Callout.Success) {
-                model.addAttribute("clearForm", true)
-            }
-
             return "fragments/callout-message"
         } catch (e: Exception) {
-            model.addAttribute(calloutAttributeName, Callout.Error("Failed to create voucher: ${e.message}"))
+            model.addAttribute(calloutAttributeName, Callout.Error("Failed to update voucher: ${e.message}"))
             return "fragments/callout-message"
         }
     }

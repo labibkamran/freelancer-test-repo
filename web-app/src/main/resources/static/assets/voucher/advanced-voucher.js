@@ -3,7 +3,16 @@ let rowCounter = 0;
 
 // Initialize form on page load
 document.addEventListener('DOMContentLoaded', function () {
-    addPostingLine();
+    // Only add a posting line if there are no existing posting lines
+    const existingPostings = document.querySelectorAll('.posting-line-row');
+    if (existingPostings.length === 0) {
+        addPostingLine();
+    } else {
+        // Set rowCounter to the number of existing postings for new additions
+        rowCounter = existingPostings.length;
+        // Update balance for existing postings
+        updateBalance();
+    }
 
     // Clear form if requested
     if (typeof clearForm !== 'undefined' && clearForm) {
@@ -45,7 +54,7 @@ function addPostingLine() {
 function removePostingLine(button) {
     const row = button.closest('tr');
     const rows = document.querySelectorAll('.posting-line-row');
-    
+
     // Don't remove the last row
     if (rows.length > 1) {
         row.remove();
@@ -126,15 +135,15 @@ function validateAndPrepareForm(event) {
         // Check regular inputs
         const inputs = row.querySelectorAll('input, select, wa-input, wa-select');
         const regularInputsHaveData = Array.from(inputs).some(input => (input.value || '').trim() !== '');
-        
+
         // Check r-combobox components
         const comboboxes = row.querySelectorAll('r-combobox');
         const comboboxesHaveData = Array.from(comboboxes).some(combobox => (combobox.value || '').trim() !== '');
-        
+
         const hasData = regularInputsHaveData || comboboxesHaveData;
-        
+
         if (hasData) hasValidData = true;
-        
+
         // Remove empty rows
         if (!hasData) row.remove();
     });
@@ -183,7 +192,7 @@ document.addEventListener('htmx:configRequest', (e) => {
     if (tenantId && e.detail.path.includes('/htmx/')) {
         e.detail.parameters.tenantId = tenantId;
     }
-    
+
     // Add r-combobox values to form data for all requests
     if (e.detail.elt && e.detail.elt.tagName === 'FORM') {
         const comboboxes = e.detail.elt.querySelectorAll('r-combobox');
