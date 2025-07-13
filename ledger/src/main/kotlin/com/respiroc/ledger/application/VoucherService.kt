@@ -2,7 +2,6 @@ package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
 import com.respiroc.ledger.api.payload.CreateVoucherPayload
 import com.respiroc.ledger.api.payload.VoucherPayload
@@ -15,6 +14,7 @@ import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.ledger.domain.repository.VoucherRepository
+import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -27,9 +27,9 @@ class VoucherService(
     private val postingRepository: PostingRepository,
     private val accountApi: AccountInternalApi,
     private val vatApi: VatInternalApi
-) : VoucherInternalApi {
+) : ContextAwareApi {
 
-    override fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
+    fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
         val tenantId = currentTenantId()
 
         val voucherNumber = generateNextVoucherNumber(tenantId, payload.date)
@@ -54,7 +54,7 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
+    fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
         val vouchers = voucherRepository.findVoucherSummariesByTenantId(currentTenantId())
 
         return vouchers.map { voucher ->
@@ -68,7 +68,7 @@ class VoucherService(
         }
     }
 
-    override fun updateVoucherWithPostings(voucherId: Long, postings: List<CreatePostingPayload>): VoucherPayload {
+    fun updateVoucherWithPostings(voucherId: Long, postings: List<CreatePostingPayload>): VoucherPayload {
         val tenantId = currentTenantId()
 
         val voucher = voucherRepository.findByIdAndTenantIdWithPostings(voucherId, tenantId)
@@ -95,7 +95,7 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findVoucherById(id: Long): Voucher? {
+    fun findVoucherById(id: Long): Voucher? {
         return voucherRepository.findByIdAndTenantIdWithPostings(id, currentTenantId())
     }
 
