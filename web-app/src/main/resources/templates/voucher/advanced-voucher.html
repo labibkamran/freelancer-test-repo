@@ -9,12 +9,12 @@
 
 <body>
 <main layout:fragment="content">
-    <div class="container py-4">
+    <div>
 
         <div id="form-messages"/>
 
         <div class="htmx-indicator" id="loading-indicator" style="display: none;">
-            <div class="alert alert-info">
+            <div>
                 <wa-icon name="clock" style="margin-right: 0.5rem;"/>
                 <span th:text="#{voucher_saving}"/>
             </div>
@@ -26,7 +26,7 @@
               onsubmit="return validateAndPrepareForm(event);"
               th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}">
 
-            <div class="posting-form mb-4">
+            <div class="posting-form">
                 <div class="form-header">
                     <h4 style="margin: 0;" th:text="#{voucher_information}"/>
                     <wa-button th:text="#{voucher_upload_files}"/>
@@ -34,15 +34,14 @@
 
                 <div class="wa-stack">
                     <div>
-                        <label class="form-label" for="voucherDate" th:utext="#{voucher_date_label}">Date <span
-                                class="text-danger">*</span></label>
-                        <wa-input class="form-control" id="voucherDate" name="voucherDate" required size="small"
+                        <label for="voucherDate" th:utext="#{voucher_date_label}">Date <span>*</span></label>
+                        <wa-input id="voucherDate" name="voucherDate" required size="small"
                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                                   type="date"/>
                     </div>
                     <div>
-                        <label class="form-label" for="voucherDescription" th:text="#{description}"/>
-                        <wa-input class="form-control" id="voucherDescription" name="voucherDescription"
+                        <label for="voucherDescription" th:text="#{description}"/>
+                        <wa-input id="voucherDescription" name="voucherDescription"
                                   size="small"
                                   th:placeholder="#{description}"
                                   type="text"/>
@@ -53,7 +52,7 @@
             <div class="posting-form">
                 <div class="form-header">
                     <h4 style="margin: 0;" th:text="#{postings}"/>
-                    <small class="text-muted" th:text="#{debits.credits}"/>
+                    <small th:text="#{debits.credits}"/>
                 </div>
 
                 <table class="posting-table">
