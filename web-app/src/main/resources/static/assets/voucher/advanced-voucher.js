@@ -14,10 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateBalance();
     }
 
-    // Clear form if requested
-    if (typeof clearForm !== 'undefined' && clearForm) {
-        clearVoucherForm();
-    }
 });
 
 // Add new posting line
@@ -30,7 +26,7 @@ function addPostingLine() {
 
     // Get tenant ID from URL
     const tenantId = new URLSearchParams(window.location.search).get('tenantId');
-    const url = tenantId ? 
+    const url = tenantId ?
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}&tenantId=${tenantId}` :
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}`;
 
@@ -59,41 +55,6 @@ function removePostingLine(button) {
     if (rows.length > 1) {
         row.remove();
         updateBalance();
-    }
-}
-
-// Clear the voucher form
-function clearVoucherForm() {
-        // Clear voucher information fields
-        document.querySelectorAll('#voucherForm input[type="date"], #voucherForm input[type="text"]:not([name*="postingLines"])').forEach(input => {
-            if (input.type === 'date') {
-                input.value = new Date().toISOString().split('T')[0];
-            } else {
-                input.value = '';
-            }
-            input.classList.remove('field-error');
-        });
-
-        // Clear all posting lines and add a fresh one
-        document.getElementById('postingLines').innerHTML = '';
-        rowCounter = 0;
-        addPostingLine();
-
-    // Reset balance display
-    resetBalanceDisplay();
-}
-
-// Reset balance display to initial state
-function resetBalanceDisplay() {
-    // Reset to server-provided values or fallback
-    document.getElementById('totalDebit').textContent = '0.00';
-    document.getElementById('totalCredit').textContent = '0.00';
-    document.getElementById('balanceAmount').textContent = '0.00';
-
-    // Ensure the save button remains enabled
-    const saveButton = document.getElementById('saveButton');
-    if (saveButton) {
-        saveButton.disabled = false;
     }
 }
 
@@ -164,14 +125,5 @@ document.addEventListener('htmx:configRequest', (e) => {
                 e.detail.parameters[combobox.name] = combobox.value;
             }
         });
-    }
-});
-
-// Handle HTMX success event to clear form
-document.addEventListener('htmx:afterSettle', function(event) {
-    // Clear form on successful voucher creation
-    if (event.detail.target.id === 'form-messages' && 
-        event.detail.target.querySelector('wa-callout[variant="success"]')) {
-        setTimeout(() => clearVoucherForm(), 100);
     }
 });
