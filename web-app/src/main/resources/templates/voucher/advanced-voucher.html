@@ -1,118 +1,96 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html dir="ltr" lang="en" layout:decorate="~{layout/base}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/assets/voucher/advanced-voucher.css}">
 
-    <!-- r-combobox dependencies -->
     <th:block th:replace="~{fragments/r-combobox :: r-combobox-dependencies}"></th:block>
 </head>
-
-<!-- Breadcrumb Items -->
-<th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item th:href="'/voucher/overview?tenantId=' + ${user.ctx.currentTenant?.id}">
-        Vouchers
-    </wa-breadcrumb-item>
-    <wa-breadcrumb-item>
-        Advanced Voucher
-    </wa-breadcrumb-item>
-</th:block>
 
 <body>
 <main layout:fragment="content">
     <div class="container py-4">
 
-                <!-- Messages will be displayed via the base template callout system -->
-        <div id="form-messages">
-            <!-- This div is kept for HTMX target, but messages will be displayed in base template -->
-        </div>
+        <div id="form-messages"/>
 
-        <div id="loading-indicator" class="htmx-indicator" style="display: none;">
+        <div class="htmx-indicator" id="loading-indicator" style="display: none;">
             <div class="alert alert-info">
-                <wa-icon name="clock" style="margin-right: 0.5rem;"></wa-icon>
-                Saving voucher...
+                <wa-icon name="clock" style="margin-right: 0.5rem;"/>
+                <span th:text="#{voucher_saving}"/>
             </div>
         </div>
 
-        <!-- Complete Voucher Form -->
-        <form th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}"
+        <form hx-indicator="#loading-indicator"
               hx-target="#form-messages"
-              hx-indicator="#loading-indicator"
               id="voucherForm"
-              onsubmit="return validateAndPrepareForm(event);">
+              onsubmit="return validateAndPrepareForm(event);"
+              th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}">
 
-            <!-- Voucher Information Card -->
             <div class="posting-form mb-4">
                 <div class="form-header">
-                    <h4 style="margin: 0;" th:text="#{voucher_information}" />
+                    <h4 style="margin: 0;" th:text="#{voucher_information}"/>
                     <wa-button th:text="#{voucher_upload_files}"/>
                 </div>
 
                 <div class="wa-stack">
                     <div>
-                        <label for="voucherDate" class="form-label">Date <span class="text-danger">*</span></label>
-                        <wa-input size="small" type="date"
-                               class="form-control"
-                               id="voucherDate"
-                               name="voucherDate"
-                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
-                                  required></wa-input>
+                        <label class="form-label" for="voucherDate" th:utext="#{voucher_date_label}">Date <span class="text-danger">*</span></label>
+                        <wa-input class="form-control" id="voucherDate" name="voucherDate" required size="small"
+                                  th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                                  type="date"/>
                     </div>
                     <div>
-                        <label for="voucherDescription" class="form-label" th:text="#{description}" />
-                        <wa-input size="small" type="text"
-                               class="form-control"
-                               id="voucherDescription"
-                               name="voucherDescription"
-                                  placeholder="Optional voucher description"></wa-input>
+                        <label class="form-label" for="voucherDescription" th:text="#{description}"/>
+                        <wa-input class="form-control" id="voucherDescription" name="voucherDescription"
+                                  th:placeholder="#{voucher_description_placeholder}"
+                                  size="small"
+                                  type="text"/>
                     </div>
                 </div>
             </div>
 
-            <!-- Postings Card -->
             <div class="posting-form">
                 <div class="form-header">
-                    <h4 style="margin: 0;" th:text="#{postings}" />
-                    <small class="text-muted" th:text="#{debits.credits}" />
+                    <h4 style="margin: 0;" th:text="#{postings}"/>
+                    <small class="text-muted" th:text="#{debits.credits}"/>
                 </div>
 
-                <!-- Individual Posting Lines Table -->
                 <table class="posting-table">
                     <thead>
-                        <tr>
-                            <th th:text="#{date}" style="width: 90px;" />
-                            <th th:text="#{debit}" style="width: 160px;" />
-                            <th th:text="#{credit}" style="width: 160px;" />
-                            <th th:text="#{amount}" style="width: 100px;" />
-                            <th th:text="#{currency}" style="width: 70px;" />
-                            <th th:text="#{description}" />
-                            <th th:text="#{action}" style="width: 60px;" />
-                        </tr>
+                    <tr>
+                        <th style="width: 90px;" th:text="#{date}"/>
+                        <th style="width: 160px;" th:text="#{debit}"/>
+                        <th style="width: 160px;" th:text="#{credit}"/>
+                        <th style="width: 100px;" th:text="#{amount}"/>
+                        <th style="width: 70px;" th:text="#{currency}"/>
+                        <th th:text="#{description}"/>
+                        <th style="width: 60px;" th:text="#{action}"/>
+                    </tr>
                     </thead>
                     <tbody id="postingLines">
-                        <!-- Initial posting line will be added via HTMX on page load -->
+                    <!-- Initial posting line will be added via HTMX on page load -->
                     </tbody>
                     <tfoot id="balanceFooter">
-                        <tr class="balance-row">
-                            <td></td>
-                            <td class="balance-total"><span id="totalDebit">0.00 NOK</span></td>
-                            <td class="balance-total"><span id="totalCredit">0.00 NOK</span></td>
-                            <td class="balance-total"><span id="balanceAmount">0.00 NOK</span></td>
-                            <td colspan="3"></td>
-                        </tr>
+                    <tr class="balance-row">
+                        <td></td>
+                        <td class="balance-total"><span id="totalDebit">0.00</span></td>
+                        <td class="balance-total"><span id="totalCredit">0.00</span></td>
+                        <td class="balance-total"><span id="balanceAmount">0.00</span></td>
+                        <td colspan="3"></td>
+                    </tr>
                     </tfoot>
                 </table>
 
-                <!-- Form Actions -->
                 <div class="form-actions">
-                    <wa-button type="button" 
-                               size="small" 
+                    <wa-button onclick="addPostingLine()"
+                               size="small"
+                               type="button"
                                variant="neutral"
-                               onclick="addPostingLine()">
+                               th:text="#{voucher_new_row}">
                         New row
                     </wa-button>
-                    
-                    <wa-button type="submit" size="small" variant="success" id="saveButton">
+
+                    <wa-button id="saveButton" size="small" type="submit" variant="success" th:text="#{voucher_create}">
                         Create
                     </wa-button>
                 </div>

@@ -56,26 +56,6 @@
         </div>
     </header>
 
-    <!-- Subheader with breadcrumbs -->
-    <nav slot="subheader">
-        <div class="wa-cluster" style="flex-wrap: nowrap">
-            <wa-button data-toggle-nav appearance="plain" size="small">
-                <wa-icon name="bars" label="Menu"></wa-icon>
-            </wa-button>
-            <wa-breadcrumb style="font-size: var(--wa-font-size-s)">
-                <wa-breadcrumb-item
-                        th:href="'/dashboard?tenantId=' + ${user.ctx.currentTenant.id}"
-                        th:if="${currentTenant != null}" th:text="${currentTenant.companyName}">
-                    Company
-                </wa-breadcrumb-item>
-                <!-- Breadcrumb Items from child pages -->
-                <th:block layout:fragment="breadcrumb-items">
-                    <!-- Page breadcrumb content will be inserted here -->
-                </th:block>
-            </wa-breadcrumb>
-        </div>
-    </nav>
-
     <!-- Navigation -->
     <nav slot="navigation"
          th:replace="~{fragments/navigation :: navigation(sections=${@navigationProvider.getNavigationSections()},user=${user})}"></nav>
