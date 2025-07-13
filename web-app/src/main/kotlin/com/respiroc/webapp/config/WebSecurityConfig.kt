@@ -46,13 +46,6 @@ class WebSecurityConfig {
     )
 
     @Bean
-    fun webSecurityCustomizer(): WebSecurityCustomizer {
-        return WebSecurityCustomizer { web ->
-            web.ignoring().requestMatchers("/assets/**", "/favicon.ico")
-        }
-    }
-
-    @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .authorizeHttpRequests { requests ->
