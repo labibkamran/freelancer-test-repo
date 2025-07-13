@@ -11,7 +11,7 @@
 <main layout:fragment="content">
     <div>
 
-        <div id="form-messages"/>
+        <div id="form-messages"></div>
 
         <div class="htmx-indicator" id="loading-indicator" style="display: none;">
             <div>
@@ -24,6 +24,7 @@
               hx-target="#form-messages"
               th:hx-post="@{/htmx/voucher/update/{voucherId}(voucherId=${voucherId}, tenantId=${user.ctx.currentTenant?.id})}"
               id="voucherForm"
+              hx-swap="innerHTML"
         >
 
             <div class="posting-form">
