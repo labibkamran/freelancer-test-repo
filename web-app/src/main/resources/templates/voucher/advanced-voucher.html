@@ -27,7 +27,6 @@
             <!-- This div is kept for HTMX target, but messages will be displayed in base template -->
         </div>
 
-        <!-- Loading Indicator -->
         <div id="loading-indicator" class="htmx-indicator" style="display: none;">
             <div class="alert alert-info">
                 <wa-icon name="clock" style="margin-right: 0.5rem;"></wa-icon>
@@ -39,14 +38,14 @@
         <form th:attr="hx-post='/htmx/voucher/create?tenantId=' + ${user.ctx.currentTenant?.id}"
               hx-target="#form-messages"
               hx-indicator="#loading-indicator"
-              id="voucherForm" 
+              id="voucherForm"
               onsubmit="return validateAndPrepareForm(event);">
 
             <!-- Voucher Information Card -->
             <div class="posting-form mb-4">
                 <div class="form-header">
                     <h4 style="margin: 0;" th:text="#{voucher_information}" />
-                    <wa-button>📁 Upload(or drag & drop) </wa-button>
+                    <wa-button th:text="#{voucher_upload_files}"/>
                 </div>
 
                 <div class="wa-stack">
@@ -62,9 +61,9 @@
                     <div>
                         <label for="voucherDescription" class="form-label" th:text="#{description}" />
                         <wa-input size="small" type="text"
-                               class="form-control" 
+                               class="form-control"
                                id="voucherDescription"
-                               name="voucherDescription" 
+                               name="voucherDescription"
                                   placeholder="Optional voucher description"></wa-input>
                     </div>
                 </div>
@@ -76,7 +75,7 @@
                     <h4 style="margin: 0;" th:text="#{postings}" />
                     <small class="text-muted" th:text="#{debits.credits}" />
                 </div>
-                
+
                 <!-- Individual Posting Lines Table -->
                 <table class="posting-table">
                     <thead>
