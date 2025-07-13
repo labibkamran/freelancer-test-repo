@@ -17,13 +17,11 @@
     </th:block>
 </head>
 <body>
-<!-- Authenticated User Layout -->
+
 <wa-page mobile-breakpoint="920" th:if="${user != null}">
-    <!-- Header -->
     <header slot="header" class="wa-split">
         <div class="wa-cluster">
             <span class="wa-heading-s wa-desktop-only" th:text="#{layout.header.title}" />
-            <!-- Company Selector -->
             <wa-dropdown>
                 <wa-button slot="trigger" size="small" variant="brand" appearance="outlined" with-caret
                            th:text="${currentTenant != null ? currentTenant.companyName : 'Select Company'}">
@@ -56,26 +54,16 @@
         </div>
     </header>
 
-    <!-- Navigation -->
     <nav slot="navigation"
          th:replace="~{fragments/navigation :: navigation(sections=${@navigationProvider.getNavigationSections()},user=${user})}"></nav>
 
-    <!-- Navigation Footer -->
-    <!-- <nav slot="navigation-footer">
-         <a href="/company/create" class="wa-flank">
-             <wa-icon name="building"></wa-icon>
-             <span>Create Company</span>
-         </a>
-     </nav>-->
 
-    <!-- Aside Sidebar -->
     <aside slot="aside" class="wa-desktop-only" th:if="${user != null}" id="aside-panel">
         <div layout:fragment="aside" id="aside-content">
             <!-- Aside content will be inserted here -->
         </div>
     </aside>
 
-    <!-- Callout -->
     <div th:if="${callout}" style="padding: var(--wa-space-m) var(--wa-space-l) 0;">
         <wa-callout th:attr="variant=${callout.variant()}, data-link=${callout.link}" open
                     th:classappend="${callout.link != null} ? 'clickable-callout' : ''"
@@ -87,7 +75,6 @@
         </wa-callout>
     </div>
 
-    <!-- Main Content -->
     <main layout:fragment="content" id="main-content">
         <!-- Page content will be inserted here -->
     </main>
