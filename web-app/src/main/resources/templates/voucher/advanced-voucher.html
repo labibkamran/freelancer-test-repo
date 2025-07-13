@@ -70,8 +70,8 @@
                     </tr>
                     </thead>
                     <tbody id="postingLines">
-                    <!-- Render existing postings when editing a voucher -->
                     <tr th:if="${voucher != null}" th:each="posting, iterStat : ${voucher.postings}" class="posting-line-row"
+                        th:fragment="posting-line-row"
                         th:id="'posting-line-row-' + ${iterStat.index}">
                         <td>
                             <wa-input type="date" size="small"
@@ -149,7 +149,9 @@
                         </td>
                         <td>
                             <wa-button type="button" size="small" variant="danger" tabindex="-1"
-                                     onclick="removePostingLine(this)">
+                                     th:hx-delete="@{/htmx/voucher/posting-line/{voucherId}/{rowNumber}(voucherId=${voucherId}, rowNumber=${iterStat.index})}"
+                                     hx-target="closest tr"
+                                     hx-swap="outerHTML">
                                 <wa-icon label="Remove posting row" name="trash"></wa-icon>
                             </wa-button>
                         </td>
