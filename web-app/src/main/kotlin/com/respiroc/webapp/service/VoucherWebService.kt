@@ -183,4 +183,8 @@ class VoucherWebService(
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
         }
     }
-} 
+
+    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
+        voucherApi.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
+    }
+}

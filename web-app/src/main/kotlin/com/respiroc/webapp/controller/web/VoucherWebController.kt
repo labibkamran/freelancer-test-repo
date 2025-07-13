@@ -140,6 +140,22 @@ class VoucherHTMXController(
         return "fragments/posting-line-row"
     }
 
+    @DeleteMapping("/posting-line/{voucherId}/{rowNumber}")
+    @HxRequest
+    fun deletePostingLineHTMX(
+        @PathVariable voucherId: Long,
+        @PathVariable rowNumber: Int,
+        model: Model
+    ): String {
+        try {
+            voucherWebService.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
+            return ""
+        } catch (e: Exception) {
+            model.addAttribute(calloutAttributeName, Callout.Error("Failed to delete posting line: ${e.message}"))
+            return "fragments/callout-message"
+        }
+    }
+
     @PostMapping("/update-balance")
     @HxRequest
     fun updateBalanceHTMX(
