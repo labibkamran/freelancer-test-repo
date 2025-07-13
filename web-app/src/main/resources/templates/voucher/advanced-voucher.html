@@ -34,7 +34,8 @@
 
                 <div class="wa-stack">
                     <div>
-                        <label class="form-label" for="voucherDate" th:utext="#{voucher_date_label}">Date <span class="text-danger">*</span></label>
+                        <label class="form-label" for="voucherDate" th:utext="#{voucher_date_label}">Date <span
+                                class="text-danger">*</span></label>
                         <wa-input class="form-control" id="voucherDate" name="voucherDate" required size="small"
                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                                   type="date"/>
@@ -42,8 +43,8 @@
                     <div>
                         <label class="form-label" for="voucherDescription" th:text="#{description}"/>
                         <wa-input class="form-control" id="voucherDescription" name="voucherDescription"
-                                  th:placeholder="#{voucher_description_placeholder}"
                                   size="small"
+                                  th:placeholder="#{voucher_description_placeholder}"
                                   type="text"/>
                     </div>
                 </div>
@@ -84,15 +85,12 @@
                 <div class="form-actions">
                     <wa-button onclick="addPostingLine()"
                                size="small"
+                               th:text="#{voucher_new_row}"
                                type="button"
-                               variant="neutral"
-                               th:text="#{voucher_new_row}">
-                        New row
-                    </wa-button>
+                               variant="neutral"/>
 
-                    <wa-button id="saveButton" size="small" type="submit" variant="success" th:text="#{voucher_create}">
-                        Create
-                    </wa-button>
+                    <wa-button id="saveButton" size="small" th:text="#{voucher_create}" type="submit"
+                               variant="success"/>
                 </div>
             </div>
         </form>
