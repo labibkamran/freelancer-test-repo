@@ -24,7 +24,7 @@
               hx-target="#form-messages"
               id="voucherForm"
               onsubmit="return validateAndPrepareForm(event);"
-              th:hx-post="${voucherId != null ? '/htmx/voucher/update/' + voucherId + '?tenantId=' + user.ctx.currentTenant?.id : '/htmx/voucher/create?tenantId=' + user.ctx.currentTenant?.id}">
+              th:hx-post="@{/htmx/voucher/update/{voucherId}(voucherId=${voucherId}, tenantId=${user.ctx.currentTenant?.id})}">
 
             <div class="posting-form">
                 <div class="form-header">
