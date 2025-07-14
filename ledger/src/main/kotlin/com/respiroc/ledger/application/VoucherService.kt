@@ -1,11 +1,9 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.payload.CreatePostingPayload
-import com.respiroc.ledger.api.payload.CreateVoucherPayload
-import com.respiroc.ledger.api.payload.VoucherPayload
-import com.respiroc.ledger.api.payload.VoucherSummaryPayload
+import com.respiroc.ledger.application.payload.CreatePostingPayload
+import com.respiroc.ledger.application.payload.CreateVoucherPayload
+import com.respiroc.ledger.application.payload.VoucherPayload
+import com.respiroc.ledger.application.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidPostingsException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
@@ -25,8 +23,8 @@ import java.time.LocalDate
 class VoucherService(
     private val voucherRepository: VoucherRepository,
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi,
-    private val vatApi: VatInternalApi
+    private val accountService: AccountService,
+    private val vatService: VatService
 ) : ContextAwareApi {
 
     fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
@@ -129,13 +127,13 @@ class VoucherService(
     }
 
     private fun validateAccount(accountNumber: String) {
-        if (accountApi.findAccountByNumber(accountNumber) == null) {
+        if (accountService.findAccountByNumber(accountNumber) == null) {
             throw AccountNotFoundException(accountNumber)
         }
     }
 
     private fun validateVatCode(vatCode: String?) {
-        if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
+        if (vatCode != null && !vatService.vatCodeExists(vatCode)) {
             throw InvalidVatCodeException(vatCode)
         }
     }
