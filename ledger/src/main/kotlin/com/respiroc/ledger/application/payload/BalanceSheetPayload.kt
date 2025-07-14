@@ -10,6 +10,5 @@ data class BalanceSheetPayload(
 data class BalanceSheetEntry(
     val accountNumber: String,
     val accountName: String,
-    val accountDescription: String,
     val amount: BigDecimal,
 )

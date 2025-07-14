@@ -123,7 +123,6 @@ class PostingService(
                     BalanceSheetEntry(
                         accountNumber = accountNumber,
                         accountName = account.accountName,
-                        accountDescription = account.accountDescription,
                         amount = amount
                     )
                 } else null
