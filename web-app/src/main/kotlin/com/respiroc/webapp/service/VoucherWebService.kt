@@ -135,7 +135,7 @@ class VoucherWebService(
             description = line.description,
             originalAmount = originalBaseAmount,
             originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-            vatCode = null
+            vatCode = vatCode
         )
 
         val vatPosting = CreatePostingPayload(
@@ -146,7 +146,7 @@ class VoucherWebService(
             description = line.description,
             originalAmount = originalVatAmount,
             originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-            vatCode = vatCode
+            vatCode = null
         )
 
         return listOf(basePosting, vatPosting)
