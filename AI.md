@@ -6,6 +6,8 @@ Backend application code:
 * do not check or write tests.
 * Do not use comments, the code should be self-explanatory, prefer longer and meaningful names instead of comments
 * Never split into Impl and interface, just assume there is one implementation
+* Thymeleaf for server-side rendering. 
+Use URL expression resolution with @{} instead of string concatenation to build urls
 
 Backend database:
 
