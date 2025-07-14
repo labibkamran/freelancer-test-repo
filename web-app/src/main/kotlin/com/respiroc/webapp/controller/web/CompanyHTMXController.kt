@@ -1,4 +1,4 @@
-package com.respiroc.webapp.controller.web.htmx
+package com.respiroc.webapp.controller.web
 
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
 import com.respiroc.webapp.controller.BaseController
@@ -37,4 +37,4 @@ class CompanyHTMXController(
             return "fragments/company-search :: error"
         }
     }
-} 
+}

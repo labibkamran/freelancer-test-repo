@@ -1,11 +1,8 @@
 package com.respiroc.webapp.service
 
-import com.respiroc.company.api.CompanyInternalApi
 import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.VoucherInternalApi
 import com.respiroc.ledger.api.payload.CreatePostingPayload
-import com.respiroc.ledger.api.payload.CreateVoucherPayload
-import com.respiroc.util.context.UserContext
+import com.respiroc.ledger.application.VoucherService
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
@@ -15,7 +12,7 @@ import java.math.BigDecimal
 
 @Service
 class VoucherWebService(
-    private val voucherApi: VoucherInternalApi,
+    private val voucherApi: VoucherService,
     private val vatApi: VatInternalApi,
     private val currencyService: CurrencyService
 ) {
@@ -24,29 +21,22 @@ class VoucherWebService(
         private const val VAT_ACCOUNT_NUMBER = "2710"
     }
 
-    fun processVoucherRequest(
+    fun updateVoucherWithPostings(
+        voucherId: Long,
         request: CreateVoucherRequest,
-        userContext: UserContext,
         companyCurrencyCode: String
     ): Callout {
         return try {
             val validPostingLines = request.getValidPostingLines()
             val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
-            val voucherPayload = CreateVoucherPayload(
-                date = request.voucherDate,
-                description = request.voucherDescription,
-                postings = postingCommands
-            )
-
-            val result = voucherApi.createVoucher(voucherPayload)
+            val result = voucherApi.updateVoucherWithPostings(voucherId, postingCommands)
 
             Callout.Success(
-                message = "New voucher ${result.number} created successfully!",
-                link = "/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}"
+                message = "Voucher ${result.number} updated successfully!"
             )
         } catch (e: Exception) {
-            Callout.Error(message = "Failed to save voucher: ${e.message}")
+            Callout.Error(message = "Failed to update voucher: ${e.message}")
         }
     }
 
@@ -193,4 +183,8 @@ class VoucherWebService(
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
         }
     }
-} 
+
+    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
+        voucherApi.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
+    }
+}

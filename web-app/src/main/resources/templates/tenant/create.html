@@ -5,15 +5,9 @@
     <link rel="stylesheet" th:href="@{/assets/tenant/create.css}">
 </head>
 
-<!-- Breadcrumb Items -->
-<th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item th:text="#{company.breadcrumb.companies}"></wa-breadcrumb-item>
-    <wa-breadcrumb-item th:text="#{company.breadcrumb.new}"></wa-breadcrumb-item>
-</th:block>
-
 <body>
 <main layout:fragment="content">
-    <div class="container">
+    <div>
         <div>
             <wa-card style="margin-bottom: 1rem;">
                 <div style="padding: 2rem;">
@@ -24,7 +18,6 @@
                           hx-swap="innerHTML"
                           hx-ext="redirect">
 
-                        <!-- Company Name Field with Search -->
                         <div class="form-group">
                             <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.name.label}" />
                             <wa-input
@@ -44,7 +37,6 @@
                             <div id="name-dropdown"></div>
                         </div>
 
-                        <!-- Organization Number Field -->
                         <div class="form-group">
                             <label for="organizationNumber" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.organization.label}" />
                             <wa-input
@@ -58,7 +50,6 @@
                             </wa-input>
                         </div>
 
-                        <!-- Country Code Field -->
                         <div class="form-group">
                             <label for="countryCode" style="display: block; margin-bottom: 0.5rem; font-weight: 500;" th:text="#{company.create.form.country.label}" />
                             <wa-select id="countryCode" name="countryCode" th:field="*{countryCode}" required>
@@ -67,11 +58,9 @@
                             <small style="color: #6b7280; display: block; margin-top: 0.5rem;" th:text="#{company.create.form.country.help}" />
                         </div>
 
-                        <!-- Submit Button -->
                         <!-- Form Messages -->
                         <div id="form-messages" style="margin-bottom: 1rem;"></div>
 
-                        <!-- Submit Button -->
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <wa-button type="submit" variant="success" size="small" id="submitButton" th:text="#{company.create.form.submit.button}"></wa-button>
                         </div>
