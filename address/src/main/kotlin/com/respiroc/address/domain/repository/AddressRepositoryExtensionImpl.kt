@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional
 import org.springframework.stereotype.Repository
 
 @Repository
-open class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
+class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
 
     @PersistenceContext
     private lateinit var entityManager: EntityManager
