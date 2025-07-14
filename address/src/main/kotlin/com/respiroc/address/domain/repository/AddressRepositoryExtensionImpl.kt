@@ -42,7 +42,7 @@ class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
                 :streetAddress1,
                 :streetAddress2
             )
-            ON CONFLICT (country_iso_code, city, postal_code)
+            ON CONFLICT (country_iso_code, administrative_division_code, city, postal_code, street_address_1, street_address_2)
             DO UPDATE SET 
                 administrative_division_code = EXCLUDED.administrative_division_code
             RETURNING *;
