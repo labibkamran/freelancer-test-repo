@@ -8,14 +8,20 @@ Backend application code:
 * Never split into Impl and interface, just assume there is one implementation
 * Thymeleaf for server-side rendering. 
 Use URL expression resolution with @{} instead of string concatenation to build urls
+* Hibernate and JPA for ORM, be careful to avoid N+1 and other database performance issues
 
 Backend database:
 
 * Flyway for migrations, database updates
+* Latest Postgres 17: Use newer and more modern features and avoid bad practices.
+GENERATED ALWAYS AS IDENTITY PRIMARY KEY, for primary keys 
+Be careful to not use bigint if the table does not obviously grow extremely large
+typically integer or smallint will suffice 
+* Generate DDL so that it optimizes storage space (column tetris)
+
 
 
 Frontend:
-
 
 * We use the new web component framework webawesome.com
   You can search web-types.json to make sure you use
@@ -24,7 +30,7 @@ Frontend:
 * The only libraries we use: 
 Web awesome, HTMX, htmx-ext-loading-states 
 No other libraries are in use or should be used
-* This all CSS classes start with either: wa-, r- or htmx-
+* All CSS classes start with either: wa-, r- or htmx-
 * Prefer inline styling if styles will not realistically be reused
 * Prefix our own CSS classes with r-
 * Use modern CSS features, no need to care about older browser support, using polyfills if necessary
