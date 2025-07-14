@@ -1,7 +1,7 @@
 package com.respiroc.ledger.application
 
 import com.respiroc.ledger.api.payload.BalanceSheetEntry
-import com.respiroc.ledger.api.payload.BalanceSheetPayload
+import com.respiroc.ledger.api.payload.BalanceSheetDTO
 import com.respiroc.ledger.application.payload.TrialBalanceEntry
 import com.respiroc.ledger.application.payload.TrialBalancePayload
 import com.respiroc.ledger.application.payload.GeneralLedgerPayload
@@ -101,7 +101,7 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    fun getPostingsForBalanceSheet(startDate: LocalDate, endDate: LocalDate): Map<AccountType, BalanceSheetPayload> {
+    fun getPostingsForBalanceSheet(startDate: LocalDate, endDate: LocalDate): Map<AccountType, BalanceSheetDTO> {
         val tenantId = currentTenantId()
         val accounts = accountService.findAllAccounts().associateBy { it.noAccountNumber }
 
@@ -127,7 +127,7 @@ class PostingService(
                     )
                 } else null
             }
-            BalanceSheetPayload(
+            BalanceSheetDTO(
                 entries = entries,
                 totalBalance = entries.sumOf { it.amount }
             )

@@ -1,6 +1,6 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.api.payload.BalanceSheetPayload
+import com.respiroc.ledger.api.payload.BalanceSheetDTO
 import com.respiroc.ledger.application.payload.ProfitLossPayload
 import com.respiroc.ledger.application.PostingService
 import com.respiroc.ledger.domain.model.AccountType
@@ -90,9 +90,9 @@ class ReportWebController(
         model.addAttribute("user", springUser)
         model.addAttribute("startDate", defaultStartDate)
         model.addAttribute("endDate", defaultEndDate)
-        model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetPayload(emptyList(),BigDecimal.ZERO))
-        model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
-        model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetDTO(emptyList(),BigDecimal.ZERO))
+        model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
 
         return "report/balance-sheet"
     }
@@ -185,9 +185,9 @@ class ReportHTMXController(
             model.addAttribute("user", springUser)
             model.addAttribute("startDate", defaultStartDate)
             model.addAttribute("endDate", defaultEndDate)
-            model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetPayload(emptyList(),BigDecimal.ZERO))
-            model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
-            model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetDTO(emptyList(),BigDecimal.ZERO))
+            model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
 
             "report/balance-sheet :: tableContent"
         } catch (e: Exception) {
