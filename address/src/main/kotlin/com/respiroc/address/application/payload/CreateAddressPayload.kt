@@ -1,4 +1,4 @@
-package com.respiroc.address.api.payload
+package com.respiroc.address.application.payload
 
 class CreateAddressPayload(
     val countryIsoCode: String,

@@ -1,14 +1,13 @@
 package com.respiroc.address.application
 
-import com.respiroc.address.api.AddressInternalApi
-import com.respiroc.address.api.payload.CreateAddressPayload
+import com.respiroc.address.application.payload.CreateAddressPayload
 import com.respiroc.address.domain.model.Address
 import com.respiroc.address.domain.repository.AddressRepository
 import org.springframework.stereotype.Service
 
 @Service
-class AddressService(val addressRepository: AddressRepository) : AddressInternalApi {
-    override fun getOrCreateAddress(payload: CreateAddressPayload): Address {
+class AddressService(val addressRepository: AddressRepository) {
+    fun getOrCreateAddress(payload: CreateAddressPayload): Address {
         val address =
             addressRepository
                 .findAddressByCountryIsoCodeIgnoreCaseAndCityIgnoreCaseAndPostalCodeIgnoreCase(
