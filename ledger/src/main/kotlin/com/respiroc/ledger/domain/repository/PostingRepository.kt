@@ -115,11 +115,7 @@ interface PostingRepository : CustomJpaRepository<Posting, Long> {
         SUM(p.amount) as totalAmount 
     FROM Posting p 
     WHERE p.tenantId = :tenantId
-      AND (
-            p.accountNumber LIKE '1%' OR 
-            p.accountNumber LIKE '20%' OR
-            (p.accountNumber LIKE '2%' AND p.accountNumber NOT LIKE '20%')
-          )
+      AND p.accountNumber >= '1' AND p.accountNumber < '3'
       AND p.postingDate BETWEEN :startDate AND :endDate 
     GROUP BY accountType, p.accountNumber
     ORDER BY accountType, p.accountNumber
