@@ -1,5 +1,6 @@
 package com.respiroc.webapp.controller.web
 
+import com.respiroc.ledger.api.payload.BalanceSheetPayload
 import com.respiroc.ledger.application.payload.ProfitLossPayload
 import com.respiroc.ledger.application.PostingService
 import com.respiroc.ledger.domain.model.AccountType
@@ -84,7 +85,7 @@ class ReportWebController(
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val postingsForBalanceSheet = postingApi.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
+        val postingsForBalanceSheet = postingService.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
 
         model.addAttribute("user", springUser)
         model.addAttribute("startDate", defaultStartDate)
@@ -179,7 +180,7 @@ class ReportHTMXController(
             val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val postingsForBalanceSheet = postingApi.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
+            val postingsForBalanceSheet = postingService.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
 
             model.addAttribute("user", springUser)
             model.addAttribute("startDate", defaultStartDate)
@@ -190,7 +191,6 @@ class ReportHTMXController(
 
             "report/balance-sheet :: tableContent"
         } catch (e: Exception) {
-            logger.error("Error loading balance sheet data via HTMX", e)
             model.addAttribute(calloutAttributeName, Callout.Error("Error loading balance sheet: ${e.message}"))
             return "report/balance-sheet :: error-message"
         }
