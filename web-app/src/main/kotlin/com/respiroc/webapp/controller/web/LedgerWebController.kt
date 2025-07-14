@@ -1,7 +1,7 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.PostingInternalApi
+import com.respiroc.ledger.application.AccountService
+import com.respiroc.ledger.application.PostingService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
@@ -16,8 +16,8 @@ import java.time.LocalDate
 @Controller
 @RequestMapping(value = ["/ledger"])
 class LedgerWebController(
-    private val postingApi: PostingInternalApi,
-    private val accountApi: AccountInternalApi
+    private val postingService: PostingService,
+    private val accountService: AccountService
 ) : BaseController() {
 
     @GetMapping(value = ["/general"])
@@ -36,7 +36,7 @@ class LedgerWebController(
             val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val generalLedgerData = postingApi.getGeneralLedger(effectiveStartDate, effectiveEndDate, accountNumber)
+            val generalLedgerData = postingService.getGeneralLedger(effectiveStartDate, effectiveEndDate, accountNumber)
 
             model.addAttribute("generalLedgerData", generalLedgerData)
             model.addAttribute("startDate", effectiveStartDate)
@@ -44,7 +44,7 @@ class LedgerWebController(
             model.addAttribute("selectedAccountNumber", accountNumber)
 
             addCommonAttributes(model, "General Ledger")
-            val accounts = accountApi.findAllAccounts().sortedBy { it.noAccountNumber }
+            val accounts = accountService.findAllAccounts().sortedBy { it.noAccountNumber }
             model.addAttribute("accounts", accounts)
 
             "ledger/general"
@@ -58,7 +58,7 @@ class LedgerWebController(
 @Controller
 @RequestMapping("/htmx/ledger")
 class LedgerHTMXController(
-    private val postingApi: PostingInternalApi
+    private val postingService: PostingService
 ) : BaseController() {
 
     @GetMapping("/general")
@@ -78,7 +78,7 @@ class LedgerHTMXController(
             val effectiveStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val effectiveEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val generalLedgerData = postingApi.getGeneralLedger(effectiveStartDate, effectiveEndDate, accountNumber)
+            val generalLedgerData = postingService.getGeneralLedger(effectiveStartDate, effectiveEndDate, accountNumber)
 
             model.addAttribute("generalLedgerData", generalLedgerData)
             model.addAttribute("startDate", effectiveStartDate)

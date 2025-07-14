@@ -1,9 +1,9 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.company.api.command.CreateCompanyCommand
+import com.respiroc.company.application.payload.CreateCompanyPayload
 import com.respiroc.companylookup.api.CompanyLookupInternalApi
-import com.respiroc.tenant.api.TenantInternalApi
-import com.respiroc.user.api.UserInternalApi
+import com.respiroc.tenant.application.TenantService
+import com.respiroc.user.application.UserService
 import com.respiroc.util.constant.TenantRoleCode
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.CreateCompanyRequest
@@ -32,8 +32,8 @@ class TenantWebController : BaseController() {
 @Controller
 @RequestMapping("/htmx/tenant")
 class TenantHTMXController(
-    private val tenantApi: TenantInternalApi,
-    private val userApi: UserInternalApi,
+    private val tenantService: TenantService,
+    private val userService: UserService,
     private val companyLookupApi: CompanyLookupInternalApi
 ) : BaseController() {
 
@@ -56,7 +56,7 @@ class TenantHTMXController(
             val companyInfo =
                 companyLookupApi.getInfo(createCompanyRequest.organizationNumber, createCompanyRequest.countryCode)
             val companyAddress = companyInfo.address
-            val command = CreateCompanyCommand(
+            val command = CreateCompanyPayload(
                 name = companyInfo.name,
                 organizationNumber = companyInfo.registrationNumber!!,
                 countryCode = companyInfo.countryCode,
@@ -69,9 +69,9 @@ class TenantHTMXController(
             )
 
             // TODO: check for exist user tenant company
-            val tenant = tenantApi.createNewTenant(command)
-            val tenantRole = tenantApi.findTenantRoleByCode(TenantRoleCode.OWNER)
-            userApi.addUserTenantRole(tenant, tenantRole, user())
+            val tenant = tenantService.createNewTenant(command)
+            val tenantRole = tenantService.findTenantRoleByCode(TenantRoleCode.OWNER)
+            userService.addUserTenantRole(tenant, tenantRole, user())
 
             return "redirect:htmx:/dashboard?tenantId=${tenant.id}"
 
