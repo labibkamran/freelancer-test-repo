@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.SecurityFilterChain
@@ -43,6 +44,15 @@ class WebSecurityConfig {
         "/error/**",
         "/actuator/**"
     )
+
+    //This is to prevent the filters from running on these paths — it's not the same as permitAll.
+    private val webIgnoringPaths = arrayOf("/assets/**", "/favicon.ico")
+    @Bean
+    fun webSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web ->
+            web.ignoring().requestMatchers(*webIgnoringPaths)
+        }
+    }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
