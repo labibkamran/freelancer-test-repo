@@ -199,47 +199,6 @@
         // Initialize comboboxes for existing postings
         const accounts = /*[[${accounts ?: {}}]]*/ [];
         const vatCodes = /*[[${vatCodes ?: {}}]]*/ [];
-
-        // Initialize existing posting comboboxes when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof customElements !== 'undefined' && customElements.whenDefined) {
-                customElements.whenDefined('r-combobox').then(() => {
-                    initializeExistingPostingComboboxes();
-                });
-            } else {
-                setTimeout(initializeExistingPostingComboboxes, 100);
-            }
-        });
-
-        function initializeExistingPostingComboboxes() {
-            // Setup account comboboxes
-            const accountItems = accounts.map(account => ({
-                value: account.noAccountNumber,
-                title: account.noAccountNumber,
-                subtitle: account.accountName,
-                displayText: account.noAccountNumber + ' - ' + account.accountName
-            }));
-
-            // Setup VAT code comboboxes
-            const vatItems = [
-                { value: '0', title: 'No VAT', displayText: 'No VAT' }
-            ].concat(vatCodes.map(vat => ({
-                value: vat.code,
-                title: vat.code,
-                subtitle: '(' + vat.rate + '%) - ' + vat.description,
-                displayText: vat.code + ' (' + vat.rate + '%) - ' + vat.description
-            })));
-
-            // Initialize all existing comboboxes
-            document.querySelectorAll('r-combobox').forEach(combobox => {
-                if (combobox.id.includes('account')) {
-                    combobox.items = accountItems;
-                } else if (combobox.id.includes('vat')) {
-                    combobox.items = vatItems;
-                }
-                combobox.addEventListener('change', () => updateBalance());
-            });
-        }
     </script>
 
     <script th:src="@{/assets/voucher/advanced-voucher.js}"></script>
