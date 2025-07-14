@@ -22,6 +22,7 @@ Frontend:
 * The only libraries we use: 
 Web awesome, HTMX, htmx-ext-loading-states 
 No other libraries are in use or should be used
+* This all CSS classes start with either: wa-, r- or htmx-
 * Prefer inline styling if styles will not realistically be reused
 * Prefix our own CSS classes with r-
 * Use modern CSS features, no need to care about older browser support, using polyfills if necessary
