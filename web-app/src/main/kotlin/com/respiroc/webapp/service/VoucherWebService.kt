@@ -38,12 +38,27 @@ class VoucherWebService(
         val debitPosting = basePostings.find { it.amount > BigDecimal.ZERO }
         val creditPosting = basePostings.find { it.amount < BigDecimal.ZERO }
 
-        val (debitTotalAmount, creditTotalAmount) = calculateTotalAmounts(basePostings, vatPostings)
+        val hasOriginalCurrency = rowPostings.any { it.originalAmount != null && it.originalCurrency != null }
 
-        val displayAmount = maxOf(
-            debitTotalAmount?.abs() ?: BigDecimal.ZERO,
-            creditTotalAmount?.abs() ?: BigDecimal.ZERO
-        )
+        val (displayAmount, displayCurrency) = if (hasOriginalCurrency) {
+            // Use original amounts and currency
+            val (debitOriginalTotal, creditOriginalTotal) = calculateOriginalTotalAmounts(basePostings, vatPostings)
+            val originalAmount = maxOf(
+                debitOriginalTotal?.abs() ?: BigDecimal.ZERO,
+                creditOriginalTotal?.abs() ?: BigDecimal.ZERO
+            )
+            val originalCurrency = rowPostings.first { it.originalCurrency != null }.originalCurrency!!
+            Pair(originalAmount, originalCurrency)
+        } else {
+            // Use amounts and company currency
+            val (debitTotalAmount, creditTotalAmount) = calculateTotalAmounts(basePostings, vatPostings)
+            val convertedAmount = maxOf(
+                debitTotalAmount?.abs() ?: BigDecimal.ZERO,
+                creditTotalAmount?.abs() ?: BigDecimal.ZERO
+            )
+            val companyCurrency = rowPostings.first().currency
+            Pair(convertedAmount, companyCurrency)
+        }
 
         val samplePosting = rowPostings.first()
 
@@ -51,7 +66,7 @@ class VoucherWebService(
             debitAccount = debitPosting?.accountNumber ?: "",
             creditAccount = creditPosting?.accountNumber ?: "",
             amount = if (displayAmount > BigDecimal.ZERO) displayAmount else null,
-            currency = samplePosting.currency,
+            currency = displayCurrency,
             postingDate = samplePosting.postingDate,
             description = samplePosting.description,
             debitVatCode = debitPosting?.vatCode,
@@ -76,6 +91,31 @@ class VoucherWebService(
 
         val creditTotal = if (creditBase != null) {
             creditBase.amount + (creditVat?.amount ?: BigDecimal.ZERO)
+        } else null
+
+        return Pair(debitTotal, creditTotal)
+    }
+
+    private fun calculateOriginalTotalAmounts(
+        basePostings: List<Posting>,
+        vatPostings: List<Posting>
+    ): Pair<BigDecimal?, BigDecimal?> {
+        val debitBase = basePostings.find { it.amount > BigDecimal.ZERO }
+        val creditBase = basePostings.find { it.amount < BigDecimal.ZERO }
+
+        val debitVat = vatPostings.find { it.amount > BigDecimal.ZERO }
+        val creditVat = vatPostings.find { it.amount < BigDecimal.ZERO }
+
+        val debitTotal = if (debitBase != null) {
+            val baseOriginal = debitBase.originalAmount ?: debitBase.amount
+            val vatOriginal = debitVat?.originalAmount ?: debitVat?.amount ?: BigDecimal.ZERO
+            baseOriginal + vatOriginal
+        } else null
+
+        val creditTotal = if (creditBase != null) {
+            val baseOriginal = creditBase.originalAmount ?: creditBase.amount
+            val vatOriginal = creditVat?.originalAmount ?: creditVat?.amount ?: BigDecimal.ZERO
+            baseOriginal + vatOriginal
         } else null
 
         return Pair(debitTotal, creditTotal)
