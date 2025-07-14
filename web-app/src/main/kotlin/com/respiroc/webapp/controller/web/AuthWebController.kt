@@ -1,6 +1,6 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.user.api.UserInternalApi
+import com.respiroc.user.application.UserService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.request.LoginRequest
 import com.respiroc.webapp.controller.request.SignupRequest
@@ -59,7 +59,7 @@ class AuthWebController: BaseController() {
 @Controller
 @RequestMapping("/htmx/auth")
 class AuthHTMXController(
-    private val userApi: UserInternalApi
+    private val userService: UserService
 ) : BaseController() {
 
     private val JWT_TOKEN_PERIOD: Int = 24 * 60 * 60
@@ -72,7 +72,7 @@ class AuthHTMXController(
         model: Model
     ): String {
         try {
-            val result = userApi.loginByEmailPassword(
+            val result = userService.loginByEmailPassword(
                 email = loginRequest.email,
                 password = loginRequest.password
             )
@@ -93,7 +93,7 @@ class AuthHTMXController(
         model: Model
     ): String {
         try {
-            val result = userApi.signupByEmailPassword(
+            val result = userService.signupByEmailPassword(
                 signupRequest.email,
                 signupRequest.password
             )

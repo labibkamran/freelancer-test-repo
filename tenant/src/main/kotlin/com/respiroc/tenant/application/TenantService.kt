@@ -1,9 +1,8 @@
 package com.respiroc.tenant.application
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.company.api.command.CreateCompanyCommand
+import com.respiroc.company.application.CompanyService
+import com.respiroc.company.application.payload.CreateCompanyPayload
 import com.respiroc.company.domain.model.Company
-import com.respiroc.tenant.api.TenantInternalApi
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantRole
 import com.respiroc.tenant.domain.repository.TenantRepository
@@ -15,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class TenantService(
-    private val companyService: CompanyInternalApi,
+    private val companyService: CompanyService,
     private val tenantRepository: TenantRepository,
     private val tenantRoleRepository: TenantRoleRepository
-) : TenantInternalApi {
+) {
 
-    override fun createNewTenant(companyId: Long): Tenant {
+    fun createNewTenant(companyId: Long): Tenant {
         val tenant = Tenant()
         val company = Company()
         company.id = companyId
@@ -28,12 +27,12 @@ class TenantService(
         return tenantRepository.saveAndFlush(tenant)
     }
 
-    override fun createNewTenant(command: CreateCompanyCommand): Tenant {
+    fun createNewTenant(command: CreateCompanyPayload): Tenant {
         val company = companyService.getOrCreateCompany(command)
         return createNewTenant(company.id)
     }
 
-    override fun findTenantRoleByCode(role: TenantRoleCode): TenantRole {
+    fun findTenantRoleByCode(role: TenantRoleCode): TenantRole {
         return tenantRoleRepository.findByCode(role.code)
     }
 }
