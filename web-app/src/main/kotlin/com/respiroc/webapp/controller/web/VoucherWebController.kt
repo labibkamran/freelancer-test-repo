@@ -51,7 +51,6 @@ class VoucherWebController(
         val voucher = voucherApi.findVoucherById(id)
             ?: throw IllegalArgumentException("Voucher not found")
 
-        // Convert database postings to UI posting lines
         val uiPostingLines = if (voucher.postings.isNotEmpty()) {
             voucherWebService.convertPostingsToUILines(voucher.postings.toList())
         } else {
@@ -152,7 +151,7 @@ class VoucherHTMXController(
     ): String {
         try {
             voucherWebService.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
-            return ""
+            return "fragments/empty"
         } catch (e: Exception) {
             model.addAttribute(calloutAttributeName, Callout.Error("Failed to delete posting line: ${e.message}"))
             return "fragments/callout-message"
@@ -166,22 +165,17 @@ class VoucherHTMXController(
         model: Model
     ): String {
         try {
-            val companyCurrency = countryCode()
-
-            // Calculate balance using the voucher request
             val (totalDebit, totalCredit, balance, isBalanced, hasValidEntries) = calculateBalance(
                 createVoucherRequest,
-                companyCurrency
+                countryCode()
             )
 
-            // Simple balance calculation result
-            model.addAttribute("totalDebit", "%.2f %s".format(totalDebit, companyCurrency))
-            model.addAttribute("totalCredit", "%.2f %s".format(totalCredit, companyCurrency))
-            model.addAttribute("balance", "%.2f %s".format(balance, companyCurrency))
+            model.addAttribute("totalDebit", "%.2f".format(totalDebit))
+            model.addAttribute("totalCredit", "%.2f".format(totalCredit))
+            model.addAttribute("balance", "%.2f".format(balance))
             model.addAttribute("isBalanced", isBalanced)
             model.addAttribute("hasValidEntries", hasValidEntries)
 
-            // Return simple balance row fragment
             return "fragments/balance-row-simple"
         } catch (_: Exception) {
             // Return original balance on error - use company currency or fallback

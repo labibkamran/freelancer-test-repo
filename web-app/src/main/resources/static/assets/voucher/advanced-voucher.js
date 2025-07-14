@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update balance for existing postings
         updateBalance();
     }
-
 });
 
 // Add new posting line
