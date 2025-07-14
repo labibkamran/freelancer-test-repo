@@ -1,10 +1,9 @@
 package com.respiroc.company.application
 
-import com.respiroc.address.api.AddressInternalApi
-import com.respiroc.address.api.payload.CreateAddressPayload
+import com.respiroc.address.application.AddressService
+import com.respiroc.address.application.payload.CreateAddressPayload
 import com.respiroc.address.domain.model.Address
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.company.api.command.CreateCompanyCommand
+import com.respiroc.company.application.payload.CreateCompanyPayload
 import com.respiroc.company.domain.model.Company
 import com.respiroc.company.domain.repository.CompanyRepository
 import com.respiroc.util.currency.CurrencyService
@@ -16,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional
 class CompanyService(
     private val companyRepository: CompanyRepository,
     private val currencyService: CurrencyService,
-    private val addressService: AddressInternalApi
-) : CompanyInternalApi {
+    private val addressService: AddressService
+) {
 
-    override fun getOrCreateCompany(command: CreateCompanyCommand): Company {
+    fun getOrCreateCompany(command: CreateCompanyPayload): Company {
         var company = companyRepository.findCompanyByOrganizationNumberAndName(command.organizationNumber, command.name)
         if (company == null)
             company =  createCompany(command)
@@ -31,7 +30,7 @@ class CompanyService(
         return company
     }
 
-    fun createCompany(command: CreateCompanyCommand): Company {
+    fun createCompany(command: CreateCompanyPayload): Company {
         val address = getOrCreateAddress(command)
         val company = Company()
         company.name = command.name
@@ -41,7 +40,7 @@ class CompanyService(
         return companyRepository.save(company)
     }
 
-    fun getOrCreateAddress(command: CreateCompanyCommand): Address? {
+    fun getOrCreateAddress(command: CreateCompanyPayload): Address? {
         if (!isValidAddress(command)) return null
         val payload = CreateAddressPayload(
             city = command.city!!,
@@ -54,7 +53,7 @@ class CompanyService(
         return addressService.getOrCreateAddress(payload)
     }
 
-    fun isValidAddress(command: CreateCompanyCommand): Boolean {
+    fun isValidAddress(command: CreateCompanyPayload): Boolean {
         return !(command.primaryAddress == null || command.city == null || command.postalCode == null || command.addressCountryCode == null)
     }
 }
