@@ -51,19 +51,41 @@ class VoucherService(
         )
     }
 
+    fun findOrCreateEmptyVoucher(): VoucherPayload {
+        val tenantId = currentTenantId()
+
+        val existingEmptyVoucher = voucherRepository.findFirstEmptyVoucherByTenantId(tenantId)
+        if (existingEmptyVoucher != null) {
+            return VoucherPayload(
+                id = existingEmptyVoucher.id,
+                number = existingEmptyVoucher.getDisplayNumber(),
+                date = existingEmptyVoucher.date
+            )
+        }
+
+        val emptyVoucherPayload = CreateVoucherPayload(
+            date = LocalDate.now(),
+            description = null,
+            postings = emptyList()
+        )
+        return createVoucher(emptyVoucherPayload)
+    }
+
     @Transactional(readOnly = true)
     fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
         val vouchers = voucherRepository.findVoucherSummariesByTenantId(currentTenantId())
 
-        return vouchers.map { voucher ->
-            VoucherSummaryPayload(
-                id = voucher.id,
-                number = voucher.getDisplayNumber(),
-                date = voucher.date,
-                description = voucher.description,
-                postingCount = voucher.postings.size
-            )
-        }
+        return vouchers
+            .filter { it.postings.isNotEmpty() }
+            .map { voucher ->
+                VoucherSummaryPayload(
+                    id = voucher.id,
+                    number = voucher.getDisplayNumber(),
+                    date = voucher.date,
+                    description = voucher.description,
+                    postingCount = voucher.postings.size
+                )
+            }
     }
 
     fun updateVoucherWithPostings(voucherId: Long, postings: List<CreatePostingPayload>): VoucherPayload {
@@ -172,6 +194,7 @@ class VoucherService(
         posting.originalCurrency = postingData.originalCurrency
         posting.vatCode = postingData.vatCode
         posting.voucherId = voucherId
+        posting.rowNumber = postingData.rowNumber
 
         return posting
     }

@@ -3,6 +3,7 @@ package com.respiroc.webapp.service
 import com.respiroc.ledger.application.payload.CreatePostingPayload
 import com.respiroc.ledger.application.VatService
 import com.respiroc.ledger.application.VoucherService
+import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
@@ -19,6 +20,65 @@ class VoucherWebService(
 
     companion object {
         private const val VAT_ACCOUNT_NUMBER = "2710"
+    }
+
+    fun convertPostingsToUILines(postings: List<Posting>): List<PostingLine> {
+        return postings
+            .groupBy { it.rowNumber }
+            .toSortedMap() // Ensure proper ordering by row number
+            .map { (rowNumber, rowPostings) ->
+                convertRowPostingsToUILine(rowPostings, rowNumber)
+            }
+    }
+
+    private fun convertRowPostingsToUILine(rowPostings: List<Posting>, rowNumber: Int): PostingLine {
+        val basePostings = rowPostings.filter { it.accountNumber != VAT_ACCOUNT_NUMBER }
+        val vatPostings = rowPostings.filter { it.accountNumber == VAT_ACCOUNT_NUMBER && it.vatCode == null }
+
+        val debitPosting = basePostings.find { it.amount > BigDecimal.ZERO }
+        val creditPosting = basePostings.find { it.amount < BigDecimal.ZERO }
+
+        val (debitTotalAmount, creditTotalAmount) = calculateTotalAmounts(basePostings, vatPostings)
+
+        val displayAmount = maxOf(
+            debitTotalAmount?.abs() ?: BigDecimal.ZERO,
+            creditTotalAmount?.abs() ?: BigDecimal.ZERO
+        )
+
+        val samplePosting = rowPostings.first()
+
+        return PostingLine(
+            debitAccount = debitPosting?.accountNumber ?: "",
+            creditAccount = creditPosting?.accountNumber ?: "",
+            amount = if (displayAmount > BigDecimal.ZERO) displayAmount else null,
+            currency = samplePosting.currency,
+            postingDate = samplePosting.postingDate,
+            description = samplePosting.description,
+            debitVatCode = debitPosting?.vatCode,
+            creditVatCode = creditPosting?.vatCode,
+            rowNumber = rowNumber
+        )
+    }
+
+    private fun calculateTotalAmounts(
+        basePostings: List<Posting>,
+        vatPostings: List<Posting>
+    ): Pair<BigDecimal?, BigDecimal?> {
+        val debitBase = basePostings.find { it.amount > BigDecimal.ZERO }
+        val creditBase = basePostings.find { it.amount < BigDecimal.ZERO }
+
+        val debitVat = vatPostings.find { it.amount > BigDecimal.ZERO }
+        val creditVat = vatPostings.find { it.amount < BigDecimal.ZERO }
+
+        val debitTotal = if (debitBase != null) {
+            debitBase.amount + (debitVat?.amount ?: BigDecimal.ZERO)
+        } else null
+
+        val creditTotal = if (creditBase != null) {
+            creditBase.amount + (creditVat?.amount ?: BigDecimal.ZERO)
+        } else null
+
+        return Pair(debitTotal, creditTotal)
     }
 
     fun updateVoucherWithPostings(
@@ -44,30 +104,40 @@ class VoucherWebService(
         postingLines: List<PostingLine>,
         companyCurrency: String
     ): List<CreatePostingPayload> {
-        return postingLines.flatMap { line ->
+        return postingLines.flatMapIndexed { index, line ->
             val originalAmount = line.amount!!
             val originalCurrency = line.currency
+            // Use the line's row number if available, otherwise use the index
+            val baseRowNumber = if (line.rowNumber >= 0) line.rowNumber else index
 
             val hasDebit = line.debitAccount.isNotBlank()
             val hasCredit = line.creditAccount.isNotBlank()
 
             when {
                 hasDebit && hasCredit -> {
-                    // Both debit and credit filled - create two postings
-                    val debitLine = line.copy(creditAccount = "", creditVatCode = null)
-                    val creditLine = line.copy(debitAccount = "", debitVatCode = null)
+                    // Both debit and credit filled - create two postings with same row number
+                    val debitLine = line.copy(
+                        creditAccount = "", 
+                        creditVatCode = null,
+                        rowNumber = baseRowNumber
+                    )
+                    val creditLine = line.copy(
+                        debitAccount = "", 
+                        debitVatCode = null,
+                        rowNumber = baseRowNumber
+                    )
 
                     val debitCommands =
-                        createCommandsForLine(debitLine, originalAmount, originalCurrency, companyCurrency)
+                        createCommandsForLine(debitLine, originalAmount, originalCurrency, companyCurrency, baseRowNumber)
                     val creditCommands =
-                        createCommandsForLine(creditLine, originalAmount, originalCurrency, companyCurrency)
+                        createCommandsForLine(creditLine, originalAmount, originalCurrency, companyCurrency, baseRowNumber)
 
                     debitCommands + creditCommands
                 }
 
                 hasDebit || hasCredit -> {
                     // Only one side filled
-                    createCommandsForLine(line, originalAmount, originalCurrency, companyCurrency)
+                    createCommandsForLine(line, originalAmount, originalCurrency, companyCurrency, baseRowNumber)
                 }
 
                 else -> {
@@ -81,16 +151,17 @@ class VoucherWebService(
         line: PostingLine,
         originalAmount: BigDecimal,
         originalCurrency: String,
-        companyCurrency: String
+        companyCurrency: String,
+        rowNumber: Int
     ): List<CreatePostingPayload> {
         val vatCode = line.getVatCode()
 
         return if (vatCode != null) {
             // Create two postings: one for base amount and one for VAT
-            createVatPostings(line, originalAmount, originalCurrency, companyCurrency, vatCode)
+            createVatPostings(line, originalAmount, originalCurrency, companyCurrency, vatCode, rowNumber)
         } else {
             // Create single posting without VAT
-            listOf(createSinglePosting(line, originalAmount, originalCurrency, companyCurrency, null))
+            listOf(createSinglePosting(line, originalAmount, originalCurrency, companyCurrency, null, rowNumber))
         }
     }
 
@@ -99,7 +170,8 @@ class VoucherWebService(
         originalAmount: BigDecimal,
         originalCurrency: String,
         companyCurrency: String,
-        vatCode: String
+        vatCode: String,
+        rowNumber: Int
     ): List<CreatePostingPayload> {
         val vatCodeEntity = vatService.findVatCodeByCode(vatCode)
             ?: throw IllegalArgumentException("Invalid VAT code: $vatCode")
@@ -135,7 +207,8 @@ class VoucherWebService(
             description = line.description,
             originalAmount = originalBaseAmount,
             originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-            vatCode = vatCode
+            vatCode = vatCode,
+            rowNumber = rowNumber
         )
 
         val vatPosting = CreatePostingPayload(
@@ -146,7 +219,8 @@ class VoucherWebService(
             description = line.description,
             originalAmount = originalVatAmount,
             originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-            vatCode = null
+            vatCode = null,
+            rowNumber = rowNumber
         )
 
         return listOf(basePosting, vatPosting)
@@ -157,7 +231,8 @@ class VoucherWebService(
         originalAmount: BigDecimal,
         originalCurrency: String,
         companyCurrency: String,
-        vatCode: String?
+        vatCode: String?,
+        rowNumber: Int
     ): CreatePostingPayload {
         return CreatePostingPayload(
             accountNumber = line.getAccountNumber(),
@@ -167,7 +242,8 @@ class VoucherWebService(
             description = line.description,
             originalAmount = if (originalCurrency != companyCurrency) originalAmount else null,
             originalCurrency = if (originalCurrency != companyCurrency) originalCurrency else null,
-            vatCode = vatCode
+            vatCode = vatCode,
+            rowNumber = rowNumber
         )
     }
 
