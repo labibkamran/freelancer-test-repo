@@ -2,6 +2,8 @@
     th:id="'posting-line-row-' + ${rowCounter}"
     xmlns:th="http://www.thymeleaf.org"
     th:fragment="posting-line-row">
+    <!-- Hidden row number field -->
+    <input type="hidden" th:name="'postingLines[' + ${rowCounter} + '].rowNumber'" th:value="${rowCounter}">
     <td>
         <wa-input type="date"
                size="small"

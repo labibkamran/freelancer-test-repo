@@ -70,13 +70,15 @@
                     </tr>
                     </thead>
                     <tbody id="postingLines">
-                    <tr th:if="${voucher != null}" th:each="posting, iterStat : ${voucher.postings}" class="posting-line-row"
+                    <tr th:if="${uiPostingLines != null and !uiPostingLines.isEmpty()}" th:each="postingLine, iterStat : ${uiPostingLines}" class="posting-line-row"
                         th:fragment="posting-line-row"
                         th:id="'posting-line-row-' + ${iterStat.index}">
+                        <!-- Hidden row number field -->
+                        <input type="hidden" th:name="'postingLines[' + ${iterStat.index} + '].rowNumber'" th:value="${postingLine.rowNumber}">
                         <td>
                             <wa-input type="date" size="small"
                                    th:tabindex="${iterStat.index * 10 + 1}"
-                                   th:value="${posting.postingDate}"
+                                   th:value="${postingLine.postingDate}"
                                    th:name="'postingLines[' + ${iterStat.index} + '].postingDate'">
                             </wa-input>
                         </td>
@@ -86,14 +88,14 @@
                                            th:name="'postingLines[' + ${iterStat.index} + '].debitAccount'"
                                            placeholder="Select debit account..."
                                            th:tabindex="${iterStat.index * 10 + 3}"
-                                           th:value="${posting.amount > 0 ? posting.accountNumber : ''}"
+                                           th:value="${postingLine.debitAccount}"
                                            style="font-size: 0.8rem;">
                                 </r-combobox>
                                 <r-combobox th:id="'debit-vat-' + ${iterStat.index}"
                                            th:name="'postingLines[' + ${iterStat.index} + '].debitVatCode'"
                                            placeholder="Select VAT code..."
                                            th:tabindex="${iterStat.index * 10 + 8}"
-                                           th:value="${posting.amount > 0 ? posting.vatCode : ''}"
+                                           th:value="${postingLine.debitVatCode}"
                                            style="font-size: 0.75rem;">
                                 </r-combobox>
                             </div>
@@ -104,14 +106,14 @@
                                            th:name="'postingLines[' + ${iterStat.index} + '].creditAccount'"
                                            placeholder="Select credit account..."
                                            th:tabindex="${iterStat.index * 10 + 2}"
-                                           th:value="${posting.amount < 0 ? posting.accountNumber : ''}"
+                                           th:value="${postingLine.creditAccount}"
                                            style="font-size: 0.8rem;">
                                 </r-combobox>
                                 <r-combobox th:id="'credit-vat-' + ${iterStat.index}"
                                            th:name="'postingLines[' + ${iterStat.index} + '].creditVatCode'"
                                            placeholder="Select VAT code..."
                                            th:tabindex="${iterStat.index * 10 + 7}"
-                                           th:value="${posting.amount < 0 ? posting.vatCode : ''}"
+                                           th:value="${postingLine.creditVatCode}"
                                            style="font-size: 0.75rem;">
                                 </r-combobox>
                             </div>
@@ -123,7 +125,7 @@
                                        th:name="'postingLines[' + ${iterStat.index} + '].amount'"
                                        th:id="'posting-lines-amount-' + ${iterStat.index}"
                                        min="0" step="0.01" placeholder="Amount"
-                                       th:value="${#numbers.formatDecimal(posting.amount.abs(), 1, 2)}">
+                                       th:value="${postingLine.amount != null ? #numbers.formatDecimal(postingLine.amount, 1, 2) : ''}">
                                 </wa-input>
                                 <div th:id="'converted-amount-' + ${iterStat.index}" class="converted-amount-display"></div>
                             </div>
@@ -135,7 +137,7 @@
                                      th:id="'posting-lines-currency-' + ${iterStat.index}">
                                 <wa-option th:each="currency : ${supportedCurrencies}"
                                          th:value="${currency}" th:text="${currency}"
-                                         th:selected="${currency == posting.currency}">
+                                         th:selected="${currency == postingLine.currency}">
                                 </wa-option>
                             </wa-select>
                         </td>
@@ -144,7 +146,7 @@
                                    th:tabindex="${iterStat.index * 10 + 6}"
                                    placeholder="Description"
                                    th:name="'postingLines[' + ${iterStat.index} + '].description'"
-                                   th:value="${posting.description}">
+                                   th:value="${postingLine.description}">
                             </wa-input>
                         </td>
                         <td>

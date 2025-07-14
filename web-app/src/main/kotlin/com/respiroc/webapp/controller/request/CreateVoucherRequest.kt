@@ -30,7 +30,8 @@ data class PostingLine(
     val postingDate: LocalDate = LocalDate.now(),
     val description: String? = null,
     val debitVatCode: String? = null,
-    val creditVatCode: String? = null
+    val creditVatCode: String? = null,
+    val rowNumber: Int = 0
 ) {
     fun getAccountNumber(): String {
         return if (debitAccount.isNotBlank()) debitAccount else creditAccount

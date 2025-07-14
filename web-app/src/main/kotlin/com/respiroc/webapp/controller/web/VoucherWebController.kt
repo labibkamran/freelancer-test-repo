@@ -1,6 +1,5 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.application.payload.CreateVoucherPayload
 import com.respiroc.ledger.application.AccountService
 import com.respiroc.ledger.application.VatService
 import com.respiroc.ledger.application.VoucherService
@@ -24,7 +23,8 @@ class VoucherWebController(
     private val accountService: AccountService,
     private val currencyService: CurrencyService,
     private val vatService: VatService,
-    private val voucherApi: VoucherService
+    private val voucherApi: VoucherService,
+    private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -42,13 +42,8 @@ class VoucherWebController(
 
     @GetMapping(value = ["/new-advanced-voucher"])
     fun newAdvancedVoucher(): String {
-        val emptyVoucherPayload = CreateVoucherPayload(
-            date = LocalDate.now(),
-            description = null,
-            postings = emptyList()
-        )
-        val createdVoucher = voucherApi.createVoucher(emptyVoucherPayload)
-        return "redirect:/voucher/${createdVoucher.id}?tenantId=${tenantId()}"
+        val emptyVoucher = voucherApi.findOrCreateEmptyVoucher()
+        return "redirect:/voucher/${emptyVoucher.id}?tenantId=${tenantId()}"
     }
 
     @GetMapping(value = ["/{id}"])
@@ -56,8 +51,16 @@ class VoucherWebController(
         val voucher = voucherApi.findVoucherById(id)
             ?: throw IllegalArgumentException("Voucher not found")
 
+        // Convert database postings to UI posting lines
+        val uiPostingLines = if (voucher.postings.isNotEmpty()) {
+            voucherWebService.convertPostingsToUILines(voucher.postings.toList())
+        } else {
+            emptyList()
+        }
+
         setupModelAttributes(model)
         model.addAttribute("voucher", voucher)
+        model.addAttribute("uiPostingLines", uiPostingLines)
         model.addAttribute("voucherId", id)
         model.addAttribute("voucherDate", voucher.date.toString())
         return "voucher/advanced-voucher"
