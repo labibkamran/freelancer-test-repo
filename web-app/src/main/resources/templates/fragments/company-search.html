@@ -18,7 +18,9 @@
     <div th:if="${companies}" class="search-dropdown" style="display: block;">
         <div th:each="company : ${companies}" 
              class="search-item" 
-             th:attr="onclick='selectCompany(\'' + ${company.name} + '\', \'' + ${company.registrationNumber} + '\')'">
+             th:attr="data-name=${company.name}, data-org-number=${company.registrationNumber}, data-country-code='NO'"
+             onclick="selectCompanyFromSearch(this)"
+             style="cursor: pointer;">
             <div class="search-item-name" th:text="${company.name}" />
                     <div class="search-item-details">
             <span th:if="${!#strings.isEmpty(company.registrationNumber)}" th:text="'Org. Nr: ' + ${company.registrationNumber}" />

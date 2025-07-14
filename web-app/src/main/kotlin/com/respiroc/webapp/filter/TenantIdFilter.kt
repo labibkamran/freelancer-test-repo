@@ -1,6 +1,6 @@
 package com.respiroc.webapp.filter
 
-import com.respiroc.user.api.UserInternalApi
+import com.respiroc.user.application.UserService
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserTenantContext
 import jakarta.servlet.FilterChain
@@ -15,15 +15,28 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    val userService: UserInternalApi
+    val userService: UserService
 ) : OncePerRequestFilter() {
-    private val paths: List<String> = listOf("/dashboard/**", "/voucher/**", "/tenant/**", "/company/**", "/report/**", "/ledger/**")
+
+    private val paths: List<String> = listOf(
+        "/dashboard/**",
+        "/voucher/**",
+        "/tenant/**",
+        "/company/**",
+        "/report/**",
+        "/ledger/**",
+        "/htmx/**"
+    )
+
     private val excludePaths: List<String> = listOf(
         "/tenant/create",
-        "/company/search",
         "/assets/**",
         "/errors/**",
-        "/error/**"
+        "/error/**",
+        "/htmx/auth/**",
+        "/htmx/tenant/create",
+        "/htmx/company/search",
+        "/htmx/currency/**"
     )
     private val paramName: String = "tenantId"
     private val matcher = AntPathMatcher()
@@ -106,7 +119,8 @@ class TenantIdFilter(
         val roles = userService.findTenantRoles(springUser.ctx.id, tenantIdLong)
         val user = springUser.ctx
         val currentTenant = user.tenants.find { it.id == tenantIdLong }!!
-        user.currentTenant = UserTenantContext(tenantIdLong, currentTenant.companyName, roles)
+        user.currentTenant =
+            UserTenantContext(tenantIdLong, currentTenant.companyName, currentTenant.currencyCode, roles)
         setSecurityContext(SpringUser(user), request)
     }
 
