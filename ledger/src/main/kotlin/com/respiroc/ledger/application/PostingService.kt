@@ -1,16 +1,15 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.PostingInternalApi
-import com.respiroc.ledger.api.payload.TrialBalanceEntry
-import com.respiroc.ledger.api.payload.TrialBalancePayload
-import com.respiroc.ledger.api.payload.GeneralLedgerPayload
-import com.respiroc.ledger.api.payload.GeneralLedgerAccountEntry
-import com.respiroc.ledger.api.payload.GeneralLedgerPostingEntry
-import com.respiroc.ledger.api.payload.ProfitLossEntry
-import com.respiroc.ledger.api.payload.ProfitLossPayload
+import com.respiroc.ledger.application.payload.TrialBalanceEntry
+import com.respiroc.ledger.application.payload.TrialBalancePayload
+import com.respiroc.ledger.application.payload.GeneralLedgerPayload
+import com.respiroc.ledger.application.payload.GeneralLedgerAccountEntry
+import com.respiroc.ledger.application.payload.GeneralLedgerPostingEntry
+import com.respiroc.ledger.application.payload.ProfitLossEntry
+import com.respiroc.ledger.application.payload.ProfitLossPayload
 import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.ledger.domain.repository.PostingRepository
+import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -20,14 +19,14 @@ import java.time.LocalDate
 @Transactional
 class PostingService(
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi
-) : PostingInternalApi {
+    private val accountService: AccountService
+) : ContextAwareApi {
 
     @Transactional(readOnly = true)
-    override fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload {
+    fun getTrialBalance(startDate: LocalDate, endDate: LocalDate): TrialBalancePayload {
         val tenantId = currentTenantId()
         val accountNumbers = postingRepository.findDistinctAccountNumbersByTenant(tenantId)
-        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+        val accounts = accountService.findAllAccounts().associateBy { it.noAccountNumber }
 
         val trialBalanceEntries = accountNumbers.mapNotNull { accountNumber ->
             val account = accounts[accountNumber]
@@ -65,9 +64,9 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun getPostingsForProfitLoss(startDate: LocalDate, endDate: LocalDate): Map<AccountType, ProfitLossPayload> {
+    fun getPostingsForProfitLoss(startDate: LocalDate, endDate: LocalDate): Map<AccountType, ProfitLossPayload> {
         val tenantId = currentTenantId()
-        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+        val accounts = accountService.findAllAccounts().associateBy { it.noAccountNumber }
 
         val profitLossPostings = postingRepository.findProfitLossPostings(tenantId, startDate, endDate)
 
@@ -100,13 +99,13 @@ class PostingService(
     }
 
     @Transactional(readOnly = true)
-    override fun getGeneralLedger(
+    fun getGeneralLedger(
         startDate: LocalDate,
         endDate: LocalDate,
         accountNumber: String?
     ): GeneralLedgerPayload {
         val tenantId = currentTenantId()
-        val accounts = accountApi.findAllAccounts().associateBy { it.noAccountNumber }
+        val accounts = accountService.findAllAccounts().associateBy { it.noAccountNumber }
 
         val summaryData = postingRepository.getGeneralLedgerSummary(accountNumber, tenantId, startDate, endDate)
 

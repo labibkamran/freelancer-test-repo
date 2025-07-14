@@ -1,7 +1,7 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.api.PostingInternalApi
-import com.respiroc.ledger.api.payload.ProfitLossPayload
+import com.respiroc.ledger.application.payload.ProfitLossPayload
+import com.respiroc.ledger.application.PostingService
 import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
@@ -18,7 +18,7 @@ import java.time.LocalDate
 @Controller
 @RequestMapping(value = ["/report"])
 class ReportWebController(
-    private val postingApi: PostingInternalApi
+    private val postingService: PostingService
 ) : BaseController() {
 
     @GetMapping(value = ["/trial-balance"])
@@ -34,7 +34,7 @@ class ReportWebController(
         // Default to current month if no dates provided
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
-        val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
+        val trialBalanceData = postingService.getTrialBalance(defaultStartDate, defaultEndDate)
 
         addCommonAttributes(model, "Trial Balance")
         model.addAttribute("trialBalanceData", trialBalanceData)
@@ -57,7 +57,7 @@ class ReportWebController(
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+        val postingsForProfitLoss = postingService.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
 
         addCommonAttributes(model, "Profit & Loss")
         model.addAttribute("startDate", defaultStartDate)
@@ -73,7 +73,7 @@ class ReportWebController(
 @Controller
 @RequestMapping("/htmx/report")
 class ReportHTMXController(
-    private val postingApi: PostingInternalApi
+    private val postingService: PostingService
 ) : BaseController() {
 
     @GetMapping("/trial-balance")
@@ -91,7 +91,7 @@ class ReportHTMXController(
             val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
+            val trialBalanceData = postingService.getTrialBalance(defaultStartDate, defaultEndDate)
 
             model.addAttribute(userAttributeName, springUser())
             model.addAttribute("trialBalanceData", trialBalanceData)
@@ -120,7 +120,7 @@ class ReportHTMXController(
             val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
             val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-            val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+            val postingsForProfitLoss = postingService.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
 
             model.addAttribute(userAttributeName, springUser())
             model.addAttribute("startDate", defaultStartDate)
