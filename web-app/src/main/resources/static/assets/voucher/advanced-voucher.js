@@ -1,21 +1,54 @@
-// Simplified Advanced Voucher JavaScript - Basic functionality
 let rowCounter = 0;
 
-// Initialize form on page load
 document.addEventListener('DOMContentLoaded', function () {
     // Only add a posting line if there are no existing posting lines
     const existingPostings = document.querySelectorAll('.posting-line-row');
     if (existingPostings.length === 0) {
         addPostingLine();
     } else {
-        // Set rowCounter to the number of existing postings for new additions
         rowCounter = existingPostings.length;
-        // Update balance for existing postings
-        updateBalance();
+        setTimeout(updateBalance, 200)
+    }
+
+    if (typeof customElements !== 'undefined' && customElements.whenDefined) {
+        customElements.whenDefined('r-combobox').then(() => {
+            initializeExistingPostingComboboxes();
+        });
+    } else {
+        setTimeout(initializeExistingPostingComboboxes, 100);
     }
 });
 
-// Add new posting line
+function initializeExistingPostingComboboxes() {
+    // Setup account comboboxes
+    const accountItems = accounts.map(account => ({
+        value: account.noAccountNumber,
+        title: account.noAccountNumber,
+        subtitle: account.accountName,
+        displayText: account.noAccountNumber + ' - ' + account.accountName
+    }));
+
+    // Setup VAT code comboboxes
+    const vatItems = [
+        { value: '0', title: 'No VAT', displayText: 'No VAT' }
+    ].concat(vatCodes.map(vat => ({
+        value: vat.code,
+        title: vat.code,
+        subtitle: '(' + vat.rate + '%) - ' + vat.description,
+        displayText: vat.code + ' (' + vat.rate + '%) - ' + vat.description
+    })));
+
+    // Initialize all existing comboboxes
+    document.querySelectorAll('r-combobox').forEach(combobox => {
+        if (combobox.id.includes('account')) {
+            combobox.items = accountItems;
+        } else if (combobox.id.includes('vat')) {
+            combobox.items = vatItems;
+        }
+        combobox.addEventListener('change', () => updateBalance());
+    });
+}
+
 function addPostingLine() {
     const tbody = document.getElementById('postingLines');
     if (!tbody) {
@@ -23,14 +56,12 @@ function addPostingLine() {
         return;
     }
 
-    // Get tenant ID from URL
     const tenantId = new URLSearchParams(window.location.search).get('tenantId');
     const url = tenantId ?
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}&tenantId=${tenantId}` :
         `/htmx/voucher/add-posting-line?rowCounter=${rowCounter}`;
 
 
-    // Use HTMX to fetch the new posting line
     htmx.ajax('GET', url, {
         target: '#postingLines',
         swap: 'beforeend',
@@ -45,7 +76,6 @@ function addPostingLine() {
     });
 }
 
-// Remove posting line
 function removePostingLine(button) {
     const row = button.closest('tr');
     const rows = document.querySelectorAll('.posting-line-row');
@@ -57,12 +87,10 @@ function removePostingLine(button) {
     }
 }
 
-// Update balance by sending form data to server via HTMX
 function updateBalance() {
     const form = document.getElementById('voucherForm');
     if (!form) return;
 
-    // Use HTMX to submit the form data to the balance endpoint
     htmx.ajax('POST', '/htmx/voucher/update-balance', {
         source: form,
         target: '#balanceFooter',
@@ -77,9 +105,6 @@ function updateBalance() {
     });
 }
 
-
-// Handle form validation before submission
-// Show validation error message
 function showValidationError(message) {
     const messagesDiv = document.getElementById('form-messages');
     if (messagesDiv) {
@@ -91,7 +116,6 @@ function showValidationError(message) {
     }
 }
 
-// Handle HTMX events and errors
 document.addEventListener('htmx:responseError', (e) => {
     console.error('HTMX Error:', e.detail);
     showValidationError('An error occurred. Please try again.');
@@ -102,21 +126,18 @@ document.addEventListener('htmx:sendError', (e) => {
     showValidationError('Network error. Please check your connection.');
 });
 
-// Auto-trigger balance update
 document.addEventListener('change', (e) => {
     if (e.target.matches('input[type="number"], select, wa-input, wa-select')) {
         setTimeout(updateBalance, 100);
     }
 });
 
-// Configure HTMX requests with tenant ID and form data
 document.addEventListener('htmx:configRequest', (e) => {
     const tenantId = new URLSearchParams(window.location.search).get('tenantId');
     if (tenantId && e.detail.path.includes('/htmx/')) {
         e.detail.parameters.tenantId = tenantId;
     }
 
-    // Add r-combobox values to form data for all requests
     if (e.detail.elt && e.detail.elt.tagName === 'FORM') {
         const comboboxes = e.detail.elt.querySelectorAll('r-combobox');
         comboboxes.forEach(combobox => {
