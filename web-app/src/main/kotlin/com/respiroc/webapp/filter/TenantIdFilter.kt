@@ -1,6 +1,6 @@
 package com.respiroc.webapp.filter
 
-import com.respiroc.user.api.UserInternalApi
+import com.respiroc.user.application.UserService
 import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserTenantContext
 import jakarta.servlet.FilterChain
@@ -15,7 +15,7 @@ import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class TenantIdFilter(
-    val userService: UserInternalApi
+    val userService: UserService
 ) : OncePerRequestFilter() {
 
     private val paths: List<String> = listOf(

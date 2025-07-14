@@ -1,8 +1,8 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.payload.CreateVoucherPayload
+import com.respiroc.ledger.application.payload.CreateVoucherPayload
+import com.respiroc.ledger.application.AccountService
+import com.respiroc.ledger.application.VatService
 import com.respiroc.ledger.application.VoucherService
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.BaseController
@@ -21,9 +21,9 @@ import java.time.LocalDate
 @Controller
 @RequestMapping(value = ["/voucher"])
 class VoucherWebController(
-    private val accountApi: AccountInternalApi,
+    private val accountService: AccountService,
     private val currencyService: CurrencyService,
-    private val vatApi: VatInternalApi,
+    private val vatService: VatService,
     private val voucherApi: VoucherService
 ) : BaseController() {
 
@@ -68,8 +68,8 @@ class VoucherWebController(
     // -------------------------------
 
     private fun setupModelAttributes(model: Model) {
-        val accounts = accountApi.findAllAccounts()
-        val vatCodes = vatApi.findAllVatCodes()
+        val accounts = accountService.findAllAccounts()
+        val vatCodes = vatService.findAllVatCodes()
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
         addCommonAttributes(model, "General Ledger")
@@ -83,9 +83,9 @@ class VoucherWebController(
 @Controller
 @RequestMapping("/htmx/voucher")
 class VoucherHTMXController(
-    private val accountApi: AccountInternalApi,
+    private val accountService: AccountService,
     private val currencyService: CurrencyService,
-    private val vatApi: VatInternalApi,
+    private val vatService: VatService,
     private val voucherWebService: VoucherWebService
 ) : BaseController() {
 
@@ -125,8 +125,8 @@ class VoucherHTMXController(
         @RequestParam(defaultValue = "0") rowCounter: Int,
         model: Model
     ): String {
-        val accounts = accountApi.findAllAccounts()
-        val vatCodes = vatApi.findAllVatCodes()
+        val accounts = accountService.findAllAccounts()
+        val vatCodes = vatService.findAllVatCodes()
         val supportedCurrencies = currencyService.getSupportedCurrencies()
         val initialDate = LocalDate.now()
 
