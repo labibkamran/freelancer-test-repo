@@ -1,4 +1,3 @@
-asdfasdfljadsklj
 Backend application code:
 
 * We always use the latest version of Spring boot, so use new features like the
