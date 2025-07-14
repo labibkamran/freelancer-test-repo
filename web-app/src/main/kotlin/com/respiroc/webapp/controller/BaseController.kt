@@ -4,12 +4,10 @@ import com.respiroc.util.context.SpringUser
 import com.respiroc.util.context.UserContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
-import kotlin.reflect.full.memberProperties
 
 open class BaseController {
 
     val titleAttributeName: String = "title"
-    val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
     val tenantsAttributeName: String = "tenants"
@@ -28,10 +26,8 @@ open class BaseController {
         return user().currentTenant?.id ?: throw IllegalStateException("No current tenant is set for the user")
     }
 
-    inline fun <reified T : Any> toMap(obj: T): Map<String, Any?> {
-        return T::class.memberProperties.associate { prop ->
-            prop.name to prop.get(obj)
-        }
+    fun countryCode(): String {
+        return user().currentTenant?.countryCode ?: throw IllegalStateException("No current tenant is set for the user")
     }
 
     fun addCommonAttributes(

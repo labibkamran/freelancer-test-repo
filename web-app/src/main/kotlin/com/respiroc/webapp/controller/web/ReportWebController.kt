@@ -1,12 +1,11 @@
 package com.respiroc.webapp.controller.web
 
-import com.respiroc.ledger.api.PostingInternalApi
-import com.respiroc.ledger.api.payload.BalanceSheetPayload
-import com.respiroc.ledger.api.payload.ProfitLossPayload
+import com.respiroc.ledger.application.payload.ProfitLossPayload
+import com.respiroc.ledger.application.PostingService
 import com.respiroc.ledger.domain.model.AccountType
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
-import org.slf4j.LoggerFactory
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -18,9 +17,9 @@ import java.time.LocalDate
 
 @Controller
 @RequestMapping(value = ["/report"])
-class ReportWebController(private val postingApi: PostingInternalApi) : BaseController() {
-
-    private val logger = LoggerFactory.getLogger(ReportWebController::class.java)
+class ReportWebController(
+    private val postingService: PostingService
+) : BaseController() {
 
     @GetMapping(value = ["/trial-balance"])
     fun trialBalance(
@@ -35,7 +34,7 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         // Default to current month if no dates provided
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
-        val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
+        val trialBalanceData = postingService.getTrialBalance(defaultStartDate, defaultEndDate)
 
         addCommonAttributes(model, "Trial Balance")
         model.addAttribute("trialBalanceData", trialBalanceData)
@@ -43,36 +42,6 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         model.addAttribute("endDate", defaultEndDate)
 
         return "report/trial-balance"
-    }
-
-    @GetMapping(value = ["/trial-balance"], headers = ["HX-Request"])
-    fun trialBalanceHtmx(
-        @RequestParam(name = "startDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        startDate: LocalDate?,
-        @RequestParam(name = "endDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        endDate: LocalDate?,
-        model: Model
-    ): String {
-        return try {
-            // Default to current month if no dates provided
-            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
-
-            val trialBalanceData = postingApi.getTrialBalance(defaultStartDate, defaultEndDate)
-
-            model.addAttribute(userAttributeName, springUser())
-            model.addAttribute("trialBalanceData", trialBalanceData)
-            model.addAttribute("startDate", defaultStartDate)
-            model.addAttribute("endDate", defaultEndDate)
-
-            "report/trial-balance :: tableContent"
-        } catch (e: Exception) {
-            logger.error("Error loading trial balance data via HTMX", e)
-            model.addAttribute(calloutAttributeName, Callout.Error("Error loading trial balance: ${e.message}"))
-            return "report/trial-balance :: error-message"
-        }
     }
 
     @GetMapping(value = ["/profit-loss"])
@@ -85,14 +54,12 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         endDate: LocalDate?,
         model: Model
     ): String {
-        val springUser = springUser()
-
         val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
         val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
 
-        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+        val postingsForProfitLoss = postingService.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
 
-        model.addAttribute("user", springUser)
+        addCommonAttributes(model, "Profit & Loss")
         model.addAttribute("startDate", defaultStartDate)
         model.addAttribute("endDate", defaultEndDate)
         model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
@@ -100,39 +67,6 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
 
         return "report/profit-loss"
-    }
-
-    @GetMapping(value = ["/profit-loss"], headers = ["HX-Request"])
-    fun profitLossHtmx(
-        @RequestParam(name = "startDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        startDate: LocalDate?,
-        @RequestParam(name = "endDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        endDate: LocalDate?,
-        model: Model
-    ): String {
-        return try {
-        val springUser = springUser()
-
-        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
-        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
-
-        val postingsForProfitLoss = postingApi.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
-
-        model.addAttribute("user", springUser)
-        model.addAttribute("startDate", defaultStartDate)
-        model.addAttribute("endDate", defaultEndDate)
-        model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-        model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-        model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
-
-         "report/profit-loss :: tableContent"
-        } catch (e: Exception) {
-            logger.error("Error loading profit loss data via HTMX", e)
-            model.addAttribute(calloutAttributeName, Callout.Error("Error loading profit loss: ${e.message}"))
-            return "report/profit-loss :: error-message"
-        }
     }
 
     @GetMapping(value = ["/balance-sheet"])
@@ -160,6 +94,73 @@ class ReportWebController(private val postingApi: PostingInternalApi) : BaseCont
         model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetPayload(emptyList(), BigDecimal.ZERO))
 
         return "report/balance-sheet"
+    }
+}
+
+@Controller
+@RequestMapping("/htmx/report")
+class ReportHTMXController(
+    private val postingService: PostingService
+) : BaseController() {
+
+    @GetMapping("/trial-balance")
+    @HxRequest
+    fun trialBalanceHTMX(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        return try {
+            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+            val trialBalanceData = postingService.getTrialBalance(defaultStartDate, defaultEndDate)
+
+            model.addAttribute(userAttributeName, springUser())
+            model.addAttribute("trialBalanceData", trialBalanceData)
+            model.addAttribute("startDate", defaultStartDate)
+            model.addAttribute("endDate", defaultEndDate)
+
+            "report/trial-balance :: tableContent"
+        } catch (e: Exception) {
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading trial balance: ${e.message}"))
+            "report/trial-balance :: error-message"
+        }
+    }
+
+    @GetMapping(value = ["/profit-loss"])
+    @HxRequest
+    fun profitLossHTMX(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        return try {
+            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+            val postingsForProfitLoss = postingService.getPostingsForProfitLoss(defaultStartDate, defaultEndDate)
+
+            model.addAttribute(userAttributeName, springUser())
+            model.addAttribute("startDate", defaultStartDate)
+            model.addAttribute("endDate", defaultEndDate)
+            model.addAttribute("assetPostings", postingsForProfitLoss[AccountType.ASSET] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("revenuePostings", postingsForProfitLoss[AccountType.REVENUE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("operatingCostPostings", postingsForProfitLoss[AccountType.EXPENSE] ?: ProfitLossPayload(emptyList(), BigDecimal.ZERO))
+
+            "report/profit-loss :: tableContent"
+        } catch (e: Exception) {
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading profit loss: ${e.message}"))
+            return "report/profit-loss :: error-message"
+        }
     }
 
     @GetMapping(value = ["/balance-sheet"], headers = ["HX-Request"])

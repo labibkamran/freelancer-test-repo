@@ -3,9 +3,8 @@ package com.respiroc.user.application
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.tenant.domain.model.TenantPermission
 import com.respiroc.tenant.domain.model.TenantRole
-import com.respiroc.user.api.UserInternalApi
-import com.respiroc.user.api.result.ForgotResult
-import com.respiroc.user.api.result.LoginResult
+import com.respiroc.user.application.payload.ForgotPayload
+import com.respiroc.user.application.payload.LoginPayload
 import com.respiroc.user.application.jwt.JwtUtils
 import com.respiroc.user.domain.model.*
 import com.respiroc.user.domain.repository.UserRepository
@@ -13,6 +12,7 @@ import com.respiroc.user.domain.repository.UserSessionRepository
 import com.respiroc.user.domain.repository.UserTenantRepository
 import com.respiroc.user.domain.repository.UserTenantRoleRepository
 import com.respiroc.util.context.*
+import com.respiroc.util.currency.CurrencyService
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -30,14 +30,15 @@ class UserService(
     private val userSessionRepository: UserSessionRepository,
     private val userTenantRoleRepository: UserTenantRoleRepository,
     private val userTenantRepository: UserTenantRepository,
-    private val jwt: JwtUtils
-) : UserInternalApi {
+    private val jwt: JwtUtils,
+    private val currencyService: CurrencyService
+) {
 
     private val passwordEncoder = BCryptPasswordEncoder()
 
     private val JWT_TOKEN_PERIOD: Long = 24 * 60 * 60 * 1000
 
-    override fun signupByEmailPassword(email: String, password: String) {
+    fun signupByEmailPassword(email: String, password: String): LoginPayload {
         val existUser = userRepository.findByEmail(email)
         if (existUser != null) {
             throw IllegalArgumentException("User already exists")
@@ -46,20 +47,20 @@ class UserService(
         val newUser = User()
         newUser.email = email
         newUser.passwordHash = passwordEncoder.encode(password)
-        signup(newUser)
+        return signup(newUser)
     }
 
-    override fun loginByEmailPassword(
+    fun loginByEmailPassword(
         email: String,
         password: String
-    ): LoginResult {
+    ): LoginPayload {
         val user = userRepository.findByEmail(email) ?: throw UsernameNotFoundException("Email not found")
         if (!passwordEncoder.matches(password, user.passwordHash)) throw BadCredentialsException("Login incorrect")
 
         return login(user)
     }
 
-    override fun changePassword(
+    fun changePassword(
         user: SpringUser,
         oldPassword: String,
         newPassword: String
@@ -67,26 +68,26 @@ class UserService(
         TODO("Not yet implemented")
     }
 
-    override fun logout(token: String) {
+    fun logout(token: String) {
         TODO("Not yet implemented")
     }
 
-    override fun forgetPassword(
+    fun forgetPassword(
         email: String,
         ipAddress: String
-    ): ForgotResult {
+    ): ForgotPayload {
         TODO("Not yet implemented")
     }
 
-    override fun resetPassword(token: String, newPassword: String) {
+    fun resetPassword(token: String, newPassword: String) {
         TODO("Not yet implemented")
     }
 
-    override fun setPassword(user: SpringUser, newPassword: String) {
+    fun setPassword(user: SpringUser, newPassword: String) {
         TODO("Not yet implemented")
     }
 
-    override fun findByToken(token: String): UserContext? {
+    fun findByToken(token: String): UserContext? {
         return userRepository.findByToken(token, Instant.now())?.let { user ->
             if (jwt.isTokenValid(token = token, subject = user.email)) {
                 user.toUserContext()
@@ -96,21 +97,21 @@ class UserService(
         }
     }
 
-    override fun findByEmail(email: String): UserContext? {
+    fun findByEmail(email: String): UserContext? {
         TODO("Not yet implemented")
     }
 
-    override fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext> {
+    fun findTenantRoles(userId: Long, tenantId: Long): List<TenantRoleContext> {
         return userRepository.findUserWithTenantRoles(userId, tenantId)!!.userTenants.single().roles.map {
             it.tenantRole.toTenantRoleContext()
         }
     }
 
-    override fun generateToken(user: SpringUser): String {
+    fun generateToken(user: SpringUser): String {
         TODO("Not yet implemented")
     }
 
-    override fun addUserTenantRole(
+    fun addUserTenantRole(
         tenant: Tenant,
         role: TenantRole,
         user: UserContext
@@ -140,11 +141,12 @@ class UserService(
     // Private Helper
     // ---------------------------------
 
-    private fun signup(user: User) {
+    private fun signup(user: User): LoginPayload {
         val savedUser: User = userRepository.saveAndFlush(user)
+        return login(savedUser)
     }
 
-    private fun login(user: User): LoginResult {
+    private fun login(user: User): LoginPayload {
         val springUser = SpringUser(user.toUserContext())
         AccountStatusUserDetailsChecker().check(springUser)
 
@@ -160,7 +162,7 @@ class UserService(
         user.lastLoginAt = Instant.now()
         userRepository.save(user)
 
-        return LoginResult(token, springUser)
+        return LoginPayload(token, springUser)
     }
 
     private fun User.toUserContext(): UserContext {
@@ -179,7 +181,11 @@ class UserService(
     private fun User.getTenantsInfo(): List<TenantInfo> {
         return this.userTenants.map {
             val tenant = it.tenant
-            TenantInfo(tenant.id, tenant.getCompanyName())
+            TenantInfo(
+                tenant.id,
+                tenant.getCompanyName(),
+                currencyService.getCompanyCurrency(tenant.getCompanyCountryCode())
+            )
         }.sortedBy { it.id }
     }
 

@@ -39,4 +39,8 @@ open class Tenant : Serializable {
     fun getCompanyName(): String {
         return company.name
     }
+
+    fun getCompanyCountryCode(): String {
+        return company.countryCode
+    }
 }
