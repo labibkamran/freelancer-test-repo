@@ -8,26 +8,17 @@ import org.springframework.stereotype.Service
 @Service
 class AddressService(val addressRepository: AddressRepository) {
     fun getOrCreateAddress(payload: CreateAddressPayload): Address {
-        val address =
-            addressRepository
-                .findAddressByCountryIsoCodeIgnoreCaseAndCityIgnoreCaseAndPostalCodeIgnoreCase(
-                    countryIsoCode = payload.countryIsoCode,
-                    city = payload.city,
-                    postalCode = payload.postalCode
-                )
-        if (address != null) return address
-        return createAddress(payload)
+        return addressRepository.upsertAddress(createAddress(payload))
     }
 
-    fun createAddress(payload: CreateAddressPayload): Address {
-        var address = Address()
+    private fun createAddress(payload: CreateAddressPayload): Address {
+        val address = Address()
         address.countryIsoCode = payload.countryIsoCode
         address.city = payload.city
         address.postalCode = payload.postalCode
         address.administrativeDivisionCode = payload.administrativeDivisionCode
         address.primaryAddress = payload.primaryAddress
         address.secondaryAddress = payload.secondaryAddress
-        address = addressRepository.save(address)
         return address
     }
 }
