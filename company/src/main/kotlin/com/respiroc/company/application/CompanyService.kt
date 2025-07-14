@@ -45,7 +45,7 @@ class CompanyService(
         val payload = CreateAddressPayload(
             city = command.city!!,
             primaryAddress = command.primaryAddress!!,
-            postalCode = command.postalCode!!,
+            postalCode = command.postalCode,
             countryIsoCode = command.addressCountryCode!!,
             secondaryAddress = command.secondaryAddress,
             administrativeDivisionCode = command.administrativeDivisionCode
@@ -54,6 +54,6 @@ class CompanyService(
     }
 
     fun isValidAddress(command: CreateCompanyPayload): Boolean {
-        return !(command.primaryAddress == null || command.city == null || command.postalCode == null || command.addressCountryCode == null)
+        return !(command.primaryAddress == null || command.city == null || command.addressCountryCode == null)
     }
 }
