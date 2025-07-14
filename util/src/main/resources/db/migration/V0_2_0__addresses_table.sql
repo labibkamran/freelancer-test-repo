@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS addresses
     street_address_2             TEXT
 );
 
-CREATE INDEX idx_addresses_country_postal_city ON addresses (country_iso_code, postal_code, city);
+CREATE UNIQUE INDEX idx_addresses_country_postal_city_unique ON addresses (country_iso_code, city, postal_code);
 
 -- add address to company
 ALTER TABLE companies
