@@ -75,7 +75,7 @@ class VoucherWebController(
         val vatCodes = vatService.findAllVatCodes()
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
-        addCommonAttributes(model, "General Ledger")
+        addCommonAttributes(model, "New Voucher")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
