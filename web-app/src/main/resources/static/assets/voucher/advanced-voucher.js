@@ -99,7 +99,6 @@ function updateBalance() {
             'HX-Request': 'true'
         }
     }).then(() => {
-        updateSaveButtonState();
     }).catch(error => {
         console.error('Error updating balance:', error);
     });
