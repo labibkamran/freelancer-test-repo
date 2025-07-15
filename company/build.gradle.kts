@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     implementation(project(":util"))
-    implementation(project(":address"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework:spring-context")
