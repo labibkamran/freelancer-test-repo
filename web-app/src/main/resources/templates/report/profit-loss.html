@@ -16,7 +16,7 @@
                 <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
 
                     <div class="filter-group">
-                        <label class="filter-label" for="startDate">Start Date</label>
+                        <label class="filter-label" for="startDate" th:text="#{start_date}" />
                         <wa-input type="date"
                                   size="small"
                                   id="startDate"
@@ -31,7 +31,7 @@
                     </div>
 
                     <div class="filter-group">
-                        <label class="filter-label" for="endDate">End Date</label>
+                        <label class="filter-label" for="endDate" th:text="#{end_date}" />
                         <wa-input type="date"
                                   size="small"
                                   id="endDate"
@@ -49,7 +49,7 @@
                     <div class="filter-group">
                         <div id="loading-indicator" class="htmx-indicator loading-indicator">
                             <wa-spinner size="small"></wa-spinner>
-                            <span style="margin-left: 0.5rem;">Loading...</span>
+                            <span style="margin-left: 0.5rem;" th:text="#{loading}" />
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
 
             <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
                 <wa-icon name="exclamation-triangle"></wa-icon>
-                <span th:text="${errorMessage}">Error occurred</span>
+                <span th:text="${errorMessage}" />
             </div>
 
 
@@ -81,13 +81,13 @@
                                 <thead>
 
                                 <tr>
-                                    <th style="width: 15%;">Account</th>
-                                    <th style="width: 35%;">Account Name</th>
-                                    <th style="width: 35%;">Description</th>
-                                    <th class="amount-header" style="width: 15%;">Amount</th>
+                                    <th style="width: 15%;" th:text="#{account}" />
+                                    <th style="width: 35%;" th:text="#{account_name}" />
+                                    <th style="width: 35%;" th:text="#{description}" />
+                                    <th class="amount-header" style="width: 15%;" th:text="#{amount}" />
                                 </tr>
                                 <tr>
-                                    <th style="width: 15%">Operating revenues</th>
+                                    <th style="width: 15%" th:text="#{operating_revenues}" />
                                     <th style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 15%;"></th>
@@ -114,7 +114,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row">
-                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
+                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
                                     <td class="amount-cell">
 
                                     </td>
@@ -131,7 +131,7 @@
                             <table class="trial-balance-table">
                                 <thead>
                                 <tr>
-                                    <th style="width: 15%">Operating expenses</th>
+                                    <th style="width: 15%" th:text="#{operating_expenses}" />
                                     <th style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 15%;"></th>
@@ -158,7 +158,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row" >
-                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
+                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
                                     <td class="amount-cell">
 
                                     </td>
@@ -174,7 +174,7 @@
                             <table class="trial-balance-table">
                                 <thead>
                                 <tr>
-                                    <th style="width: 15%">Assets</th>
+                                    <th style="width: 15%" th:text="#{assets}" />
                                     <th style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 35%;"></th>
                                     <th class="amount-header" style="width: 15%;"></th>
@@ -202,7 +202,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="total-row" >
-                                    <td colspan="1" style="text-align: center;"><strong>Total</strong></td>
+                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
                                     <td class="amount-cell">
 
                                     </td>
@@ -225,9 +225,9 @@
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
                         </div>
-                        <h3>No Data Available</h3>
-                        <p>No posting data found for the selected period.</p>
-                        <p>Try adjusting the date range or create some postings first.</p>
+                        <h3 th:text="#{no_Data_available}" />
+                        <p th:text="#{no_posting_found}" />
+                        <p th:text="#{try_adjusting_date}" />
                     </div>
                 </div>
             </div>
