@@ -76,15 +76,45 @@ function addPostingLine() {
     });
 }
 
-function removePostingLine(button) {
+function removePostingLine(button, rowIndex) {
     const row = button.closest('tr');
     const rows = document.querySelectorAll('.posting-line-row');
 
-    // Don't remove the last row
     if (rows.length > 1) {
         row.remove();
+        renumberPostingRows();
         updateBalance();
     }
+}
+
+function renumberPostingRows() {
+    const rows = document.querySelectorAll('.posting-line-row');
+    rows.forEach((row, index) => {
+        row.id = `posting-line-row-${index}`;
+
+        const hiddenRowNumber = row.querySelector('input[type="hidden"]');
+        if (hiddenRowNumber) {
+            hiddenRowNumber.name = `postingLines[${index}].rowNumber`;
+            hiddenRowNumber.value = index;
+        }
+
+        const formFields = row.querySelectorAll('input, select, r-combobox');
+        formFields.forEach(field => {
+            if (field.name) {
+                field.name = field.name.replace(/postingLines\[\d+\]/, `postingLines[${index}]`);
+            }
+        });
+
+        const tabindexFields = row.querySelectorAll('[tabindex]');
+        tabindexFields.forEach(field => {
+            const currentTabindex = parseInt(field.getAttribute('tabindex'));
+            const baseTabindex = index * 10;
+            const offset = currentTabindex % 10;
+            field.setAttribute('tabindex', baseTabindex + offset);
+        });
+    });
+
+    rowCounter = rows.length;
 }
 
 function updateBalance() {
