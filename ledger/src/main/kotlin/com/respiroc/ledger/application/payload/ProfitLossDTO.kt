@@ -2,7 +2,7 @@ package com.respiroc.ledger.application.payload
 
 import java.math.BigDecimal
 
-data class ProfitLossPayload(
+data class ProfitLossDTO(
     val entries: List<ProfitLossEntry>,
     val totalBalance: BigDecimal
 )
