@@ -18,8 +18,8 @@ class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
         query.setParameter("adminDivisionCode", address.administrativeDivisionCode)
         query.setParameter("city", address.city)
         query.setParameter("postalCode", address.postalCode)
-        query.setParameter("streetAddress1", address.primaryAddress)
-        query.setParameter("streetAddress2", address.secondaryAddress)
+        query.setParameter("streetAddress1", address.addressPart1)
+        query.setParameter("streetAddress2", address.addressPart2)
     }
 
     @Transactional
@@ -31,8 +31,8 @@ class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
                 administrative_division_code,
                 city,
                 postal_code,
-                street_address_1,
-                street_address_2
+                address_1,
+                address_2
             )
             VALUES (
                 :countryIsoCode,
@@ -42,7 +42,7 @@ class AddressRepositoryExtensionImpl : AddressRepositoryExtension {
                 :streetAddress1,
                 :streetAddress2
             )
-            ON CONFLICT (country_iso_code, administrative_division_code, city, postal_code, street_address_1, street_address_2)
+            ON CONFLICT (country_iso_code, administrative_division_code, city, postal_code, address_1, address_2)
             DO UPDATE SET 
                 administrative_division_code = EXCLUDED.administrative_division_code
             RETURNING *;

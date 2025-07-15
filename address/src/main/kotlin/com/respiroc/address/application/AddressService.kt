@@ -17,8 +17,8 @@ class AddressService(val addressRepository: AddressRepository) {
         address.city = normalizeAddressField(payload.city)!!
         address.postalCode = removeSpaces(payload.postalCode)
         address.administrativeDivisionCode = removeSpaces(payload.administrativeDivisionCode)?.uppercase()
-        address.primaryAddress = normalizeAddressField(payload.primaryAddress)!!
-        address.secondaryAddress = normalizeAddressField(payload.secondaryAddress)
+        address.addressPart1 = normalizeAddressField(payload.addressPart1)!!
+        address.addressPart2 = normalizeAddressField(payload.addressPart2)
         return address
     }
 

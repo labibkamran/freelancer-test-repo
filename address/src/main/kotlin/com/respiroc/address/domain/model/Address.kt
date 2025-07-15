@@ -24,9 +24,9 @@ class Address {
     @Column(name = "postal_code")
     var postalCode: String? = null
 
-    @Column(name = "street_address_1", nullable = false)
-    var primaryAddress: String = ""
+    @Column(name = "address_1", nullable = false)
+    var addressPart1: String = ""
 
-    @Column(name = "street_address_2")
-    var secondaryAddress: String? = null
+    @Column(name = "address_2")
+    var addressPart2: String? = null
 }
