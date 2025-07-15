@@ -106,7 +106,7 @@
                                         <span class="r-account-name" th:text="${entry.accountDescription}" />
                                     </td>
                                     <td class="r-amount-cell">
-                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'r-positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'r-negative-amount' : 'r-zero-amount'}"
+                                            <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}"/>
                                     </td>
                                 </tr>
@@ -150,7 +150,7 @@
                                         <span class="r-account-name" th:text="${entry.accountDescription}" />
                                     </td>
                                     <td class="r-amount-cell">
-                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'r-positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'r-negative-amount' : 'r-zero-amount'}"
+                                            <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}" />
                                     </td>
                                 </tr>
@@ -194,7 +194,7 @@
                                         <span class="r-account-name" th:text="${entry.accountDescription}" />
                                     </td>
                                     <td class="r-amount-cell">
-                                            <span th:class="${entry.amount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'r-positive-amount' : entry.amount.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'r-negative-amount' : 'r-zero-amount'}"
+                                            <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}" />
                                     </td>
                                 </tr>
