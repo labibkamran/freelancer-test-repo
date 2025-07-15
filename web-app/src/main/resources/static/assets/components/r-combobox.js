@@ -10,13 +10,15 @@ import { LitElement, html, css } from 'lit';
  * - Clear button
  * - Hidden input for form submission
  * - Flexible item structure (title, subtitle, description, meta)
+ * - Optional default value support
  * 
  * Usage:
  * <r-combobox 
  *   id="my-combo"
  *   placeholder="Search..."
  *   name="fieldName"
- *   value="initialValue">
+ *   value="initialValue"
+ *   data-default-value="defaultValue">
  * </r-combobox>
  * 
  * Then set items via JavaScript:
@@ -35,7 +37,8 @@ class RCombobox extends LitElement {
         isOpen: { type: Boolean, state: true },
         searchQuery: { type: String, state: true },
         highlightedIndex: { type: Number, state: true },
-        displayValue: { type: String, state: true }
+        displayValue: { type: String, state: true },
+        defaultValue: { type: String }
     };
 
     static styles = css`
@@ -171,6 +174,7 @@ class RCombobox extends LitElement {
         this.searchQuery = '';
         this.highlightedIndex = -1;
         this.displayValue = '';
+        this.defaultValue = '';
     }
 
     connectedCallback() {
@@ -178,6 +182,11 @@ class RCombobox extends LitElement {
         // Listen for clicks outside to close dropdown
         this._handleOutsideClick = this._handleOutsideClick.bind(this);
         document.addEventListener('click', this._handleOutsideClick);
+        
+        // Read default value from data attribute if not already set
+        if (!this.defaultValue && this.hasAttribute('data-default-value')) {
+            this.defaultValue = this.getAttribute('data-default-value');
+        }
     }
 
     disconnectedCallback() {
@@ -186,19 +195,36 @@ class RCombobox extends LitElement {
     }
 
     updated(changedProperties) {
-        // This is the key change: when items or value are updated,
-        // we ensure the display text is correctly set. This solves the race condition.
-        if ((changedProperties.has('items') || changedProperties.has('value')) && this.value) {
-            const item = this.items.find(i => i.value === this.value);
-            if (item) {
-                const newDisplayValue = item.displayText || `${item.title}${item.subtitle ? ' ' + item.subtitle : ''}`;
-                // Only update if it's different to avoid re-rendering loops
-                if (this.displayValue !== newDisplayValue) {
-                    this.displayValue = newDisplayValue;
-                    this.searchQuery = newDisplayValue; // Also update searchQuery to show in input
+        if (changedProperties.has('items')) {
+            // If we have items and a default value but no current value, set the default
+            if (this.items.length > 0 && this.defaultValue && !this.value) {
+                const defaultItem = this.items.find(i => i.value === this.defaultValue);
+                if (defaultItem) {
+                    this._selectItem(defaultItem);
+                    return;
                 }
-            } else {
-                this.displayValue = ''; // Clear if value is not in items
+            }
+
+            if (this.value) {
+                const item = this.items.find(i => i.value === this.value);
+                if (item) {
+                    const newDisplayValue = item.displayText || `${item.title}${item.subtitle ? ' ' + item.subtitle : ''}`;
+                    // Only update if it's different to avoid re-rendering loops
+                    if (this.displayValue !== newDisplayValue) {
+                        this.displayValue = newDisplayValue;
+                        this.searchQuery = newDisplayValue; // Also update searchQuery to show in input
+                    }
+                } else {
+                    this.displayValue = ''; // Clear if value is not in items
+                }
+            }
+        }
+        
+        // Also check for default value when defaultValue property changes
+        if (changedProperties.has('defaultValue') && this.defaultValue && this.items.length > 0 && !this.value) {
+            const defaultItem = this.items.find(i => i.value === this.defaultValue);
+            if (defaultItem) {
+                this._selectItem(defaultItem);
             }
         }
     }
@@ -330,12 +356,51 @@ class RCombobox extends LitElement {
         }));
     }
 
+    setDefaultValue(defaultValue) {
+        this.defaultValue = defaultValue;
+        // If we have items and no current value, try to apply the default
+        if (this.items.length > 0 && !this.value) {
+            const defaultItem = this.items.find(i => i.value === defaultValue);
+            if (defaultItem) {
+                this._selectItem(defaultItem);
+            }
+        }
+    }
+
+    resetToDefault() {
+        if (this.defaultValue && this.items.length > 0) {
+            const defaultItem = this.items.find(i => i.value === this.defaultValue);
+            if (defaultItem) {
+                this._selectItem(defaultItem);
+            }
+        } else {
+            this._clearValue({ stopPropagation: () => {} });
+        }
+    }
+
+    applyDefaultIfNeeded() {
+        if (this.defaultValue && this.items.length > 0 && !this.value) {
+            const defaultItem = this.items.find(i => i.value === this.defaultValue);
+            if (defaultItem) {
+                this._selectItem(defaultItem);
+                return true;
+            }
+        }
+        return false;
+    }
+
     firstUpdated() {
-        // Set initial input value
         const input = this.shadowRoot.querySelector('.combobox-input');
         if (this.displayValue) {
             input.value = this.displayValue;
             this.searchQuery = this.displayValue;
+        }
+
+        if (this.defaultValue && this.items.length > 0 && !this.value) {
+            const defaultItem = this.items.find(i => i.value === this.defaultValue);
+            if (defaultItem) {
+                this._selectItem(defaultItem);
+            }
         }
     }
 

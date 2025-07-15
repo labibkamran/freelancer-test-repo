@@ -78,6 +78,7 @@ class VoucherWebController(
         addCommonAttributes(model, "New Voucher")
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
+        model.addAttribute("defaultVatCode", vatCodes.first().code)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
     }
 }
@@ -136,6 +137,7 @@ class VoucherHTMXController(
         model.addAttribute("rowCounter", rowCounter)
         model.addAttribute("accounts", accounts)
         model.addAttribute("vatCodes", vatCodes)
+        model.addAttribute("defaultVatCode", vatCodes.first().code)
         model.addAttribute("companyCurrencyCode", countryCode())
         model.addAttribute("supportedCurrencies", supportedCurrencies)
         model.addAttribute("initialDate", initialDate)
