@@ -119,13 +119,6 @@ class VoucherService(
         return voucherRepository.findByIdAndTenantIdWithPostings(id, currentTenantId())
     }
 
-    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
-        val tenantId = currentTenantId()
-
-        postingRepository.deleteByVoucherIdAndRowNumber(voucherId, rowNumber, tenantId)
-        postingRepository.decrementRowNumbersAfterDeleted(voucherId, rowNumber, tenantId)
-    }
-
     // -------------------------------
     // Private Helper Methods
     // -------------------------------

@@ -13,7 +13,7 @@ import java.math.BigDecimal
 
 @Service
 class VoucherWebService(
-    private val voucherApi: VoucherService,
+    private val voucherService: VoucherService,
     private val vatService: VatService,
     private val currencyService: CurrencyService
 ) {
@@ -130,7 +130,7 @@ class VoucherWebService(
             val validPostingLines = request.getValidPostingLines()
             val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
-            val result = voucherApi.updateVoucherWithPostings(voucherId, postingCommands)
+            val result = voucherService.updateVoucherWithPostings(voucherId, postingCommands)
 
             Callout.Success(
                 message = "Voucher ${result.number} updated successfully!"
@@ -298,9 +298,5 @@ class VoucherWebService(
         } else {
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
         }
-    }
-
-    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
-        voucherApi.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
     }
 }

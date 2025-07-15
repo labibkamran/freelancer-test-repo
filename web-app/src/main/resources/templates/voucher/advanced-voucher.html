@@ -151,9 +151,7 @@
                         </td>
                         <td>
                             <wa-button type="button" size="small" variant="danger" tabindex="-1"
-                                     th:hx-delete="@{/htmx/voucher/posting-line/{voucherId}/{rowNumber}(voucherId=${voucherId}, rowNumber=${iterStat.index})}"
-                                     hx-target="closest tr"
-                                     hx-swap="outerHTML">
+                                     th:onclick="'removePostingLine(this, ' + ${iterStat.index} + ')'">
                                 <wa-icon label="Remove posting row" name="trash"></wa-icon>
                             </wa-button>
                         </td>
