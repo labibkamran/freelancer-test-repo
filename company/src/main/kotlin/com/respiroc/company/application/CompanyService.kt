@@ -1,12 +1,11 @@
 package com.respiroc.company.application
 
-import com.respiroc.address.application.AddressService
-import com.respiroc.address.application.payload.CreateAddressPayload
-import com.respiroc.address.domain.model.Address
 import com.respiroc.company.application.payload.CreateCompanyPayload
 import com.respiroc.company.domain.model.Company
 import com.respiroc.company.domain.repository.CompanyRepository
 import com.respiroc.util.currency.CurrencyService
+import com.respiroc.util.domain.addresss.Address
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional
 class CompanyService(
     private val companyRepository: CompanyRepository,
     private val currencyService: CurrencyService,
-    private val addressService: AddressService
+    private val entityManager: EntityManager
 ) {
 
     fun getOrCreateCompany(command: CreateCompanyPayload): Company {
         var company = companyRepository.findCompanyByOrganizationNumberAndName(command.organizationNumber, command.name)
         if (company == null)
-            company =  createCompany(command)
+            company = createCompany(command)
         else if (company.addressId == null) {
             company.address = getOrCreateAddress(command)
             company = companyRepository.save(company)
@@ -42,7 +41,7 @@ class CompanyService(
 
     fun getOrCreateAddress(command: CreateCompanyPayload): Address? {
         if (!isValidAddress(command)) return null
-        val payload = CreateAddressPayload(
+        val address = Address(
             city = command.city!!,
             addressPart1 = command.primaryAddress!!,
             postalCode = command.postalCode,
@@ -50,7 +49,7 @@ class CompanyService(
             addressPart2 = command.secondaryAddress,
             administrativeDivisionCode = command.administrativeDivisionCode
         )
-        return addressService.getOrCreateAddress(payload)
+        return Address.upsertAddress(entityManager, address)
     }
 
     fun isValidAddress(command: CreateCompanyPayload): Boolean {
