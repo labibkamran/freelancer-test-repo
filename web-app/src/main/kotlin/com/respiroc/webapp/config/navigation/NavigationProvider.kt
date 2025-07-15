@@ -28,7 +28,8 @@ class NavigationProvider {
                 title = "Reports", icon = "chart-simple",
                 items = listOf(
                     NavigationSectionItem(label = "Trial Balance", url = "/report/trial-balance"),
-                    NavigationSectionItem(label = "Profit & Loss", url = "/report/profit-loss")
+                    NavigationSectionItem(label = "Profit & Loss", url = "/report/profit-loss"),
+                    NavigationSectionItem(label = "Balance Sheet", url = "/report/balance-sheet")
                 )
             )
         )
