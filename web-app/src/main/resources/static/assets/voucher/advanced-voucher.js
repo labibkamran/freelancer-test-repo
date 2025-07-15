@@ -29,14 +29,12 @@ function initializeExistingPostingComboboxes() {
     }));
 
     // Setup VAT code comboboxes
-    const vatItems = [
-        { value: '0', title: 'No VAT', displayText: 'No VAT' }
-    ].concat(vatCodes.map(vat => ({
+    const vatItems = vatCodes.map(vat => ({
         value: vat.code,
         title: vat.code,
         subtitle: '(' + vat.rate + '%) - ' + vat.description,
         displayText: vat.code + ' (' + vat.rate + '%) - ' + vat.description
-    })));
+    }));
 
     // Initialize all existing comboboxes
     document.querySelectorAll('r-combobox').forEach(combobox => {
