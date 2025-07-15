@@ -81,16 +81,14 @@
                                 <thead>
 
                                 <tr>
-                                    <th style="width: 15%;" th:text="#{account}" />
-                                    <th style="width: 35%;" th:text="#{account_name}" />
-                                    <th style="width: 35%;" th:text="#{description}" />
-                                    <th class="r-amount-header" style="width: 15%;" th:text="#{amount}" />
+                                    <th style="width: 25%;" th:text="#{account}" />
+                                    <th style="width: 50%;" th:text="#{account_name}" />
+                                    <th class="r-amount-header" style="width: 25%;" th:text="#{amount}" />
                                 </tr>
                                 <tr>
-                                    <th style="width: 15%" th:text="#{operating_revenues}" />
-                                    <th style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 15%;"></th>
+                                    <th style="width: 25%" th:text="#{operating_revenues}" />
+                                    <th style="width: 50%;"></th>
+                                    <th class="r-amount-header" style="width: 25%;"></th>
 
                                 </tr>
                                 </thead>
@@ -102,9 +100,7 @@
                                     <td>
                                         <span class="r-account-name" th:text="${entry.accountName}" />
                                     </td>
-                                    <td>
-                                        <span class="r-account-name" th:text="${entry.accountDescription}" />
-                                    </td>
+
                                     <td class="r-amount-cell">
                                             <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}"/>
@@ -114,13 +110,8 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="r-total-row">
-                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
-                                    <td class="r-amount-cell">
+                                    <td colspan="2" style="text-align: center;"><strong th:text="#{total}" /></td>
 
-                                    </td>
-                                    <td class="r-amount-cell">
-
-                                    </td>
                                     <td class="r-amount-cell">
                                         <strong th:text="${#numbers.formatDecimal(revenuePostings.totalBalance, 1, 2)}" />
                                     </td>
@@ -131,10 +122,9 @@
                             <table class="r-profit-lose-table">
                                 <thead>
                                 <tr>
-                                    <th style="width: 15%" th:text="#{operating_expenses}" />
-                                    <th style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 15%;"></th>
+                                    <th style="width: 25%" th:text="#{operating_expenses}" />
+                                    <th style="width: 50%;"></th>
+                                    <th class="r-amount-header" style="width: 25%;"></th>
 
                                 </tr>
                                 </thead>
@@ -146,9 +136,7 @@
                                     <td>
                                         <span class="r-account-name" th:text="${entry.accountName}" />
                                     </td>
-                                    <td>
-                                        <span class="r-account-name" th:text="${entry.accountDescription}" />
-                                    </td>
+
                                     <td class="r-amount-cell">
                                             <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}" />
@@ -158,13 +146,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="r-total-row" >
-                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
-                                    <td class="r-amount-cell">
-
-                                    </td>
-                                    <td class="r-amount-cell">
-
-                                    </td>
+                                    <td colspan="2" style="text-align: center;"><strong th:text="#{total}" /></td>
                                     <td class="r-amount-cell">
                                         <strong th:text="${#numbers.formatDecimal(operatingCostPostings.totalBalance, 1, 2)}" />
                                     </td>
@@ -174,10 +156,9 @@
                             <table class="r-profit-lose-table">
                                 <thead>
                                 <tr>
-                                    <th style="width: 15%" th:text="#{assets}" />
-                                    <th style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 35%;"></th>
-                                    <th class="r-amount-header" style="width: 15%;"></th>
+                                    <th style="width: 25%" th:text="#{assets}" />
+                                    <th style="width: 50%;"></th>
+                                    <th class="r-amount-header" style="width: 25%;"></th>
 
                                 </tr>
 
@@ -190,9 +171,6 @@
                                     <td>
                                         <span class="r-account-name" th:text="${entry.accountName}" />
                                     </td>
-                                    <td>
-                                        <span class="r-account-name" th:text="${entry.accountDescription}" />
-                                    </td>
                                     <td class="r-amount-cell">
                                             <span th:class="${entry.amountClass}"
                                                   th:text="${#numbers.formatDecimal(entry.amount, 1, 2)}" />
@@ -202,13 +180,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr class="r-total-row" >
-                                    <td colspan="1" style="text-align: center;"><strong th:text="#{total}" /></td>
-                                    <td class="r-amount-cell">
-
-                                    </td>
-                                    <td class="r-amount-cell">
-
-                                    </td>
+                                    <td colspan="2" style="text-align: center;"><strong th:text="#{total}" /></td>
                                     <td class="r-amount-cell">
                                         <strong th:text="${#numbers.formatDecimal(assetPostings.totalBalance, 1, 2)}" />
                                     </td>

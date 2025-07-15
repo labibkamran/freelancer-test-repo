@@ -10,7 +10,6 @@ data class ProfitLossDTO(
 data class ProfitLossEntry(
     val accountNumber: String,
     val accountName: String,
-    val accountDescription: String,
     val amount: BigDecimal,
 ){
     val amountClass: String
