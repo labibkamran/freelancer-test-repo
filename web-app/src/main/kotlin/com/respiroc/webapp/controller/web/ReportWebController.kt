@@ -1,5 +1,6 @@
 package com.respiroc.webapp.controller.web
 
+import com.respiroc.ledger.api.payload.BalanceSheetDTO
 import com.respiroc.ledger.application.payload.ProfitLossPayload
 import com.respiroc.ledger.application.PostingService
 import com.respiroc.ledger.domain.model.AccountType
@@ -68,6 +69,33 @@ class ReportWebController(
 
         return "report/profit-loss"
     }
+
+    @GetMapping(value = ["/balance-sheet"])
+    fun balanceSheet(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        val springUser = springUser()
+
+        val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+        val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+        val postingsForBalanceSheet = postingService.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
+
+        model.addAttribute("user", springUser)
+        model.addAttribute("startDate", defaultStartDate)
+        model.addAttribute("endDate", defaultEndDate)
+        model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetDTO(emptyList(),BigDecimal.ZERO))
+        model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+        model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+
+        return "report/balance-sheet"
+    }
 }
 
 @Controller
@@ -133,6 +161,38 @@ class ReportHTMXController(
         } catch (e: Exception) {
             model.addAttribute(calloutAttributeName, Callout.Error("Error loading profit loss: ${e.message}"))
             return "report/profit-loss :: error-message"
+        }
+    }
+
+    @GetMapping(value = ["/balance-sheet"], headers = ["HX-Request"])
+    fun balanceSheetHtmx(
+        @RequestParam(name = "startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        startDate: LocalDate?,
+        @RequestParam(name = "endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        endDate: LocalDate?,
+        model: Model
+    ): String {
+        return try {
+            val springUser = springUser()
+
+            val defaultStartDate = startDate ?: LocalDate.now().withDayOfMonth(1)
+            val defaultEndDate = endDate ?: LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+            val postingsForBalanceSheet = postingService.getPostingsForBalanceSheet(defaultStartDate, defaultEndDate)
+
+            model.addAttribute("user", springUser)
+            model.addAttribute("startDate", defaultStartDate)
+            model.addAttribute("endDate", defaultEndDate)
+            model.addAttribute("assetPostings", postingsForBalanceSheet[AccountType.ASSET] ?: BalanceSheetDTO(emptyList(),BigDecimal.ZERO))
+            model.addAttribute("equityPostings", postingsForBalanceSheet[AccountType.EQUITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+            model.addAttribute("liabilityPostings", postingsForBalanceSheet[AccountType.LIABILITY] ?: BalanceSheetDTO(emptyList(), BigDecimal.ZERO))
+
+            "report/balance-sheet :: tableContent"
+        } catch (e: Exception) {
+            model.addAttribute(calloutAttributeName, Callout.Error("Error loading balance sheet: ${e.message}"))
+            return "report/balance-sheet :: error-message"
         }
     }
 }

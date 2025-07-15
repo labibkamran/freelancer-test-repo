@@ -1,5 +1,7 @@
 package com.respiroc.ledger.application
 
+import com.respiroc.ledger.api.payload.BalanceSheetEntry
+import com.respiroc.ledger.api.payload.BalanceSheetDTO
 import com.respiroc.ledger.application.payload.TrialBalanceEntry
 import com.respiroc.ledger.application.payload.TrialBalancePayload
 import com.respiroc.ledger.application.payload.GeneralLedgerPayload
@@ -92,6 +94,40 @@ class PostingService(
                 } else null
             }
             ProfitLossPayload(
+                entries = entries,
+                totalBalance = entries.sumOf { it.amount }
+            )
+        }
+    }
+
+    @Transactional(readOnly = true)
+    fun getPostingsForBalanceSheet(startDate: LocalDate, endDate: LocalDate): Map<AccountType, BalanceSheetDTO> {
+        val tenantId = currentTenantId()
+        val accounts = accountService.findAllAccounts().associateBy { it.noAccountNumber }
+
+        val balanceSheetPostings = postingRepository.findBalanceSheetPostings(tenantId, startDate, endDate)
+
+        val groupedByType = balanceSheetPostings.groupBy { row ->
+            when (row[0] as String) {
+                "ASSET" -> AccountType.ASSET
+                "EQUITY" -> AccountType.EQUITY
+                else -> AccountType.LIABILITY
+            }
+        }
+        return groupedByType.mapValues { (_, rows) ->
+            val entries = rows.mapNotNull { postingData ->
+                val accountNumber = postingData[1] as String
+                val amount = postingData[2] as BigDecimal
+                val account = accounts[accountNumber]
+                if (account != null) {
+                    BalanceSheetEntry(
+                        accountNumber = accountNumber,
+                        accountName = account.accountName,
+                        amount = amount
+                    )
+                } else null
+            }
+            BalanceSheetDTO(
                 entries = entries,
                 totalBalance = entries.sumOf { it.amount }
             )
