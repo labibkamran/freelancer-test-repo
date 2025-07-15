@@ -98,6 +98,7 @@
                                             placeholder="Select VAT code..."
                                             th:tabindex="${iterStat.index * 10 + 8}"
                                             th:value="${postingLine.debitVatCode}"
+                                            th:data-default-value="${defaultVatCode}"
                                             style="font-size: 0.75rem;">
                                 </r-combobox>
                             </div>
@@ -116,6 +117,7 @@
                                             placeholder="Select VAT code..."
                                             th:tabindex="${iterStat.index * 10 + 7}"
                                             th:value="${postingLine.creditVatCode}"
+                                            th:data-default-value="${defaultVatCode}"
                                             style="font-size: 0.75rem;">
                                 </r-combobox>
                             </div>
