@@ -44,10 +44,10 @@ class CompanyService(
         if (!isValidAddress(command)) return null
         val payload = CreateAddressPayload(
             city = command.city!!,
-            primaryAddress = command.primaryAddress!!,
+            addressPart1 = command.primaryAddress!!,
             postalCode = command.postalCode,
             countryIsoCode = command.addressCountryCode!!,
-            secondaryAddress = command.secondaryAddress,
+            addressPart2 = command.secondaryAddress,
             administrativeDivisionCode = command.administrativeDivisionCode
         )
         return addressService.getOrCreateAddress(payload)
