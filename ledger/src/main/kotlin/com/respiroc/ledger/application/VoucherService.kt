@@ -1,9 +1,6 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.application.payload.CreatePostingPayload
-import com.respiroc.ledger.application.payload.CreateVoucherPayload
-import com.respiroc.ledger.application.payload.VoucherPayload
-import com.respiroc.ledger.application.payload.VoucherSummaryPayload
+import com.respiroc.ledger.application.payload.*
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidPostingsException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
@@ -47,7 +44,8 @@ class VoucherService(
         return VoucherPayload(
             id = savedVoucher.id,
             number = savedVoucher.getDisplayNumber(),
-            date = savedVoucher.date
+            date = savedVoucher.date,
+            description = savedVoucher.description
         )
     }
 
@@ -59,7 +57,8 @@ class VoucherService(
             return VoucherPayload(
                 id = existingEmptyVoucher.id,
                 number = existingEmptyVoucher.getDisplayNumber(),
-                date = existingEmptyVoucher.date
+                date = existingEmptyVoucher.date,
+                description = existingEmptyVoucher.description
             )
         }
 
@@ -88,29 +87,34 @@ class VoucherService(
             }
     }
 
-    fun updateVoucherWithPostings(voucherId: Long, postings: List<CreatePostingPayload>): VoucherPayload {
+    fun updateVoucherWithPostings(payload: UpdateVoucherPayload): VoucherPayload {
         val tenantId = currentTenantId()
 
-        val voucher = voucherRepository.findByIdAndTenantIdWithPostings(voucherId, tenantId)
+        val voucher = voucherRepository.findByIdAndTenantIdWithPostings(payload.id, tenantId)
             ?: throw IllegalArgumentException("Voucher not found")
 
-        if (postings.isNotEmpty()) {
-            validatePostingCommands(postings)
-            validateBalance(postings)
+        if (payload.postings.isNotEmpty()) {
+            validatePostingCommands(payload.postings)
+            validateBalance(payload.postings)
         }
 
         if (voucher.postings.isNotEmpty()) {
             postingRepository.deleteAll(voucher.postings)
         }
 
-        if (postings.isNotEmpty()) {
-            saveNonZeroPostings(postings, tenantId, voucherId)
+        if (payload.postings.isNotEmpty()) {
+            saveNonZeroPostings(payload.postings, tenantId, payload.id)
         }
+
+        voucher.date = payload.date
+        voucher.description = payload.description
+        val savedVoucher = voucherRepository.save(voucher)
 
         return VoucherPayload(
             id = voucher.id,
             number = voucher.getDisplayNumber(),
-            date = voucher.date
+            date = voucher.date,
+            description = savedVoucher.description
         )
     }
 
@@ -203,7 +207,6 @@ class VoucherService(
                 createPostingEntity(postingData, tenantId, voucherId)
             }
 
-        // Save only non-zero postings to optimize storage
         if (nonZeroPostings.isNotEmpty()) {
             postingRepository.saveAll(nonZeroPostings)
         }

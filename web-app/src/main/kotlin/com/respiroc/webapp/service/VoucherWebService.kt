@@ -3,6 +3,7 @@ package com.respiroc.webapp.service
 import com.respiroc.ledger.application.payload.CreatePostingPayload
 import com.respiroc.ledger.application.VatService
 import com.respiroc.ledger.application.VoucherService
+import com.respiroc.ledger.application.payload.UpdateVoucherPayload
 import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
@@ -130,7 +131,12 @@ class VoucherWebService(
             val validPostingLines = request.getValidPostingLines()
             val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
-            val result = voucherService.updateVoucherWithPostings(voucherId, postingCommands)
+            val result = voucherService.updateVoucherWithPostings(UpdateVoucherPayload(
+                id = voucherId,
+                date = request.voucherDate,
+                description = request.voucherDescription,
+                postings = postingCommands
+            ))
 
             Callout.Success(
                 message = "Voucher ${result.number} updated successfully!"
