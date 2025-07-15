@@ -2,25 +2,13 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 
-<!-- Breadcrumb Items -->
-<th:block layout:fragment="breadcrumb-items">
-    <wa-breadcrumb-item>
-        Accounts
-    </wa-breadcrumb-item>
-    <wa-breadcrumb-item>
-        General Ledger
-    </wa-breadcrumb-item>
-</th:block>
-
 <body>
 <main layout:fragment="content">
     <div class="wa-container">
         <div class="wa-stack wa-gap-s">
             
-            <!-- Filters Card -->
             <wa-card>
                 <div class="wa-cluster">
-                    <!-- Start Date -->
                     <div class="wa-stack wa-gap-xs">
                         <label class="wa-body-s" style="font-weight: 500;">Start Date</label>
                         <wa-input type="date" 
@@ -34,7 +22,6 @@
                                   hx-include="[name='endDate'], [name='accountNumber']"></wa-input>
                     </div>
                     
-                    <!-- End Date -->
                     <div class="wa-stack wa-gap-xs">
                         <label class="wa-body-s" style="font-weight: 500;">End Date</label>
                         <wa-input type="date" 
@@ -50,12 +37,10 @@
                 </div>
             </wa-card>
 
-            <!-- Table Content -->
             <div id="tableContent" th:fragment="tableContent">
                 <wa-card>
                     <wa-progress-bar id="loading-indicator" indeterminate class="htmx-indicator"></wa-progress-bar>
                     <div class="wa-stack wa-gap-m">
-                        <!-- Empty State -->
                         <div th:if="${generalLedgerData.accounts.empty}" class="wa-center">
                             <div class="wa-stack wa-gap-m wa-center">
                                 <wa-icon name="chart-line" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
@@ -64,9 +49,7 @@
                             </div>
                         </div>
 
-                        <!-- Data Table in Card -->
-                        <wa-table th:unless="${generalLedgerData.accounts.empty}">
-                            <table id="ledgerTable" style="--wa-table-row-padding: var(--wa-space-xs);">
+                            <table id="ledgerTable" style="--wa-table-row-padding: var(--wa-space-xs);" th:unless="${generalLedgerData.accounts.empty}">
                                 <thead>
                                     <tr>
                                         <th th:text="#{closed}" />
@@ -179,7 +162,6 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                        </wa-table>
                     </div>
                 </wa-card>
             </div>

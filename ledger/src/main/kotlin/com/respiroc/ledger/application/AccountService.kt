@@ -1,6 +1,5 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.api.AccountInternalApi
 import com.respiroc.ledger.domain.model.Account
 import com.respiroc.ledger.domain.model.AccountType
 import jakarta.annotation.PostConstruct
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
 @Service
-class AccountService : AccountInternalApi {
+class AccountService {
 
     private lateinit var accounts: Map<String, Account>
 
@@ -34,38 +33,38 @@ class AccountService : AccountInternalApi {
         }
     }
 
-    override fun findAccountByNumber(noAccountNumber: String): Account? {
+    fun findAccountByNumber(noAccountNumber: String): Account? {
         return accounts[noAccountNumber]
     }
 
-    override fun findAllAccounts(): Collection<Account> {
+    fun findAllAccounts(): Collection<Account> {
         return accounts.values
     }
 
-    override fun findAccountsByType(accountType: AccountType): List<Account> {
+    fun findAccountsByType(accountType: AccountType): List<Account> {
         return accounts.values.filter { it.accountType == accountType }
     }
 
-    override fun searchAccountsByName(searchTerm: String): List<Account> {
+    fun searchAccountsByName(searchTerm: String): List<Account> {
         return accounts.values.filter {
             it.accountName.contains(searchTerm, ignoreCase = true) ||
                     it.accountDescription?.contains(searchTerm, ignoreCase = true) == true
         }
     }
 
-    override fun accountExists(noAccountNumber: String): Boolean {
+    fun accountExists(noAccountNumber: String): Boolean {
         return accounts.containsKey(noAccountNumber)
     }
 
-    override fun findAssetAccounts(): List<Account> = findAccountsByType(AccountType.ASSET)
+    fun findAssetAccounts(): List<Account> = findAccountsByType(AccountType.ASSET)
 
-    override fun findLiabilityAccounts(): List<Account> = findAccountsByType(AccountType.LIABILITY)
+    fun findLiabilityAccounts(): List<Account> = findAccountsByType(AccountType.LIABILITY)
 
-    override fun findEquityAccounts(): List<Account> = findAccountsByType(AccountType.EQUITY)
+    fun findEquityAccounts(): List<Account> = findAccountsByType(AccountType.EQUITY)
 
-    override fun findRevenueAccounts(): List<Account> = findAccountsByType(AccountType.REVENUE)
+    fun findRevenueAccounts(): List<Account> = findAccountsByType(AccountType.REVENUE)
 
-    override fun findExpenseAccounts(): List<Account> = findAccountsByType(AccountType.EXPENSE)
+    fun findExpenseAccounts(): List<Account> = findAccountsByType(AccountType.EXPENSE)
 
-    override fun findCostOfGoodsSoldAccounts(): List<Account> = findAccountsByType(AccountType.COST_OF_GOODS_SOLD)
+    fun findCostOfGoodsSoldAccounts(): List<Account> = findAccountsByType(AccountType.COST_OF_GOODS_SOLD)
 }

@@ -16,7 +16,7 @@ data class CreateVoucherRequest(
 ) {
     fun getValidPostingLines(): List<PostingLine> {
         return postingLines.filterNotNull()
-            .filter { it.amount != null && it.amount > java.math.BigDecimal.ZERO }
+            .filter { it.amount != null && it.amount > BigDecimal.ZERO }
             .filter { it.getAccountNumber().isNotBlank() }
     }
 }

@@ -1,12 +1,9 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.api.AccountInternalApi
-import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.VoucherInternalApi
-import com.respiroc.ledger.api.payload.CreatePostingPayload
-import com.respiroc.ledger.api.payload.CreateVoucherPayload
-import com.respiroc.ledger.api.payload.VoucherPayload
-import com.respiroc.ledger.api.payload.VoucherSummaryPayload
+import com.respiroc.ledger.application.payload.CreatePostingPayload
+import com.respiroc.ledger.application.payload.CreateVoucherPayload
+import com.respiroc.ledger.application.payload.VoucherPayload
+import com.respiroc.ledger.application.payload.VoucherSummaryPayload
 import com.respiroc.ledger.domain.exception.AccountNotFoundException
 import com.respiroc.ledger.domain.exception.InvalidPostingsException
 import com.respiroc.ledger.domain.exception.InvalidVatCodeException
@@ -15,6 +12,7 @@ import com.respiroc.ledger.domain.model.Posting
 import com.respiroc.ledger.domain.model.Voucher
 import com.respiroc.ledger.domain.repository.PostingRepository
 import com.respiroc.ledger.domain.repository.VoucherRepository
+import com.respiroc.util.context.ContextAwareApi
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -25,23 +23,27 @@ import java.time.LocalDate
 class VoucherService(
     private val voucherRepository: VoucherRepository,
     private val postingRepository: PostingRepository,
-    private val accountApi: AccountInternalApi,
-    private val vatApi: VatInternalApi
-) : VoucherInternalApi {
+    private val accountService: AccountService,
+    private val vatService: VatService
+) : ContextAwareApi {
 
-    override fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
+    fun createVoucher(payload: CreateVoucherPayload): VoucherPayload {
         val tenantId = currentTenantId()
 
         val voucherNumber = generateNextVoucherNumber(tenantId, payload.date)
 
-        validatePostingCommands(payload.postings)
-        validateBalance(payload.postings)
+        if (payload.postings.isNotEmpty()) {
+            validatePostingCommands(payload.postings)
+            validateBalance(payload.postings)
+        }
 
         val voucher = createVoucherEntity(payload, tenantId, voucherNumber)
         val savedVoucher = voucherRepository.save(voucher)
 
-        saveNonZeroPostings(payload.postings, tenantId, savedVoucher.id)
-        
+        if (payload.postings.isNotEmpty()) {
+            saveNonZeroPostings(payload.postings, tenantId, savedVoucher.id)
+        }
+
         return VoucherPayload(
             id = savedVoucher.id,
             number = savedVoucher.getDisplayNumber(),
@@ -50,9 +52,9 @@ class VoucherService(
     }
 
     @Transactional(readOnly = true)
-    override fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
+    fun findAllVoucherSummaries(): List<VoucherSummaryPayload> {
         val vouchers = voucherRepository.findVoucherSummariesByTenantId(currentTenantId())
-        
+
         return vouchers.map { voucher ->
             VoucherSummaryPayload(
                 id = voucher.id,
@@ -64,9 +66,42 @@ class VoucherService(
         }
     }
 
+    fun updateVoucherWithPostings(voucherId: Long, postings: List<CreatePostingPayload>): VoucherPayload {
+        val tenantId = currentTenantId()
+
+        val voucher = voucherRepository.findByIdAndTenantIdWithPostings(voucherId, tenantId)
+            ?: throw IllegalArgumentException("Voucher not found")
+
+        if (postings.isNotEmpty()) {
+            validatePostingCommands(postings)
+            validateBalance(postings)
+        }
+
+        if (voucher.postings.isNotEmpty()) {
+            postingRepository.deleteAll(voucher.postings)
+        }
+
+        if (postings.isNotEmpty()) {
+            saveNonZeroPostings(postings, tenantId, voucherId)
+        }
+
+        return VoucherPayload(
+            id = voucher.id,
+            number = voucher.getDisplayNumber(),
+            date = voucher.date
+        )
+    }
+
     @Transactional(readOnly = true)
-    override fun findVoucherById(id: Long): Voucher? {
+    fun findVoucherById(id: Long): Voucher? {
         return voucherRepository.findByIdAndTenantIdWithPostings(id, currentTenantId())
+    }
+
+    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
+        val tenantId = currentTenantId()
+
+        postingRepository.deleteByVoucherIdAndRowNumber(voucherId, rowNumber, tenantId)
+        postingRepository.decrementRowNumbersAfterDeleted(voucherId, rowNumber, tenantId)
     }
 
     // -------------------------------
@@ -77,32 +112,32 @@ class VoucherService(
         val maxNumber = voucherRepository.findMaxVoucherNumberForYear(tenantId, date.year)
         return (maxNumber + 1).toShort()
     }
-    
+
     private fun validatePostingCommands(postings: List<CreatePostingPayload>) {
         // Ensure there are at least 2 non-zero postings for valid double-entry bookkeeping
         val nonZeroPostingsCount = postings.count { it.amount.compareTo(BigDecimal.ZERO) != 0 }
         if (nonZeroPostingsCount < 2) {
             throw InvalidPostingsException()
         }
-        
+
         postings.forEach { postingData ->
             validateAccount(postingData.accountNumber)
             validateVatCode(postingData.vatCode)
         }
     }
-    
+
     private fun validateAccount(accountNumber: String) {
-        if (accountApi.findAccountByNumber(accountNumber) == null) {
+        if (accountService.findAccountByNumber(accountNumber) == null) {
             throw AccountNotFoundException(accountNumber)
         }
     }
-    
+
     private fun validateVatCode(vatCode: String?) {
-        if (vatCode != null && !vatApi.vatCodeExists(vatCode)) {
+        if (vatCode != null && !vatService.vatCodeExists(vatCode)) {
             throw InvalidVatCodeException(vatCode)
         }
     }
-    
+
     private fun validateBalance(postings: List<CreatePostingPayload>) {
         val totalAmount = postings.sumOf { it.amount }
         // Round to 2 decimal places for balance validation (currency conversion can introduce extra decimals)
@@ -111,7 +146,7 @@ class VoucherService(
             throw PostingsNotBalancedException(roundedAmount)
         }
     }
-    
+
     private fun createVoucherEntity(payload: CreateVoucherPayload, tenantId: Long, voucherNumber: Short): Voucher {
         val voucher = Voucher()
         voucher.number = voucherNumber
@@ -120,7 +155,7 @@ class VoucherService(
         voucher.tenantId = tenantId
         return voucher
     }
-    
+
     private fun createPostingEntity(
         postingData: CreatePostingPayload,
         tenantId: Long,
@@ -137,10 +172,10 @@ class VoucherService(
         posting.originalCurrency = postingData.originalCurrency
         posting.vatCode = postingData.vatCode
         posting.voucherId = voucherId
-        
+
         return posting
     }
-    
+
     private fun saveNonZeroPostings(
         postings: List<CreatePostingPayload>,
         tenantId: Long,
@@ -151,7 +186,7 @@ class VoucherService(
             .map { postingData ->
                 createPostingEntity(postingData, tenantId, voucherId)
             }
-        
+
         // Save only non-zero postings to optimize storage
         if (nonZeroPostings.isNotEmpty()) {
             postingRepository.saveAll(nonZeroPostings)

@@ -1,9 +1,8 @@
 package com.respiroc.ledger.application
 
-import com.respiroc.ledger.api.VatInternalApi
+import com.respiroc.ledger.domain.model.VatCategory
 import com.respiroc.ledger.domain.model.VatCode
 import com.respiroc.ledger.domain.model.VatType
-import com.respiroc.ledger.domain.model.VatCategory
 import com.respiroc.ledger.domain.model.requiresVatCalculation
 import jakarta.annotation.PostConstruct
 import org.springframework.core.io.ClassPathResource
@@ -13,7 +12,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Service
-class VatService : VatInternalApi {
+class VatService {
 
     private lateinit var vatCodes: Map<String, VatCode>
 
@@ -39,56 +38,56 @@ class VatService : VatInternalApi {
         }
     }
 
-    override fun findVatCodeByCode(code: String): VatCode? {
+    fun findVatCodeByCode(code: String): VatCode? {
         return vatCodes[code]
     }
 
-    override fun findAllVatCodes(): Collection<VatCode> {
+    fun findAllVatCodes(): Collection<VatCode> {
         return vatCodes.values
     }
 
-    override fun findVatCodesByType(vatType: VatType): List<VatCode> {
+    fun findVatCodesByType(vatType: VatType): List<VatCode> {
         return vatCodes.values.filter { it.vatType == vatType }
     }
 
-    override fun findVatCodesByCategory(vatCategory: VatCategory): List<VatCode> {
+    fun findVatCodesByCategory(vatCategory: VatCategory): List<VatCode> {
         return vatCodes.values.filter { it.vatCategory == vatCategory }
     }
 
-    override fun searchVatCodesByDescription(searchTerm: String): List<VatCode> {
+    fun searchVatCodesByDescription(searchTerm: String): List<VatCode> {
         return vatCodes.values.filter {
             it.description.contains(searchTerm, ignoreCase = true)
         }
     }
 
-    override fun vatCodeExists(code: String): Boolean {
+    fun vatCodeExists(code: String): Boolean {
         return vatCodes.containsKey(code)
     }
 
-    override fun findInputVatCodes(): List<VatCode> = findVatCodesByType(VatType.INPUT_VAT)
+    fun findInputVatCodes(): List<VatCode> = findVatCodesByType(VatType.INPUT_VAT)
 
-    override fun findOutputVatCodes(): List<VatCode> = findVatCodesByType(VatType.OUTPUT_VAT)
+    fun findOutputVatCodes(): List<VatCode> = findVatCodesByType(VatType.OUTPUT_VAT)
 
-    override fun findExemptVatCodes(): List<VatCode> {
-        return vatCodes.values.filter { 
-            it.vatType == VatType.EXEMPT || it.vatType == VatType.OUTSIDE_SCOPE 
+    fun findExemptVatCodes(): List<VatCode> {
+        return vatCodes.values.filter {
+            it.vatType == VatType.EXEMPT || it.vatType == VatType.OUTSIDE_SCOPE
         }
     }
 
-    override fun calculateVatAmount(baseAmount: BigDecimal, vatCode: VatCode): BigDecimal {
+    fun calculateVatAmount(baseAmount: BigDecimal, vatCode: VatCode): BigDecimal {
         if (!vatCode.vatType.requiresVatCalculation()) {
             return BigDecimal.ZERO
         }
-        
+
         return baseAmount.multiply(vatCode.rate)
             .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
     }
 
-    override fun calculateBaseAmountFromVatInclusive(vatInclusiveAmount: BigDecimal, vatCode: VatCode): BigDecimal {
+    fun calculateBaseAmountFromVatInclusive(vatInclusiveAmount: BigDecimal, vatCode: VatCode): BigDecimal {
         if (!vatCode.vatType.requiresVatCalculation()) {
             return vatInclusiveAmount
         }
-        
+
         val divisor = BigDecimal.ONE.add(vatCode.rate.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
         return vatInclusiveAmount.divide(divisor, 2, RoundingMode.HALF_UP)
     }

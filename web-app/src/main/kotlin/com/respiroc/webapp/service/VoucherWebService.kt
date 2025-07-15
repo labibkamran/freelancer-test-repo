@@ -1,11 +1,8 @@
 package com.respiroc.webapp.service
 
-import com.respiroc.company.api.CompanyInternalApi
-import com.respiroc.ledger.api.VatInternalApi
-import com.respiroc.ledger.api.VoucherInternalApi
-import com.respiroc.ledger.api.payload.CreatePostingPayload
-import com.respiroc.ledger.api.payload.CreateVoucherPayload
-import com.respiroc.util.context.UserContext
+import com.respiroc.ledger.application.payload.CreatePostingPayload
+import com.respiroc.ledger.application.VatService
+import com.respiroc.ledger.application.VoucherService
 import com.respiroc.util.currency.CurrencyService
 import com.respiroc.webapp.controller.request.CreateVoucherRequest
 import com.respiroc.webapp.controller.request.PostingLine
@@ -15,8 +12,8 @@ import java.math.BigDecimal
 
 @Service
 class VoucherWebService(
-    private val voucherApi: VoucherInternalApi,
-    private val vatApi: VatInternalApi,
+    private val voucherApi: VoucherService,
+    private val vatService: VatService,
     private val currencyService: CurrencyService
 ) {
 
@@ -24,29 +21,22 @@ class VoucherWebService(
         private const val VAT_ACCOUNT_NUMBER = "2710"
     }
 
-    fun processVoucherRequest(
+    fun updateVoucherWithPostings(
+        voucherId: Long,
         request: CreateVoucherRequest,
-        userContext: UserContext,
         companyCurrencyCode: String
     ): Callout {
         return try {
             val validPostingLines = request.getValidPostingLines()
             val postingCommands = convertToPostingCommands(validPostingLines, companyCurrencyCode)
 
-            val voucherPayload = CreateVoucherPayload(
-                date = request.voucherDate,
-                description = request.voucherDescription,
-                postings = postingCommands
-            )
-
-            val result = voucherApi.createVoucher(voucherPayload)
+            val result = voucherApi.updateVoucherWithPostings(voucherId, postingCommands)
 
             Callout.Success(
-                message = "New voucher ${result.number} created successfully!",
-                link = "/voucher/${result.id}?tenantId=${userContext.currentTenant!!.id}"
+                message = "Voucher ${result.number} updated successfully!"
             )
         } catch (e: Exception) {
-            Callout.Error(message = "Failed to save voucher: ${e.message}")
+            Callout.Error(message = "Failed to update voucher: ${e.message}")
         }
     }
 
@@ -111,14 +101,14 @@ class VoucherWebService(
         companyCurrency: String,
         vatCode: String
     ): List<CreatePostingPayload> {
-        val vatCodeEntity = vatApi.findVatCodeByCode(vatCode)
+        val vatCodeEntity = vatService.findVatCodeByCode(vatCode)
             ?: throw IllegalArgumentException("Invalid VAT code: $vatCode")
 
         val totalSignedAmount = calculateConvertedSignedAmount(line, originalCurrency, companyCurrency)
         val totalAbsAmount = totalSignedAmount.abs()
 
-        val baseAmount = vatApi.calculateBaseAmountFromVatInclusive(totalAbsAmount, vatCodeEntity)
-        val vatAmount = vatApi.calculateVatAmount(baseAmount, vatCodeEntity)
+        val baseAmount = vatService.calculateBaseAmountFromVatInclusive(totalAbsAmount, vatCodeEntity)
+        val vatAmount = vatService.calculateVatAmount(baseAmount, vatCodeEntity)
 
         val signedBaseAmount = if (totalSignedAmount < BigDecimal.ZERO) baseAmount.negate() else baseAmount
         val signedVatAmount = if (totalSignedAmount < BigDecimal.ZERO) vatAmount.negate() else vatAmount
@@ -126,8 +116,8 @@ class VoucherWebService(
         // Calculate original amounts if currency conversion is needed
         val (originalBaseAmount, originalVatAmount) = if (originalCurrency != companyCurrency) {
             val originalAbsAmount = originalAmount.abs()
-            val originalBase = vatApi.calculateBaseAmountFromVatInclusive(originalAbsAmount, vatCodeEntity)
-            val originalVat = vatApi.calculateVatAmount(originalBase, vatCodeEntity)
+            val originalBase = vatService.calculateBaseAmountFromVatInclusive(originalAbsAmount, vatCodeEntity)
+            val originalVat = vatService.calculateVatAmount(originalBase, vatCodeEntity)
 
             val signedOriginalBase = if (originalAmount < BigDecimal.ZERO) originalBase.negate() else originalBase
             val signedOriginalVat = if (originalAmount < BigDecimal.ZERO) originalVat.negate() else originalVat
@@ -193,4 +183,8 @@ class VoucherWebService(
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
         }
     }
-} 
+
+    fun deletePostingLineAndAdjustRowNumbers(voucherId: Long, rowNumber: Int) {
+        voucherApi.deletePostingLineAndAdjustRowNumbers(voucherId, rowNumber)
+    }
+}
