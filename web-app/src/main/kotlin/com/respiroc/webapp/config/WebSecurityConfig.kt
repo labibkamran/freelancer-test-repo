@@ -1,6 +1,6 @@
 package com.respiroc.webapp.config
 
-import com.respiroc.user.api.UserInternalApi
+import com.respiroc.user.application.UserService
 import com.respiroc.util.context.SpringUser
 import com.respiroc.webapp.filter.TenantIdFilter
 import jakarta.servlet.FilterChain
@@ -31,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 class WebSecurityConfig {
 
     @Autowired
-    lateinit var userApi: UserInternalApi
+    lateinit var userService: UserService
 
     private val publicPaths = arrayOf(
         "/",
@@ -45,10 +45,12 @@ class WebSecurityConfig {
         "/actuator/**"
     )
 
+    //This is to prevent the filters from running on these paths — it's not the same as permitAll.
+    private val webIgnoringPaths = arrayOf("/assets/**", "/favicon.ico")
     @Bean
     fun webSecurityCustomizer(): WebSecurityCustomizer {
         return WebSecurityCustomizer { web ->
-            web.ignoring().requestMatchers("/assets/**", "/favicon.ico")
+            web.ignoring().requestMatchers(*webIgnoringPaths)
         }
     }
 
@@ -65,11 +67,11 @@ class WebSecurityConfig {
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .addFilterBefore(
-                BearerTokenAuthenticationFilter(userApi),
+                BearerTokenAuthenticationFilter(userService),
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .addFilterAfter(
-                TenantIdFilter(userApi),
+                TenantIdFilter(userService),
                 BearerTokenAuthenticationFilter::class.java
             )
             .exceptionHandling {
@@ -99,7 +101,7 @@ class WebSecurityConfig {
         return source
     }
 
-    class BearerTokenAuthenticationFilter(private val userApi: UserInternalApi) : OncePerRequestFilter() {
+    class BearerTokenAuthenticationFilter(private val userService: UserService) : OncePerRequestFilter() {
         override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
             if (SecurityContextHolder.getContext().authentication == null) {
                 var token = ""
@@ -122,7 +124,7 @@ class WebSecurityConfig {
                 }
 
                 if (StringUtils.isNotEmpty(token)) {
-                    val user = userApi.findByToken(token)
+                    val user = userService.findByToken(token)
                     if (user != null) {
                         val userDetails: UserDetails = SpringUser(user)
                         val usernamePasswordAuthenticationToken =

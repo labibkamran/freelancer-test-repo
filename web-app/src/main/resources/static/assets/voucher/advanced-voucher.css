@@ -1,5 +1,5 @@
 
-.posting-form {
+.r-posting-form {
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -8,7 +8,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.posting-form.mb-4 {
+.r-posting-form.mb-4 {
     margin-bottom: 2rem !important;
 }
 

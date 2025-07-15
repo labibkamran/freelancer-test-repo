@@ -8,7 +8,6 @@ import org.springframework.ui.Model
 open class BaseController {
 
     val titleAttributeName: String = "title"
-    val successMessageAttributeName: String = "success"
     val errorMessageAttributeName: String = "error"
     val userAttributeName: String = "user"
     val tenantsAttributeName: String = "tenants"
