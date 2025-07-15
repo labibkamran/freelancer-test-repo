@@ -8,10 +8,10 @@
 <main layout:fragment="content">
     <div class="container py-4">
 
-        <!-- Trial Balance Container -->
+
         <div class="trial-balance-container">
 
-            <!-- Filters Section -->
+
             <div class="filters-section">
                 <div class="filters-form" th:if="${user != null and user.ctx.currentTenant != null}">
 
@@ -45,7 +45,7 @@
                                   hx-include="[name='startDate']"></wa-input>
                     </div>
 
-                    <!-- Loading Indicator -->
+
                     <div class="filter-group">
                         <div id="loading-indicator" class="htmx-indicator loading-indicator">
                             <wa-spinner size="small"></wa-spinner>
@@ -55,13 +55,13 @@
                 </div>
             </div>
 
-            <!-- Error Message Fragment -->
+
             <div th:if="${errorMessage != null}" th:fragment="error-message" class="alert alert-danger" style="margin: 1rem;">
                 <wa-icon name="exclamation-triangle"></wa-icon>
                 <span th:text="${errorMessage}">Error occurred</span>
             </div>
 
-            <!-- Company Selection Required -->
+
             <div th:if="${user == null or user.ctx.currentTenant == null}" class="empty-state">
                 <div class="empty-state-icon">
                     <wa-icon name="building"></wa-icon>
@@ -71,12 +71,12 @@
                 <a href="/tenant/select" class="btn btn-primary">Select Company</a>
             </div>
 
-            <!-- Profit & Loss Content -->
+
             <div id="content-area">
                 <div th:fragment="tableContent">
                     <div th:unless="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}">
                         <div style="overflow-x: auto;">
-                            <!-- Operating revenues  -->
+
                             <table class="trial-balance-table">
                                 <thead>
 
@@ -127,7 +127,7 @@
                                 </tr>
                                 </tfoot>
                             </table>
-                            <!-- Operating expenses  -->
+
                             <table class="trial-balance-table">
                                 <thead>
                                 <tr>
@@ -220,7 +220,7 @@
                         </div>
                     </div>
 
-                    <!-- Empty State -->
+
                     <div th:if="${assetPostings.entries.empty && revenuePostings.entries.empty && operatingCostPostings.entries.empty}" class="empty-state">
                         <div class="empty-state-icon">
                             <wa-icon name="table"></wa-icon>
