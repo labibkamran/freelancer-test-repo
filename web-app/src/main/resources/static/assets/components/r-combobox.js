@@ -53,7 +53,7 @@ class RCombobox extends LitElement {
         }
 
         .combobox-input {
-            width: 100%;
+            width: 13rem;
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
             border: 1px solid var(--wa-color-gray-90);
