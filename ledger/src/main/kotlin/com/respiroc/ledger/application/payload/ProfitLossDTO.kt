@@ -12,4 +12,11 @@ data class ProfitLossEntry(
     val accountName: String,
     val accountDescription: String,
     val amount: BigDecimal,
-)
+){
+    val amountClass: String
+        get() = when {
+            amount > BigDecimal.ZERO -> "r-positive-amount"
+            amount < BigDecimal.ZERO -> "r-negative-amount"
+            else -> "r-zero-amount"
+        }
+}
