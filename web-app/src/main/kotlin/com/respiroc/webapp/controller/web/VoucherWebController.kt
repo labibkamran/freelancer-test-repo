@@ -58,6 +58,7 @@ class VoucherWebController(
         }
 
         setupModelAttributes(model)
+        model.addAttribute("companyCurrencyCode", countryCode())
         model.addAttribute("voucher", voucher)
         model.addAttribute("uiPostingLines", uiPostingLines)
         model.addAttribute("voucherId", id)
