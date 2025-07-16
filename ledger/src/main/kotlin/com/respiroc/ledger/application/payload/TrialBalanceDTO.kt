@@ -2,7 +2,7 @@ package com.respiroc.ledger.application.payload
 
 import java.math.BigDecimal
 
-data class TrialBalancePayload (
+data class TrialBalanceDTO (
     val entries: List<TrialBalanceEntry>,
     val totalOpeningBalance: BigDecimal,
     val totalDifference: BigDecimal,
