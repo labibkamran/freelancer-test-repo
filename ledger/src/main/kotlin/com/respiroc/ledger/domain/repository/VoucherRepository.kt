@@ -19,10 +19,9 @@ interface VoucherRepository : CustomJpaRepository<Voucher, Long> {
 
     @Query(
         """
-        SELECT v FROM Voucher v LEFT JOIN FETCH v.postings p WHERE v.tenantId = :tenantId AND
-        (p.id IS NULL OR NOT EXISTS 
-            (SELECT 1 FROM Posting post WHERE post.voucherId = v.id)
-        ) ORDER BY v.createdAt DESC LIMIT 1
+        SELECT v FROM Voucher v WHERE v.tenantId = :tenantId AND
+        NOT EXISTS (SELECT 1 FROM Posting post WHERE post.voucherId = v.id)
+        ORDER BY v.createdAt DESC LIMIT 1
     """
     )
     fun findFirstEmptyVoucherByTenantId(@Param("tenantId") tenantId: Long): Voucher?
