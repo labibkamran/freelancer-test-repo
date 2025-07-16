@@ -5,7 +5,7 @@
     <!-- Hidden row number field -->
     <input type="hidden" th:name="'postingLines[' + ${rowCounter} + '].rowNumber'" th:value="${rowCounter}">
     <td>
-        <wa-input type="date"
+        <wa-input type="date" style="width: 9rem;"
                size="small"
                th:tabindex="${rowCounter * 10 + 1}"
                th:value="${initialDate}"

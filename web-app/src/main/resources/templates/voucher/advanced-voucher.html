@@ -80,7 +80,7 @@
                             <input type="hidden" th:name="'postingLines[' + ${iterStat.index} + '].rowNumber'"
                                    th:value="${postingLine.rowNumber}">
                             <td>
-                                <wa-input type="date" size="small"
+                                <wa-input type="date" size="small" style="width: 9rem;"
                                           th:tabindex="${iterStat.index * 10 + 1}"
                                           th:value="${postingLine.postingDate}"
                                           th:name="'postingLines[' + ${iterStat.index} + '].postingDate'">
