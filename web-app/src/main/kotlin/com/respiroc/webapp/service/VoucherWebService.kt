@@ -299,10 +299,11 @@ class VoucherWebService(
         companyCurrency: String
     ): BigDecimal {
         val signedAmount = line.getSignedAmount()
-        return if (originalCurrency == companyCurrency) {
+        val convertedAmount = if (originalCurrency == companyCurrency) {
             signedAmount
         } else {
             currencyService.convertCurrency(signedAmount, originalCurrency, companyCurrency)
         }
+        return convertedAmount.setScale(2, java.math.RoundingMode.HALF_UP)
     }
 }

@@ -159,10 +159,8 @@ class VoucherService(
 
     private fun validateBalance(postings: List<CreatePostingPayload>) {
         val totalAmount = postings.sumOf { it.amount }
-        // Round to 2 decimal places for balance validation (currency conversion can introduce extra decimals)
-        val roundedAmount = totalAmount.setScale(2, java.math.RoundingMode.HALF_UP)
-        if (roundedAmount.compareTo(BigDecimal.ZERO) != 0) {
-            throw PostingsNotBalancedException(roundedAmount)
+        if (totalAmount.compareTo(BigDecimal.ZERO) != 0) {
+            throw PostingsNotBalancedException(totalAmount)
         }
     }
 

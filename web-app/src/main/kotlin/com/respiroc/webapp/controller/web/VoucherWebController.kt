@@ -194,11 +194,12 @@ class VoucherHTMXController(
                 (posting.debitAccount.isNotBlank() || posting.creditAccount.isNotBlank())
             ) {
 
-                // Convert to company currency if needed
+                // Convert to company currency if needed and round to 2 decimal places
                 val convertedAmount = if (posting.currency != companyCurrency) {
                     currencyService.convertCurrency(posting.amount, posting.currency, companyCurrency)
+                        .setScale(2, java.math.RoundingMode.HALF_UP)
                 } else {
-                    posting.amount
+                    posting.amount.setScale(2, java.math.RoundingMode.HALF_UP)
                 }
 
                 // Add to totals based on account selection
