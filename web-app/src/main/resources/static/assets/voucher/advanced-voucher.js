@@ -172,5 +172,13 @@ document.addEventListener('htmx:configRequest', (e) => {
                 e.detail.parameters[combobox.name] = combobox.value;
             }
         });
+
+        const amountInputs = e.detail.elt.querySelectorAll('input[name*="amount"]');
+        amountInputs.forEach(input => {
+            if (input.value && !isNaN(parseFloat(input.value))) {
+                const roundedValue = parseFloat(input.value).toFixed(2);
+                e.detail.parameters[input.name] = roundedValue;
+            }
+        });
     }
 });

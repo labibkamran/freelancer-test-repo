@@ -18,6 +18,7 @@ data class CreateVoucherRequest(
         return postingLines.filterNotNull()
             .filter { it.amount != null && it.amount > BigDecimal.ZERO }
             .filter { it.getAccountNumber().isNotBlank() }
+            .map { it.roundAmountToTwoDecimals() }
     }
 }
 
@@ -61,5 +62,10 @@ data class PostingLine(
         } else {
             trimmed.takeIf { it.isNotBlank() }
         }
+    }
+
+    fun roundAmountToTwoDecimals(): PostingLine {
+        val roundedAmount = amount?.setScale(2, java.math.RoundingMode.HALF_UP)
+        return this.copy(amount = roundedAmount)
     }
 }
