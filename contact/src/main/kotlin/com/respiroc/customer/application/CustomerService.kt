@@ -1,10 +1,11 @@
 package com.respiroc.customer.application
 
+import com.respiroc.common.exception.ContactExistException
+import com.respiroc.common.exception.ContactNotFoundException
 import com.respiroc.common.payload.NewCustomerSupplierPayload
 import com.respiroc.common.service.BaseService
 import com.respiroc.customer.domain.model.Customer
 import com.respiroc.customer.domain.repository.CustomerRepository
-import com.respiroc.customer.exception.ContactNotFoundException
 import com.respiroc.tenant.domain.model.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,12 +17,10 @@ class CustomerService(
     private val baseService: BaseService
 ) {
 
-    //TODO: check for exist one
     fun createNewCustomer(
         payload: NewCustomerSupplierPayload,
         tenantId: Long
     ): Customer {
-        // TODO: handle exist one
         val tenant = Tenant().apply { id = tenantId }
         return if (payload.privateCustomer) createPrivateCustomer(payload, tenant)
         else createCompanyCustomer(payload, tenant)
@@ -30,6 +29,8 @@ class CustomerService(
 
     private fun createPrivateCustomer(payload: NewCustomerSupplierPayload, tenant: Tenant): Customer {
         val person = baseService.getOrCreatePerson(payload)
+        if (customerRepository.existsCustomersByPerson_NameAndTenantId(person.name, tenant.id))
+            throw ContactExistException("Customer already exists")
         return customerRepository.save(
             Customer().apply {
                 this.person = person
@@ -38,9 +39,14 @@ class CustomerService(
         )
     }
 
-
     private fun createCompanyCustomer(payload: NewCustomerSupplierPayload, tenant: Tenant): Customer {
         val company = baseService.getOrCreateCompany(payload)
+        if (customerRepository.existsCustomersByCompany_NameAndCompany_OrganizationNumberAndTenantId(
+                company.name, company.organizationNumber, tenant.id
+            )
+        ) {
+            throw ContactExistException("Customer already exists")
+        }
         return customerRepository.save(
             Customer().apply {
                 this.company = company

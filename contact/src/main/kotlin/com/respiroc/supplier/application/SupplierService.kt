@@ -1,8 +1,9 @@
 package com.respiroc.supplier.application
 
-import com.respiroc.common.service.BaseService
+import com.respiroc.common.exception.ContactExistException
+import com.respiroc.common.exception.ContactNotFoundException
 import com.respiroc.common.payload.NewCustomerSupplierPayload
-import com.respiroc.customer.exception.ContactNotFoundException
+import com.respiroc.common.service.BaseService
 import com.respiroc.supplier.domain.model.Supplier
 import com.respiroc.supplier.domain.repository.SupplierRepository
 import com.respiroc.tenant.domain.model.Tenant
@@ -14,7 +15,6 @@ class SupplierService(
     private val baseService: BaseService
 ) {
 
-    //TODO: check for exist one
     fun createNewSupplier(
         payload: NewCustomerSupplierPayload,
         tenantId: Long
@@ -26,6 +26,8 @@ class SupplierService(
 
     private fun createPrivateSupplier(payload: NewCustomerSupplierPayload, tenant: Tenant): Supplier {
         val person = baseService.getOrCreatePerson(payload)
+        if (supplierRepository.existsSuppliersByPerson_NameAndTenantId(person.name, tenant.id))
+            throw ContactExistException("Supplier already exists")
         return supplierRepository.save(
             Supplier().apply {
                 this.person = person
@@ -36,6 +38,12 @@ class SupplierService(
 
     private fun createCompanySupplier(payload: NewCustomerSupplierPayload, tenant: Tenant): Supplier {
         val company = baseService.getOrCreateCompany(payload)
+        if (supplierRepository.existsSuppliersByCompany_NameAndCompany_OrganizationNumberAndTenantId(
+                company.name, company.organizationNumber, tenant.id
+            )
+        ) {
+            throw ContactExistException("Supplier already exists")
+        }
         return supplierRepository.save(
             Supplier().apply {
                 this.company = company
@@ -43,11 +51,7 @@ class SupplierService(
             }
         )
     }
-    /**
-     * Deletes a customer by ID and tenant ID.
-     *
-     * @throws ContactNotFoundException if the customer does not exist.
-     */
+
     fun deleteByIdAndTenantId(id: Long, tenantId: Long) {
         val exists = supplierRepository.existsByIdAndTenantId(id, tenantId)
         if (!exists)
