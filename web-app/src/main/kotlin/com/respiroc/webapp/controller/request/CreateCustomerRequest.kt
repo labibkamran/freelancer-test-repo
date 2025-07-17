@@ -15,5 +15,12 @@ data class CreateCustomerRequest(
     val type: String,
 
     @field:NotBlank(message = "Private Customer  is required")
-    val privateCustomer: Boolean
+    val privateCustomer: Boolean,
+
+    val countryCode: String? = "",
+    val city: String? = "",
+    val postalCode: String? = "",
+    val administrativeDivisionCode: String? = "",
+    val addressPart1: String? = "",
+    val addressPart2: String? = "",
 )
