@@ -146,6 +146,7 @@ class ContactHTMxController(
             }
 
             CustomerType.CUSTOMER_SUPPLIER -> {
+                // TODO: Handle it if any of these throws an error.
                 customerService.createNewCustomer(payload, tenantId)
                 supplierService.createNewSupplier(payload, tenantId)
             }

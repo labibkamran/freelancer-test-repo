@@ -37,4 +37,8 @@ interface SupplierRepository : CustomJpaRepository<Supplier, Long> {
     ): List<Supplier>
 
     fun existsByIdAndTenantId(id: Long, tenantId: Long): Boolean
+
+    fun existsSuppliersByCompany_NameAndCompany_OrganizationNumberAndTenantId(companyName: String, companyOrganizationNumber: String, tenantId: Long): Boolean
+
+    fun existsSuppliersByPerson_NameAndTenantId(personName: String, tenantId: Long): Boolean
 }
