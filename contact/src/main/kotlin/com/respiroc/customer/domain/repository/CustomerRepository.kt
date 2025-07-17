@@ -1,0 +1,40 @@
+package com.respiroc.customer.domain.repository
+
+import com.respiroc.customer.domain.model.Customer
+import com.respiroc.util.repository.CustomJpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
+
+@Repository
+interface CustomerRepository : CustomJpaRepository<Customer, Long> {
+    @Query(
+        """
+        SELECT c FROM Customer c
+        LEFT JOIN FETCH c.company company
+        LEFT JOIN FETCH c.person person
+        WHERE c.tenantId = :tenantId
+    """
+    )
+    fun findCustomersByTenantId(@Param("tenantId") tenantId: Long): List<Customer>
+
+    @Query(
+        """
+        SELECT c FROM Customer c
+        LEFT JOIN FETCH c.company company
+        LEFT JOIN FETCH c.person person
+        WHERE c.tenantId = :tenantId
+        AND (
+                (LOWER(person.name) LIKE LOWER(CONCAT('%', :name, '%'))) 
+                OR 
+                (LOWER(company.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            )
+    """
+    )
+    fun findCustomersByNameContainingIgnoreCaseAndTenantId(
+        @Param("name") name: String,
+        @Param("tenantId") tenantId: Long
+    ): List<Customer>
+
+    fun existsByIdAndTenantId(id: Long, tenantId: Long): Boolean
+}

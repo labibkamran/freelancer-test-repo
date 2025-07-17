@@ -1,0 +1,66 @@
+package com.respiroc.customer.application
+
+import com.respiroc.common.payload.NewCustomerSupplierPayload
+import com.respiroc.common.service.BaseService
+import com.respiroc.customer.domain.model.Customer
+import com.respiroc.customer.domain.repository.CustomerRepository
+import com.respiroc.customer.exception.ContactNotFoundException
+import com.respiroc.tenant.domain.model.Tenant
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+@Transactional
+class CustomerService(
+    private val customerRepository: CustomerRepository,
+    private val baseService: BaseService
+) {
+
+    //TODO: check for exist one
+    fun createNewCustomer(
+        payload: NewCustomerSupplierPayload,
+        tenantId: Long
+    ): Customer {
+        // TODO: handle exist one
+        val tenant = Tenant().apply { id = tenantId }
+        return if (payload.privateCustomer) createPrivateCustomer(payload, tenant)
+        else createCompanyCustomer(payload, tenant)
+    }
+
+
+    private fun createPrivateCustomer(payload: NewCustomerSupplierPayload, tenant: Tenant): Customer {
+        val person = baseService.getOrCreatePerson(payload)
+        return customerRepository.save(
+            Customer().apply {
+                this.person = person
+                this.tenant = tenant
+            }
+        )
+    }
+
+
+    private fun createCompanyCustomer(payload: NewCustomerSupplierPayload, tenant: Tenant): Customer {
+        val company = baseService.getOrCreateCompany(payload)
+        return customerRepository.save(
+            Customer().apply {
+                this.company = company
+                this.tenant = tenant
+            }
+        )
+    }
+
+    fun deleteByIdAndTenantId(id: Long, tenantId: Long) {
+        val exists = customerRepository.existsByIdAndTenantId(id, tenantId)
+        if (!exists)
+            throw ContactNotFoundException("Customer with id=$id and tenantId=$tenantId not found.")
+        customerRepository.deleteById(id)
+    }
+
+    fun findAllCustomerByTenantId(tenantId: Long): List<Customer> {
+        return customerRepository.findCustomersByTenantId(tenantId)
+    }
+
+    fun findByNameContainingAndTenantId(name: String, tenantId: Long): List<Customer> {
+        return customerRepository.findCustomersByNameContainingIgnoreCaseAndTenantId(name, tenantId)
+    }
+}
