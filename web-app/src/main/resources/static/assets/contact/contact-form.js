@@ -1,14 +1,25 @@
-function selectCompany(name, orgNumber) {
+function selectCompanyFromSearch(element) {
+    let isSelectingCompany = true;
+    const name = element.getAttribute('data-name');
+    const orgNumber = element.getAttribute('data-org-number');
     const nameInput = document.getElementById('companyName');
     const orgInput = document.getElementById('organizationNumber');
     nameInput.value = name;
-    if (orgNumber)
+    if (orgNumber && orgNumber !== 'null') {
         orgInput.value = orgNumber;
+    }
+
+    nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+    orgInput.dispatchEvent(new Event('change', { bubbles: true }));
+
     document.getElementById('name-dropdown').innerHTML = '';
-    nameInput.blur();
-    orgInput.blur();
-    nameInput.setAttribute('data-selected', 'true');
-    orgInput.setAttribute('data-selected', 'true');
+
+    setTimeout(() => {
+        orgInput.setCustomValidity('');
+        orgInput.reportValidity();
+        // Reset flag to allow form submission
+        isSelectingCompany = false;
+    }, 100);
 }
 
 document.addEventListener('click', function (e) {
