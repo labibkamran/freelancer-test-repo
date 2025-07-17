@@ -1,6 +1,5 @@
 package com.respiroc.customer.domain.repository
 
-import com.respiroc.company.domain.model.Company
 import com.respiroc.customer.domain.model.Customer
 import com.respiroc.util.repository.CustomJpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -39,7 +38,11 @@ interface CustomerRepository : CustomJpaRepository<Customer, Long> {
 
     fun existsByIdAndTenantId(id: Long, tenantId: Long): Boolean
 
-    fun existsCustomersByCompany_NameAndCompany_OrganizationNumberAndTenantId(companyName:String, companyOrganizationNumber: String, tenantId: Long): Boolean
+    fun existsCustomersByCompany_NameAndCompany_OrganizationNumberAndTenantId(
+        companyName: String,
+        companyOrganizationNumber: String,
+        tenantId: Long
+    ): Boolean
 
     fun existsCustomersByPerson_NameAndTenantId(personName: String, tenantId: Long): Boolean
 }
