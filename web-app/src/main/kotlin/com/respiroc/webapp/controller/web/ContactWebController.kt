@@ -113,7 +113,7 @@ class ContactHTMxController(
             "customer",
             CreateCustomerRequest("", "", CustomerType.CUSTOMER.name, privateCustomer)
         )
-        return "contact/contact-form :: customerFormFields"
+        return "contact/contact-form :: contactFormFields"
     }
 
     @PostMapping

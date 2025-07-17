@@ -31,14 +31,14 @@
                                 th:label="#{contact.private_customer}"
                                 th:value="${customer.privateCustomer}"
                                 th:attr="hx-get='/htmx/contact/new?tenantId=' + ${user.ctx.currentTenant.id}"
-                                hx-target="#customerFormFields"
+                                hx-target="#contactFormFields"
                                 hx-trigger="change"
                         >
                             <wa-radio value="false" th:text="#{contact.company}"></wa-radio>
                             <wa-radio value="true" th:text="#{contact.private_person}"></wa-radio>
                         </wa-radio-group>
                     </div>
-                    <div th:fragment="customerFormFields" id="customerFormFields">
+                    <div th:fragment="contactFormFields" id="contactFormFields">
                         <div class="r-form-group">
                             <wa-input
                                     th:unless="${customer.privateCustomer}"
