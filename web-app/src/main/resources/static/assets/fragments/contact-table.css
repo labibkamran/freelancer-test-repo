@@ -1,4 +1,4 @@
-.custom-table {
+.r-custom-table {
     width: 100%;
     font-size: var(--wa-font-size-s);
     color: var(--wa-color-text-normal);
@@ -9,27 +9,27 @@
     box-shadow: var(--wa-shadow-m);
 }
 
-.custom-table thead {
+.r-custom-table thead {
     background-color: var(--wa-color-brand-fill-normal);
     color: black;
 }
 
-.custom-table th,
-.custom-table td {
+.r-custom-table th,
+.r-custom-table td {
     padding: var(--wa-space-s) var(--wa-space-m);
     border-bottom: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
     text-align: left;
 }
 
-.custom-table .text-right {
+.r-custom-table .r-text-right {
     text-align: right;
 }
 
-.custom-table tbody tr:hover {
+.r-custom-table tbody tr:hover {
     background-color: var(--wa-color-brand-fill-quiet);
 }
 
-.custom-table .no-data {
+.r-custom-table .r-no-data {
     text-align: center;
     padding: var(--wa-space-m);
     font-style: italic;
@@ -37,11 +37,11 @@
 }
 
 @media (max-width: 768px) {
-    .custom-table thead {
+    .r-custom-table thead {
         display: none;
     }
 
-    .custom-table tr {
+    .r-custom-table tr {
         display: block;
         margin-bottom: var(--wa-space-s);
         border: var(--wa-border-width-s) var(--wa-border-style) var(--wa-color-surface-border);
@@ -50,7 +50,7 @@
         background: var(--wa-color-surface-default);
     }
 
-    .custom-table td {
+    .r-custom-table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -60,14 +60,14 @@
         font-size: var(--wa-font-size-s);
     }
 
-    .custom-table td::before {
+    .r-custom-table td::before {
         content: attr(data-label);
         font-weight: var(--wa-font-weight-semibold);
         color: var(--wa-color-text-quiet);
         flex-basis: 45%;
     }
 
-    .text-right {
+    .r-text-right {
         justify-content: flex-end;
     }
 }

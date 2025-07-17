@@ -1,4 +1,4 @@
-.table-toolbar {
+.r-table-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -6,7 +6,7 @@
 }
 
 @media screen and (max-width: 768px) {
-    .table-toolbar {
+    .r-table-toolbar {
         flex-direction: column;
     }
 }
