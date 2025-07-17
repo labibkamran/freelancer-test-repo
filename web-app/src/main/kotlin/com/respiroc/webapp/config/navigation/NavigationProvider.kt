@@ -34,10 +34,11 @@ class NavigationProvider {
             ),
 
             NavigationSection(
-                title = "Customer", icon = "users",
+                title = "Contact", icon = "users",
                 items = listOf(
-                    NavigationSectionItem(label = "Customers/Suppliers", url = "/customer"),
-                    NavigationSectionItem(label = "New Customers/Suppliers", url = "/customer/new")
+                    NavigationSectionItem(label = "Customers", url = "/contact/customer"),
+                    NavigationSectionItem(label = "Suppliers", url = "/contact/supplier"),
+                    NavigationSectionItem(label = "New Customers/Suppliers", url = "/contact/new")
                 )
             )
         )
