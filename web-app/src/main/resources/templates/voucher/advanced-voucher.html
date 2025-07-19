@@ -211,9 +211,10 @@
         // Clear form if success flag is set
         const clearForm = /*[[${clearForm ?: false}]]*/ false;
 
-        const vatCodes = /*[[${vatCodes ?: {}}]]*/ [];
+        let vatCodes = [];
     </script>
     <script th:src="@{/assets/accounts.js}"></script>
+    <script th:src="@{/assets/vat-codes.js}"></script>
     <script th:src="@{/assets/voucher/advanced-voucher.js}"></script>
 </th:block>
 </body>

@@ -110,7 +110,7 @@
 /*<![CDATA[*/
 (function() {
     const rowCounter = /*[[${rowCounter}]]*/ 0;
-    const vatCodes = /*[[${vatCodes}]]*/ [];
+    let vatCodes = [];
     
     // Wait for components to be defined
     if (typeof customElements !== 'undefined' && customElements.whenDefined) {
@@ -124,6 +124,7 @@
     
     async function setupComboboxes() {
         const accounts = await window.getAccounts();
+        vatCodes = await window.getVatCodes();
         const accountItems = accounts.map(account => ({
             value: account.noAccountNumber,
             title: account.noAccountNumber,

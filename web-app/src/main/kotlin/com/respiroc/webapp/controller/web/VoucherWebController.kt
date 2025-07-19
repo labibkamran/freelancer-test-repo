@@ -88,7 +88,6 @@ class VoucherWebController(
         val supportedCurrencies = currencyService.getSupportedCurrencies()
 
         addCommonAttributesForCurrentTenant(model, "New Voucher")
-        model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("defaultVatCode", vatCodes.first().code)
         model.addAttribute("supportedCurrencies", supportedCurrencies)
     }
@@ -174,7 +173,6 @@ class VoucherHTMXController(
         val initialDate = LocalDate.now()
 
         model.addAttribute("rowCounter", rowCounter)
-        model.addAttribute("vatCodes", vatCodes)
         model.addAttribute("defaultVatCode", vatCodes.first().code)
         model.addAttribute("companyCurrencyCode", countryCode())
         model.addAttribute("supportedCurrencies", supportedCurrencies)

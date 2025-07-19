@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function initializeExistingPostingComboboxes() {
     const accounts = await window.getAccounts();
+    const vatCodes = await window.getVatCodes();
     const accountItems = accounts.map(account => ({
         value: account.noAccountNumber,
         title: account.noAccountNumber,
