@@ -110,7 +110,6 @@
 /*<![CDATA[*/
 (function() {
     const rowCounter = /*[[${rowCounter}]]*/ 0;
-    const accounts = /*[[${accounts}]]*/ [];
     const vatCodes = /*[[${vatCodes}]]*/ [];
     
     // Wait for components to be defined
@@ -123,8 +122,8 @@
         setTimeout(setupComboboxes, 100);
     }
     
-    function setupComboboxes() {
-        // Setup account comboboxes
+    async function setupComboboxes() {
+        const accounts = await window.getAccounts();
         const accountItems = accounts.map(account => ({
             value: account.noAccountNumber,
             title: account.noAccountNumber,

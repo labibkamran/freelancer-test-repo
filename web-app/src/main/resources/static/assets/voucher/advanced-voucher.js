@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function initializeExistingPostingComboboxes() {
-    // Setup account comboboxes
+async function initializeExistingPostingComboboxes() {
+    const accounts = await window.getAccounts();
     const accountItems = accounts.map(account => ({
         value: account.noAccountNumber,
         title: account.noAccountNumber,
