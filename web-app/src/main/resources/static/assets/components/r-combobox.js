@@ -54,7 +54,7 @@ class RCombobox extends LitElement {
 
         .combobox-input {
             width: 13rem;
-            padding: 0.5rem 0.75rem;
+            padding: var(--wa-space-xs) var(--wa-space-s);
             font-size: 0.875rem;
             border: 1px solid var(--wa-color-gray-90);
             border-radius: 0.375rem;
@@ -96,7 +96,7 @@ class RCombobox extends LitElement {
         }
 
         .dropdown-item {
-            padding: 0.5rem 0.75rem;
+            padding: var(--wa-space-xs) var(--wa-space-s);
             cursor: pointer;
             transition: background-color 0.15s ease-in-out;
             border-bottom: 1px solid var(--wa-color-gray-95);
@@ -147,7 +147,7 @@ class RCombobox extends LitElement {
         }
 
         .no-results {
-            padding: 1rem;
+            padding: var(--wa-space-m);
             text-align: center;
             color: var(--wa-color-gray-50);
             font-style: italic;
@@ -163,7 +163,7 @@ class RCombobox extends LitElement {
             border: none;
             color: var(--wa-color-gray-50);
             cursor: pointer;
-            padding: 0.25rem;
+            padding: var(--wa-space-xs);
             display: none;
         }
 

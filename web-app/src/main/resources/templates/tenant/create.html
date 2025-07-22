@@ -9,7 +9,7 @@
 <main layout:fragment="content">
     <div>
         <wa-card style="margin-bottom: var(--wa-space-m);">
-            <div style="padding: 2rem;">
+            <div style="padding: var(--wa-space-xl);">
                 <form id="createCompanyForm"
                       th:object="${createCompanyRequest}"
                       hx-post="/htmx/tenant/create"

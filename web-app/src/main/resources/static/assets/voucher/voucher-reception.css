@@ -28,7 +28,7 @@ wa-copy-button::part(button) {
 
 .r-voucher-reception-table th {
     background: var(--wa-color-surface-raised);
-    padding: 1rem 0.75rem;
+    padding: var(--wa-space-m) var(--wa-space-s);
     text-align: left;
     font-weight: 600;
     color: var(--wa-color-gray-30);
@@ -37,7 +37,7 @@ wa-copy-button::part(button) {
 }
 
 .r-voucher-reception-table td {
-    padding: 0.875rem 0.75rem;
+    padding: var(--wa-space-s) var(--wa-space-xs);
     border-bottom: 1px solid var(--wa-color-surface-raised);
 }
 
@@ -55,6 +55,6 @@ wa-copy-button::part(button) {
 
     .r-voucher-reception-table th,
     .r-voucher-reception-table td {
-        padding: 0.5rem 0.375rem;
+        padding: var(--wa-space-s) var(--wa-space-2xs);
     }
 }
