@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="wa-container">
+        <div class="wa-stack wa-gap-s">
+            <div>
+                <h1 class="wa-heading-l">Upload Invoice</h1>
+                <p class="wa-body-m">Upload your invoice to automatically extract and process the information.</p>
+            </div>
+
+            <wa-callout th:if="${error != null}" variant="danger" open>
+                <wa-icon slot="icon" name="exclamation-triangle" variant="regular"></wa-icon>
+                <span th:text="${error}">Error message</span>
+            </wa-callout>
+
+            <wa-callout th:if="${success != null}" variant="success" open>
+                <wa-icon slot="icon" name="check-circle" variant="regular"></wa-icon>
+                <span th:text="${success}">Success message</span>
+            </wa-callout>
+
+            <wa-card>
+                <div class="wa-card__body">
+                    <form th:action="@{/smart-receipt/upload}" method="post" enctype="multipart/form-data" class="wa-stack wa-gap-m">
+                        <div class="wa-stack wa-gap-xs">
+                            <label for="invoiceFile" class="wa-body-s" style="font-weight: 500;">Select Invoice File</label>
+                            <input type="file" id="invoiceFile" name="invoiceFile" accept=".pdf,.jpg,.jpeg,.png" required 
+                                   style="width: 100%; padding: var(--wa-space-xs); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s);">
+                            <div class="wa-body-s" style="color: var(--wa-color-text-quiet);">Supported formats: PDF, JPG, JPEG, PNG</div>
+                        </div>
+
+                        <div>
+                            <wa-button type="submit" variant="brand">
+                                <wa-icon slot="prefix" name="upload"></wa-icon>
+                                Upload Invoice
+                            </wa-button>
+                        </div>
+                    </form>
+                </div>
+            </wa-card>
+
+            <wa-card th:if="${uploadedFile != null}">
+                <div class="wa-card__body">
+                    <h3 class="wa-heading-s">Uploaded File</h3>
+                    <p class="wa-body-m" th:text="${uploadedFile}">File name will appear here</p>
+                </div>
+            </wa-card>
+        </div>
+    </div>
+</main>
+</body>
+</html> 
