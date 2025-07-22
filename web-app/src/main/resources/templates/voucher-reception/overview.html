@@ -17,7 +17,7 @@
           hx-swap="outerHTML"
           hx-encoding="multipart/form-data"
           style="display:none">
-        <input type="file" name="files" id="file-input" multiple />
+        <input type="file" name="file" id="file-input" multiple />
         <input type="hidden" name="tenantSlug" th:value="${tenantSlug}" />
     </form>
 
@@ -39,6 +39,9 @@
                 <tr>
                     <th th:text="#{filename}"/>
                     <th th:text="#{sender_Uploader_email}"/>
+                    <th th:text="#{received}"/>
+                    <th>AI Status</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="document-table-body" th:fragment="documentTableBody">
@@ -51,6 +54,36 @@
                     style="cursor: pointer;">
                     <td th:text="${document.attachment.filename}"></td>
                     <td th:text="${document.senderEmail ?: '-'}"></td>
+                    <td th:text="${#temporals.format(document.receivedAt, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td>
+                        <wa-badge th:if="${document.aiExtraction != null}"
+                                  th:attr="variant=${document.aiExtraction.status?.name?.toLowerCase()}"
+                                  th:text="${document.aiExtraction.status == 'CONVERTED_TO_VOUCHER' ? 'VOUCHER CREATED' : document.aiExtraction.status ?: 'NOT_PROCESSED'}"/>
+                        <span th:unless="${document.aiExtraction != null}">-</span>
+                    </td>
+                    <td>
+                        <div class="wa-cluster wa-gap-xs">
+                            <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
+                                       size="small" variant="brand"
+                                       th:hx-get="@{/htmx/voucher-reception/show-extraction(documentId=${document.id})}"
+                                       th:hx-target="#extraction-modal"
+                                       th:hx-swap="innerHTML">
+                                View Data
+                            </wa-button>
+                            <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
+                                       size="small" variant="success"
+                                       th:hx-post="@{/htmx/voucher-reception/create-voucher(extractionId=${document.aiExtraction.id})}"
+                                       th:hx-target="body"
+                                       th:hx-swap="beforeend">
+                                Create Voucher
+                            </wa-button>
+                            <wa-badge th:if="${document.aiExtraction?.status == 'CONVERTED_TO_VOUCHER'}"
+                                     variant="success" size="small">
+                                <wa-icon slot="prefix" name="check" size="small"></wa-icon>
+                                Auto-Created
+                            </wa-badge>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -71,6 +104,8 @@
         </wa-drawer>
     </div>
 
+    <!-- AI Extraction Modal -->
+    <div id="extraction-modal"></div>
 </main>
 </body>
 </html>

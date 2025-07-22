@@ -47,6 +47,12 @@ class VoucherService(
         )
     }
 
+    fun createVoucher(payload: CreateVoucherPayload, tenantId: Long): VoucherPayload {
+        // For AI voucher creation, we use the provided tenant context
+        // The actual tenant context will be set by the calling service
+        return createVoucher(payload)
+    }
+
     fun findOrCreateEmptyVoucher(): VoucherPayload {
         val existingEmptyVoucher = voucherRepository.findFirstEmptyVoucher()
         if (existingEmptyVoucher != null) {

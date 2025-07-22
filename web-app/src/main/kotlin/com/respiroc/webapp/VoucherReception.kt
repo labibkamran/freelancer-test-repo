@@ -4,10 +4,17 @@ import com.respiroc.tenant.application.TenantService
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.util.repository.CustomJpaRepository
 import com.respiroc.webapp.controller.BaseController
+import com.respiroc.webapp.domain.model.InvoiceAiExtraction
+import com.respiroc.webapp.domain.model.ExtractionStatus
+import com.respiroc.webapp.repository.InvoiceAiExtractionRepository
+import com.respiroc.webapp.service.InvoiceExtractionService
+import com.respiroc.webapp.service.InvoiceExtractionResult
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.slf4j.LoggerFactory
+import org.springframework.data.jpa.repository.Query
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -20,6 +27,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
+import java.io.File
 import java.time.Instant
 import java.util.*
 
@@ -77,8 +85,13 @@ class VoucherReceptionController(
 class VoucherReceptionService(
     private val voucherDocumentRepository: VoucherReceptionDocumentRepository,
     private val attachmentRepository: AttachmentRepository,
-    private val attachmentService: AttachmentService
+    private val attachmentService: AttachmentService,
+    private val invoiceExtractionService: InvoiceExtractionService,
+    private val aiExtractionRepository: InvoiceAiExtractionRepository,
+    private val aiVoucherCreationService: com.respiroc.webapp.service.AiVoucherCreationService
 ) {
+
+    private val logger = LoggerFactory.getLogger(VoucherReceptionService::class.java)
 
     fun saveDocument(
         fileData: ByteArray,
@@ -87,50 +100,139 @@ class VoucherReceptionService(
         senderEmail: String,
         tenant: Tenant
     ): VoucherReceptionDocument {
+        logger.info("Saving document: $filename for tenant: ${tenant.slug}")
 
-        val (pdfBytes, pdfName, pdfMime) =
-            attachmentService.convertToPdf(fileData, filename, mimeType)
-
+        // Create and save attachment
         val attachment = Attachment().apply {
-            this.fileData = pdfBytes
-            this.filename = pdfName
-            this.mimetype = pdfMime
+            this.fileData = fileData
+            this.filename = filename
+            this.mimetype = mimeType
         }
         val savedAttachment = attachmentRepository.save(attachment)
 
-        val document = VoucherReceptionDocument().apply {
-            this.attachment = savedAttachment
-            this.senderEmail = senderEmail
-            this.tenant = tenant
+        // Create voucher reception document
+        val document = VoucherReceptionDocument(
+            attachment = savedAttachment,
+            senderEmail = senderEmail,
+            tenant = tenant
+        )
+
+        val savedDocument = voucherDocumentRepository.save(document)
+        logger.info("✅ Document saved with ID: ${savedDocument.id}")
+
+        // Start AI extraction for PDF files
+        if (mimeType == "application/pdf") {
+            try {
+                logger.info("Starting AI extraction for PDF: $filename")
+                
+                // Create temporary file for processing
+                val tempFile = File.createTempFile("invoice_", ".pdf")
+                tempFile.writeBytes(fileData)
+                
+                val extraction = invoiceExtractionService.extractInvoiceData(tempFile)
+                
+                val aiExtraction = InvoiceAiExtraction().apply {
+                    voucherReceptionDocument = savedDocument
+                    status = when (extraction) {
+                        is InvoiceExtractionResult.Success -> ExtractionStatus.COMPLETED
+                        is InvoiceExtractionResult.Error -> ExtractionStatus.FAILED
+                    }
+                    extractionData = jacksonObjectMapper().writeValueAsString(extraction)
+                    extractionDate = Instant.now()
+                    processingErrors = if (extraction is InvoiceExtractionResult.Error) {
+                        extraction.message
+                    } else null
+                }
+                
+                val savedAiExtraction = aiExtractionRepository.save(aiExtraction)
+                logger.info("✅ AI extraction completed for document: ${savedDocument.id}")
+                
+                // Try to auto-create voucher if extraction was successful
+                if (aiExtraction.status == ExtractionStatus.COMPLETED) {
+                    try {
+                        aiVoucherCreationService.createVoucherFromAiExtraction(savedAiExtraction.id!!)
+                        logger.info("✅ Auto-created voucher from AI extraction")
+                    } catch (e: Exception) {
+                        logger.warn("⚠️ Could not auto-create voucher: ${e.message}")
+                    }
+                }
+                
+                // Clean up temp file
+                tempFile.delete()
+                
+            } catch (e: Exception) {
+                logger.error("❌ AI extraction failed for document: ${savedDocument.id}", e)
+                
+                val failedExtraction = InvoiceAiExtraction().apply {
+                    voucherReceptionDocument = savedDocument
+                    status = ExtractionStatus.FAILED
+                    extractionData = "{}"
+                    extractionDate = Instant.now()
+                    processingErrors = e.message
+                }
+                aiExtractionRepository.save(failedExtraction)
+            }
+        } else {
+            logger.info("Skipping AI extraction for non-PDF file: $filename")
         }
-        return voucherDocumentRepository.save(document)
+
+        return savedDocument
+    }
+
+    fun getDocumentById(id: Long): VoucherReceptionDocument? {
+        return voucherDocumentRepository.findById(id).orElse(null)
+    }
+
+    fun getAllDocuments(): List<VoucherReceptionDocument> {
+        return voucherDocumentRepository.findAll()
     }
 }
 
-@Repository
-interface VoucherReceptionDocumentRepository : CustomJpaRepository<VoucherReceptionDocument, Long>
-
 @Entity
 @Table(name = "voucher_reception_documents")
-class VoucherReceptionDocument {
+class VoucherReceptionDocument(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
+    val id: Long? = null,
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attachment_id", nullable = false)
-    lateinit var attachment: Attachment
-
-    @CreationTimestamp
-    @Column(name = "received_at", nullable = false)
-    var receivedAt: Instant? = null
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @JoinColumn(name = "attachment_id")
+    val attachment: Attachment,
 
     @Column(name = "sender_email")
-    var senderEmail: String? = null
+    val senderEmail: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
-    lateinit var tenant: Tenant
+    @JoinColumn(name = "tenant_id")
+    val tenant: Tenant,
+
+    @CreationTimestamp
+    @Column(name = "received_at")
+    val receivedAt: Instant = Instant.now(),
+
+    @OneToOne(mappedBy = "voucherReceptionDocument", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val aiExtraction: InvoiceAiExtraction? = null
+) {
+    // Default constructor for Hibernate
+    constructor() : this(
+        id = null,
+        attachment = Attachment(),
+        senderEmail = null,
+        tenant = Tenant(),
+        receivedAt = Instant.now(),
+        aiExtraction = null
+    )
+}
+
+@Repository
+interface VoucherReceptionDocumentRepository : CustomJpaRepository<VoucherReceptionDocument, Long> {
+    
+    @Query("""
+        SELECT vrd FROM VoucherReceptionDocument vrd 
+        LEFT JOIN FETCH vrd.aiExtraction 
+        ORDER BY vrd.receivedAt DESC
+    """)
+    fun findAllWithAiExtractions(): List<VoucherReceptionDocument>
 }
 
 @Controller
@@ -140,6 +242,8 @@ class VoucherReceptionWebController(
     private val voucherReceptionService: VoucherReceptionService,
     private val tenantService: TenantService
 ) : BaseController() {
+
+    private val logger = LoggerFactory.getLogger(VoucherReceptionWebController::class.java)
 
     @GetMapping(value = ["", "/"])
     fun overview(model: Model): String {
@@ -157,51 +261,65 @@ class VoucherReceptionWebController(
         return "voucher-reception/overview"
     }
 
-    @GetMapping("/document/{id}/pdf")
-    fun getDocumentData(@PathVariable id: Long): ResponseEntity<String> {
-        val document = voucherReceptionDocumentRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found") }
-
-        val base64Data = Base64.getEncoder().encodeToString(document.attachment.fileData)
-        val dataUrl = "data:application/pdf;base64,$base64Data"
-        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML)
-            .body("""<embed id="pdf-embed" type="application/pdf" src="$dataUrl" style="width: 100%; height: 100%; border: none;"/>""");
-    }
-
     @PostMapping("/upload")
-    @HxRequest
-    fun uploadFiles(
-        @RequestParam("files") files: List<MultipartFile>,
-        @RequestParam("tenantSlug") tenantSlug: String,
-        model: Model): String {
-        val tenant = tenantService.findTenantBySlug(tenantSlug) ?: return "Tenant not found."
-        val currentUser = springUser()
-
+    fun handleFileUpload(
+        @RequestParam("file") files: List<MultipartFile>,
+        model: Model
+    ): String {
+        logger.info("=== Voucher Reception File Upload ===")
+        logger.info("Number of files: ${files.size}")
+        
+        val springUser = springUser()
+        val tenantSlug = springUser.ctx.currentTenant?.tenantSlug
+            ?: throw IllegalStateException("No current tenant found")
+        
+        val tenant = tenantService.findTenantBySlug(tenantSlug)
+            ?: throw IllegalStateException("Tenant not found for slug: $tenantSlug")
+        
         try {
-            files.forEach { file ->
-                val fileData = file.bytes
-                val filename = file.originalFilename ?: "unnamed"
-                val mimeType = file.contentType ?: "application/octet-stream"
-
-                voucherReceptionService.saveDocument(
-                    fileData = fileData,
-                    filename = filename,
-                    mimeType = mimeType,
-                    senderEmail = currentUser.username,
-                    tenant = tenant
-                )
+            if (files.isEmpty()) {
+                model.addAttribute("error", "Please select files to upload")
+                return overview(model)
             }
-
-            val updatedDocuments = voucherReceptionDocumentRepository.findAll()
-            model.addAttribute("documents", updatedDocuments)
-
-            return "voucher-reception/overview :: documentTableBody"
+            
+            val uploadedFiles = mutableListOf<String>()
+            
+            files.forEach { file ->
+                if (!file.isEmpty) {
+                    logger.info("Processing file: ${file.originalFilename}, size: ${file.size} bytes")
+                    
+                    // Save file to database
+                    val savedDocument = voucherReceptionService.saveDocument(
+                        fileData = file.bytes,
+                        filename = file.originalFilename ?: "unknown",
+                        mimeType = file.contentType ?: "application/octet-stream",
+                        senderEmail = "web-upload@reai.no",
+                        tenant = tenant
+                    )
+                    
+                    uploadedFiles.add(file.originalFilename ?: "unknown")
+                    logger.info("✅ File uploaded successfully with document ID: ${savedDocument.id}")
+                }
+            }
+            
+            if (uploadedFiles.isNotEmpty()) {
+                model.addAttribute("success", "${uploadedFiles.size} file(s) uploaded successfully!")
+            }
+            
         } catch (e: Exception) {
-            return "Error saving files"
+            logger.error("❌ Error uploading files", e)
+            model.addAttribute("error", "Error uploading files: ${e.message}")
         }
+        
+        return overview(model)
     }
 
+    @GetMapping("/htmx/voucher-reception/refresh-table")
+    @HxRequest
+    fun refreshTable(model: Model): String {
+        val documents = voucherReceptionDocumentRepository.findAllWithAiExtractions()
+        model.addAttribute("documents", documents)
 
-
-
+        return "voucher-reception/overview :: table"
+    }
 }

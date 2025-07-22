@@ -48,6 +48,9 @@ open class Voucher {
     @OneToMany(mappedBy = "voucher")
     open var postings: MutableSet<Posting> = mutableSetOf()
 
+    @Column(name = "ai_extraction_id")
+    open var aiExtractionId: Long? = null
+
     open fun getDisplayNumber(): String {
         return "${number}-${date.year}"
     }

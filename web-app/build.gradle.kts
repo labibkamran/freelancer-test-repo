@@ -18,6 +18,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
     implementation("io.github.wimdeblauwe:htmx-spring-boot:4.0.1")
@@ -26,6 +27,13 @@ dependencies {
 
     // converting images to pdf, invoices etc.
     implementation("com.itextpdf:itext7-core:9.2.0")
+    
+    // PDF processing for AI extraction
+    implementation("org.apache.pdfbox:pdfbox:2.0.29")
+    
+    // Jackson for JSON processing
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     //implementation("org.springframework.boot:spring-boot-starter-validation")
     //implementation("org.springframework.session:spring-session-jdbc")
 
