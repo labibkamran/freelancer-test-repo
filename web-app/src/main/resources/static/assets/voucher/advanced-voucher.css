@@ -1,7 +1,6 @@
-
 .balance-row {
-    background: #f8f9fa;
-    border-top: 1px solid #dee2e6;
+    background: var(--wa-color-neutral-95);
+    border-top: 1px solid var(--wa-color-neutral-80);
 }
 
 .balance-row td {
