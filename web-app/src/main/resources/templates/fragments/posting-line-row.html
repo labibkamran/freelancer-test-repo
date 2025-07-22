@@ -19,7 +19,7 @@
                 th:name="'postingLines[' + ${rowCounter} + '].debitAccount'"
                 placeholder="Select debit account..."
                 th:tabindex="${rowCounter * 10 + 3}"
-                style="font-size: 0.8rem;">
+                style="font-size: var(--wa-font-size-xs);">
             </r-combobox>
             
             <r-combobox
@@ -28,7 +28,7 @@
                 placeholder="Select VAT code..."
                 th:tabindex="${rowCounter * 10 + 8}"
                 th:data-default-value="${defaultVatCode}"
-                style="font-size: 0.75rem;">
+                style="font-size: var(--wa-font-size-xs);">
             </r-combobox>
         </div>
     </td>
@@ -39,7 +39,7 @@
                 th:name="'postingLines[' + ${rowCounter} + '].creditAccount'"
                 placeholder="Select credit account..."
                 th:tabindex="${rowCounter * 10 + 2}"
-                style="font-size: 0.8rem;">
+                style="font-size: var(--wa-font-size-xs);">
             </r-combobox>
             
             <r-combobox
@@ -48,7 +48,7 @@
                 placeholder="Select VAT code..."
                 th:tabindex="${rowCounter * 10 + 7}"
                 th:data-default-value="${defaultVatCode}"
-                style="font-size: 0.75rem;">
+                style="font-size: var(--wa-font-size-xs);">
             </r-combobox>
         </div>
     </td>

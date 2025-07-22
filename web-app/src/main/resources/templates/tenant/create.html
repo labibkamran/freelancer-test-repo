@@ -8,8 +8,8 @@
 <body>
 <main layout:fragment="content">
     <div>
-        <wa-card style="margin-bottom: 1rem;">
-            <div style="padding: 2rem;">
+        <wa-card style="margin-bottom: var(--wa-space-m);">
+            <div style="padding: var(--wa-space-xl);">
                 <form id="createCompanyForm"
                       th:object="${createCompanyRequest}"
                       th:hx-post="'/htmx/tenant/create'"
@@ -51,10 +51,10 @@
                                    th:label="#{company.create.form.country.label}">
                             <wa-option value="NO" th:text="#{company.create.form.country.norway}"></wa-option>
                         </wa-select>
-                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;"
+                        <small style="color: var(--wa-color-gray-60); display: block; margin-top: var(--wa-space-s);"
                                th:text="#{company.create.form.country.help}"/>
                         <!-- Form Messages -->
-                        <div id="form-messages" style="margin-bottom: 1rem;"></div>
+                        <div id="form-messages" style="margin-bottom: var(--wa-space-m);"></div>
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <wa-button class="disabled:r-opacity-25"
                                        type="submit" variant="success"
