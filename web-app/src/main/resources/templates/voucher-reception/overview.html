@@ -23,11 +23,11 @@
 
     <div id="pageContent" class="r-voucher-reception-container">
         <wa-callout variant="neutral" class="r-voucher-reception">
-            <h1 class="wa-heading-xl" th:text="#{voucher_reception}"></h1>
+            <h1 class="wa-heading-xl" th:text="#{voucher_reception}"/>
             <p class="wa-text">
-                <span th:text="#{voucher_reception_info}"></span>
+                <span th:text="#{voucher_reception_info}"/>
                 <wa-tag variant="brand" appearance="accent">
-                    <span th:text="${tenantSlug + '@ea.reai.no'}"></span>
+                    <span th:text="${tenantSlug + '@ea.reai.no'}"/>
                     <wa-copy-button th:value="${tenantSlug + '@ea.reai.no'}"></wa-copy-button>
                 </wa-tag>
             </p>
@@ -37,11 +37,11 @@
             <table class="r-voucher-reception-table">
                 <thead>
                 <tr>
-                    <th th:text="#{filename}"></th>
-                    <th th:text="#{sender_email}"></th>
-                    <th th:text="#{mime_type}"></th>
-                    <th th:text="#{received}"></th>
-                    <th th:text="#{file_created_at}"></th>
+                    <th th:text="#{filename}"/>
+                    <th th:text="#{sender_email}"/>
+                    <th th:text="#{mime_type}"/>
+                    <th th:text="#{received}"/>
+                    <th th:text="#{file_created_at}"/>
                 </tr>
                 </thead>
                 <tbody id="document-table-body" th:fragment="documentTableBody">
@@ -64,7 +64,7 @@
             <div class="wa-center" th:if="${#lists.isEmpty(documents)}">
                 <div class="wa-stack wa-center wa-gap-m">
                     <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
-                    <h2 class="wa-heading-m" th:text="#{no_voucher_reception_found}"></h2>
+                    <h2 class="wa-heading-m" th:text="#{no_voucher_reception_found}"/>
                 </div>
             </div>
         </div>
