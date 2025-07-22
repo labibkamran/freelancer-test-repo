@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html dir="ltr" lang="en" layout:decorate="~{layout/base}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/assets/voucher/voucher-reception.css}">
     <script src="/assets/voucher/voucher-reception.js"></script>
 </head>
-
 <body>
 <main layout:fragment="content">
     <div style="visibility:hidden; opacity:0" id="dropzone">
@@ -18,7 +17,7 @@
           hx-swap="outerHTML"
           hx-encoding="multipart/form-data"
           style="display:none">
-        <input type="file" name="files" id="file-input" multiple />
+        <input type="file" name="file" id="file-input" multiple />
         <input type="hidden" name="tenantSlug" th:value="${tenantSlug}" />
     </form>
 
@@ -40,6 +39,9 @@
                 <tr>
                     <th th:text="#{filename}"/>
                     <th th:text="#{sender_Uploader_email}"/>
+                    <th th:text="#{received}"/>
+                    <th>AI Status</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="document-table-body" th:fragment="documentTableBody">
@@ -52,6 +54,36 @@
                     style="cursor: pointer;">
                     <td th:text="${document.attachment.filename}"></td>
                     <td th:text="${document.senderEmail ?: '-'}"></td>
+                    <td th:text="${#temporals.format(document.receivedAt, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td>
+                        <wa-badge th:if="${document.aiExtraction != null}"
+                                  th:attr="variant=${document.aiExtraction.status?.name?.toLowerCase()}"
+                                  th:text="${document.aiExtraction.status == 'CONVERTED_TO_VOUCHER' ? 'VOUCHER CREATED' : document.aiExtraction.status ?: 'NOT_PROCESSED'}"/>
+                        <span th:unless="${document.aiExtraction != null}">-</span>
+                    </td>
+                    <td>
+                        <div class="wa-cluster wa-gap-xs">
+                            <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
+                                       size="small" variant="brand"
+                                       th:hx-get="@{/htmx/voucher-reception/show-extraction(documentId=${document.id})}"
+                                       th:hx-target="#extraction-modal"
+                                       th:hx-swap="innerHTML">
+                                View Data
+                            </wa-button>
+                            <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
+                                       size="small" variant="success"
+                                       th:hx-post="@{/htmx/voucher-reception/create-voucher(extractionId=${document.aiExtraction.id})}"
+                                       th:hx-target="body"
+                                       th:hx-swap="beforeend">
+                                Create Voucher
+                            </wa-button>
+                            <wa-badge th:if="${document.aiExtraction?.status == 'CONVERTED_TO_VOUCHER'}"
+                                     variant="success" size="small">
+                                <wa-icon slot="prefix" name="check" size="small"></wa-icon>
+                                Auto-Created
+                            </wa-badge>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -62,248 +94,17 @@
                     <h2 class="wa-heading-m" th:text="#{no_voucher_reception_found}"/>
                 </div>
             </div>
-
-            <wa-card>
-                <div slot="header" class="wa-split">
-                    <h4>Uploaded Documents</h4>
-                    <wa-button size="small" variant="neutral"
-                               th:hx-get="@{/htmx/voucher-reception/refresh-table}"
-                               th:hx-target=".wa-card__body"
-                               th:hx-swap="innerHTML">
-                        <wa-icon slot="prefix" name="arrow-clockwise" size="small"></wa-icon>
-                        Refresh
-                    </wa-button>
-                </div>
-                <div class="wa-card__body" th:fragment="table">
-                    <table class="r-voucher-reception-table">
-                        <thead>
-                        <tr>
-                            <th th:text="#{filename}" />
-                            <th th:text="#{sender_email}" />
-                            <th th:text="#{mime_type}" />
-                            <th th:text="#{received}" />
-                            <th th:text="#{file_created_at}" />
-                            <th>AI Status</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="document : ${documents}">
-                            <td th:text="${document.attachment.filename}"/>
-                            <td th:text="${document.senderEmail ?: '-'}"/>
-                            <td th:text="${document.attachment.mimetype}"/>
-                            <td th:text="${#temporals.format(document.receivedAt, 'dd.MM.yyyy HH:mm')}"/>
-                            <td th:text="${#temporals.format(document.attachment.createdAt, 'dd.MM.yyyy HH:mm')}"/>
-                            <td>
-                                <wa-badge th:if="${document.aiExtraction != null}"
-                                          th:attr="variant=${document.aiExtraction.status?.name?.toLowerCase()}"
-                                          th:text="${document.aiExtraction.status == 'CONVERTED_TO_VOUCHER' ? 'VOUCHER CREATED' : document.aiExtraction.status ?: 'NOT_PROCESSED'}"/>
-                                <span th:unless="${document.aiExtraction != null}">-</span>
-                            </td>
-                            <td>
-                                <div class="wa-cluster wa-gap-xs">
-                                    <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
-                                               size="small" variant="brand"
-                                               th:hx-get="@{/htmx/voucher-reception/show-extraction(documentId=${document.id})}"
-                                               th:hx-target="#extraction-modal"
-                                               th:hx-swap="innerHTML">
-                                        View Data
-                                    </wa-button>
-                                    <wa-button th:if="${document.aiExtraction?.status == 'COMPLETED'}"
-                                               size="small" variant="success"
-                                               th:hx-post="@{/htmx/voucher-reception/create-voucher(extractionId=${document.aiExtraction.id})}"
-                                               th:hx-target="body"
-                                               th:hx-swap="beforeend">
-                                        Create Voucher
-                                    </wa-button>
-                                    <wa-badge th:if="${document.aiExtraction?.status == 'CONVERTED_TO_VOUCHER'}"
-                                             variant="success" size="small">
-                                        <wa-icon slot="prefix" name="check" size="small"></wa-icon>
-                                        Auto-Created
-                                    </wa-badge>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="wa-center" th:if="${#lists.isEmpty(documents)}">
-                        <div class="wa-stack wa-center wa-gap-m">
-                            <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
-                            <h2 class="wa-heading-m" th:text="#{no_voucher_reception_found}" />
-                        </div>
-                    </div>
-                </div>
-            </wa-card>
         </div>
+
+        <wa-drawer id="drawer-custom-size" class="drawer-custom-size" style="--size: 45vw; --spacing: 0">
+            <div id="pdf-container" style="height: 100%; overflow-y: hidden;">
+                <embed id="pdf-embed" type="application/pdf" style="width: 100%; height: 100%; border: none; display: none;"/>
+            </div>
+        </wa-drawer>
     </div>
-    
+
     <!-- AI Extraction Modal -->
     <div id="extraction-modal"></div>
-    
-    <!-- Upload Invoice Modal -->
-    <div id="upload-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Upload Invoice</h3>
-                <button class="close-button">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="upload-message"></div>
-                <form id="upload-form" enctype="multipart/form-data" class="wa-stack wa-gap-m">
-                    <div class="wa-stack wa-gap-xs">
-                        <label for="file" class="wa-body-s" style="font-weight: 500;">Select Invoice File</label>
-                        <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required 
-                               style="width: 100%; padding: var(--wa-space-xs); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s);">
-                        <div class="wa-body-s" style="color: var(--wa-color-text-quiet);">Supported formats: PDF, JPG, JPEG, PNG (AI extraction available for PDF files)</div>
-                    </div>
-                    <div class="wa-split">
-                        <wa-button type="submit" variant="brand">
-                            <wa-icon slot="prefix" name="upload"></wa-icon>
-                            Upload Invoice
-                        </wa-button>
-                        <wa-button type="button" variant="neutral" id="cancel-button">
-                            Cancel
-                        </wa-button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 </main>
-
-<style>
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 0;
-    border-radius: var(--wa-border-radius-m);
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--wa-space-m);
-    border-bottom: 1px solid var(--wa-color-surface-border);
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: var(--wa-font-size-l);
-    font-weight: 600;
-}
-
-.close-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--wa-color-text-quiet);
-}
-
-.close-button:hover {
-    color: var(--wa-color-text);
-}
-
-.modal-body {
-    padding: var(--wa-space-m);
-}
-
-#upload-message {
-    margin-bottom: var(--wa-space-m);
-}
-</style>
-
-<script>
-// Simple test to see if JavaScript is running
-console.log('JavaScript is loading...');
-
-// Basic modal functions
-function openModal() {
-    console.log('Opening modal...');
-    const modal = document.getElementById('upload-modal');
-    if (modal) {
-        modal.style.display = 'block';
-        console.log('Modal opened!');
-    } else {
-        console.error('Modal not found!');
-    }
-}
-
-function closeModal() {
-    console.log('Closing modal...');
-    const modal = document.getElementById('upload-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Wait for page to load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded, setting up buttons...');
-    
-    // Set up upload button
-    const uploadBtn = document.getElementById('upload-button');
-    if (uploadBtn) {
-        console.log('Upload button found');
-        uploadBtn.onclick = openModal;
-    } else {
-        console.error('Upload button not found');
-    }
-    
-    // Set up test button
-    const testBtn = document.getElementById('test-modal');
-    if (testBtn) {
-        console.log('Test button found');
-        testBtn.onclick = function() {
-            alert('Test button works!');
-            openModal();
-        };
-    } else {
-        console.error('Test button not found');
-    }
-    
-    // Set up close button
-    const closeBtn = document.querySelector('.close-button');
-    if (closeBtn) {
-        console.log('Close button found');
-        closeBtn.onclick = closeModal;
-    }
-    
-    // Set up cancel button
-    const cancelBtn = document.getElementById('cancel-button');
-    if (cancelBtn) {
-        console.log('Cancel button found');
-        cancelBtn.onclick = closeModal;
-    }
-    
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        const modal = document.getElementById('upload-modal');
-        if (event.target === modal) {
-            closeModal();
-        }
-    };
-    
-    console.log('All buttons set up!');
-});
-
-console.log('Script loaded successfully!');
-</script>
 </body>
 </html>

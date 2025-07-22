@@ -19,7 +19,7 @@ import java.io.IOException
 
 @Service
 class InvoiceExtractionService(
-    @Value("\${openai.api.key:}") private val openaiApiKey: String,
+    @Value("\${OPENAI_API_KEY:}") private val openaiApiKey: String,
     private val vatService: VatService,
     private val accountService: AccountService
 ) {
