@@ -45,7 +45,7 @@ document.getElementById('createCompanyForm').addEventListener('htmx:beforeReques
         const submitButton = document.getElementById('submitButton');
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.innerHTML = '<wa-spinner style="margin-right: 0.5rem;"></wa-spinner> Creating Company...';
+            submitButton.innerHTML = '<wa-spinner style="margin-right: var(--wa-space-s);"></wa-spinner> Creating Company...';
         }
     }
 });
@@ -66,7 +66,7 @@ document.getElementById('createCompanyForm').addEventListener('htmx:afterRequest
             const submitButton = document.getElementById('submitButton');
             if (submitButton && submitButton.disabled) {
                 submitButton.disabled = false;
-                submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: 0.5rem;"></wa-icon>Create Company';
+                submitButton.innerHTML = '<wa-icon name="plus" style="margin-right: var(--wa-space-s);"></wa-icon>Create Company';
             }
         }, 100);
     }

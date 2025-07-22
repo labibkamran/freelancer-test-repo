@@ -18,7 +18,7 @@
 .posting-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 1rem;
+    margin-bottom: var(--wa-space-m);
 }
 
 .form-actions {
@@ -43,7 +43,7 @@
 .error-message {
     color: #dc2626;
     font-size: 0.875rem;
-    margin-top: 0.25rem;
+    margin-top: var(--wa-space-xs);
     display: block;
 }
 

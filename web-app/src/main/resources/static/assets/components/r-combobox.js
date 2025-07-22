@@ -122,7 +122,7 @@ class RCombobox extends LitElement {
             font-weight: 500;
             font-size: 0.875rem;
             color: var(--wa-color-gray-10);
-            margin-bottom: 0.125rem;
+            margin-bottom: var(--wa-space-2xs);
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -140,7 +140,7 @@ class RCombobox extends LitElement {
         .item-meta {
             font-size: 0.7rem;
             color: var(--wa-color-gray-50);
-            margin-top: 0.125rem;
+            margin-top: var(--wa-space-2xs);
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
