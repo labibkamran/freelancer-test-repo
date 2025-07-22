@@ -80,18 +80,16 @@ document.addEventListener('click', function(e) {
     }
 });
 
-document.addEventListener('htmx:beforeRequest', e => {
-    const btn = e.target.closest('form')?.querySelector('.r-spinner-button');
-    if (btn) {
-        btn.classList.add('loading');
-        btn.disabled = true;
+document.addEventListener('htmx:configRequest', e => {
+    const spinner = document.getElementById('loading-indicator');
+    if (spinner) {
+        spinner.style.display = 'inline-block';
     }
 });
 
 document.addEventListener('htmx:afterRequest', e => {
-    const btn = e.target.closest('form')?.querySelector('.r-spinner-button');
-    if (btn) {
-        btn.classList.remove('loading');
-        btn.disabled = false;
+    const spinner = document.getElementById('loading-indicator');
+    if (spinner) {
+        spinner.style.display = 'none';
     }
 });
