@@ -43,7 +43,7 @@
                     <div class="wa-stack wa-gap-m">
                         <div th:if="${#lists.isEmpty(vouchers)}" class="wa-center">
                             <div class="wa-stack wa-gap-m wa-center">
-                                <wa-icon name="document-text" style="font-size: 3rem; opacity: 0.5;"></wa-icon>
+                                <wa-icon name="document-text" style="font-size: var(--wa-font-size-4xl); opacity: 0.5;"></wa-icon>
                                 <h3 class="wa-heading-m" th:text="#{no_vouchers_found}"/>
                             </div>
                         </div>
@@ -65,20 +65,12 @@
                                     <tr style="background-color: var(--wa-color-gray-90);">
                                         <td></td>
                                         <td style="font-weight: 600;">
-                                            <div class="wa-cluster wa-gap-xs">
-                                                <a style="color: var(--wa-color-blue-50); text-decoration: none;"
-                                                   th:href="'/voucher/' + ${voucher.id}">
-                                                    <strong th:text="${voucher.number}"/><span
-                                                        style="font-size: var(--wa-font-size-s)"
-                                                        th:text=" ' ' + #{show_voucher}"/>
-                                                </a>
-                                                <wa-badge th:if="${voucher.isAiGenerated}" 
-                                                         variant="success" 
-                                                         size="small">
-                                                    <wa-icon slot="prefix" name="robot" size="small"></wa-icon>
-                                                    AI Generated
-                                                </wa-badge>
-                                            </div>
+                                            <a style="color: var(--wa-color-blue-50); text-decoration: none;"
+                                               th:href="'/voucher/' + ${voucher.id}">
+                                                <strong th:text="${voucher.number}"/><span
+                                                    style="font-size: var(--wa-font-size-s)"
+                                                    th:text=" ' ' + #{show_voucher}"/>
+                                            </a>
                                         </td>
                                         <td></td>
                                         <td></td>
