@@ -31,7 +31,15 @@
             <wa-card>
                 <div slot="header" class="wa-split">
                     <h4 th:text="${'Voucher ' + voucher.displayNumber}"/>
-                    <wa-button appearance="plain" th:text="#{voucher_upload_files}"/>
+                    <div class="wa-cluster wa-gap-xs">
+                        <wa-badge th:if="${isAiGenerated}" 
+                                 variant="success" 
+                                 size="small">
+                            <wa-icon slot="prefix" name="robot" size="small"></wa-icon>
+                            AI Generated
+                        </wa-badge>
+                        <wa-button appearance="plain" th:text="#{voucher_upload_files}"/>
+                    </div>
                 </div>
 
                 <div class="wa-stack">
@@ -52,7 +60,40 @@
                 </div>
             </wa-card>
 
-            <wa-card>
+            <!-- AI Extraction Information -->
+            <wa-card th:if="${isAiGenerated and aiExtractionData != null}">
+                <div slot="header">
+                    <h4>AI Extraction Source</h4>
+                </div>
+                <div class="wa-stack wa-gap-m">
+                    <div class="wa-cluster wa-gap-m">
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Invoice Number</label>
+                            <span class="wa-body-m" th:text="${aiExtractionData.invoice_details.invoice_number}">-</span>
+                        </div>
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Company</label>
+                            <span class="wa-body-m" th:text="${aiExtractionData.invoice_details.company_name}">-</span>
+                        </div>
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Amount</label>
+                            <span class="wa-body-m" th:text="${aiExtractionData.invoice_details.order_total + ' ' + aiExtractionData.invoice_details.currency}">-</span>
+                        </div>
+                    </div>
+                    <div class="wa-cluster wa-gap-m">
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">AI Predicted Account</label>
+                            <wa-badge variant="brand" th:text="${aiExtractionData.debit_prediction.account}">-</wa-badge>
+                        </div>
+                        <div class="wa-stack wa-gap-xs">
+                            <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">VAT Code</label>
+                            <wa-badge variant="neutral" th:text="${aiExtractionData.invoice_details.vat_code}">-</wa-badge>
+                        </div>
+                    </div>
+                </div>
+            </wa-card>
+
+                <wa-card>
                 <div slot="header">
                     <h4 th:text="#{postings}"/>
                 </div>

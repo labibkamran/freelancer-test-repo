@@ -58,7 +58,6 @@ open class Posting : Serializable {
     @Column(name = "description", length = Integer.MAX_VALUE)
     open var description: String? = null
 
-    @TenantId
     @Column(name = "tenant_id", nullable = false, updatable = false)
     open var tenantId: Long? = null
 

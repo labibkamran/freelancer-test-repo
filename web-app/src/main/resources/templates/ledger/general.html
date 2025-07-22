@@ -104,13 +104,21 @@
                                             <wa-icon th:if="${posting.closed}" name="check"></wa-icon>
                                         </td>
                                         <td>
-                                            <a th:if="${posting.voucherId != null}"
-                                               th:href="'/voucher/' + ${posting.voucherId}"
-                                               style="color: var(--wa-color-blue-50); text-decoration: none;"
-                                               th:text="${posting.voucherNumber}">
-                                                5-2020
-                                            </a>
-                                            <span th:unless="${posting.voucherId != null}">-</span>
+                                            <div class="wa-cluster wa-gap-xs">
+                                                <a th:if="${posting.voucherId != null}"
+                                                   th:href="'/voucher/' + ${posting.voucherId}"
+                                                   style="color: var(--wa-color-blue-50); text-decoration: none;"
+                                                   th:text="${posting.voucherNumber}">
+                                                    5-2020
+                                                </a>
+                                                <span th:unless="${posting.voucherId != null}">-</span>
+                                                <wa-badge th:if="${posting.isAiGenerated}" 
+                                                         variant="success" 
+                                                         size="small">
+                                                    <wa-icon slot="prefix" name="robot" size="small"></wa-icon>
+                                                    AI
+                                                </wa-badge>
+                                            </div>
                                         </td>
                                         <td th:text="${#temporals.format(posting.date, 'dd.MM.yyyy')}"/>
                                         <td th:text="${posting.description ?: '-'}"/>

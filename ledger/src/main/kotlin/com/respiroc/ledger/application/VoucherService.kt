@@ -47,6 +47,30 @@ class VoucherService(
         )
     }
 
+    fun createVoucher(payload: CreateVoucherPayload, tenantId: Long): VoucherPayload {
+        val voucherNumber = generateNextVoucherNumber(payload.date)
+
+        if (payload.postings.isNotEmpty()) {
+            validatePostingCommands(payload.postings)
+            validateBalance(payload.postings)
+        }
+
+        val voucher = createVoucherEntity(payload, voucherNumber)
+        voucher.tenantId = tenantId
+        val savedVoucher = voucherRepository.save(voucher)
+
+        if (payload.postings.isNotEmpty()) {
+            saveNonZeroPostingsWithTenantId(payload.postings, savedVoucher.id, tenantId)
+        }
+
+        return VoucherPayload(
+            id = savedVoucher.id,
+            number = savedVoucher.getDisplayNumber(),
+            date = savedVoucher.date,
+            description = savedVoucher.description
+        )
+    }
+
     fun findOrCreateEmptyVoucher(): VoucherPayload {
         val existingEmptyVoucher = voucherRepository.findFirstEmptyVoucher()
         if (existingEmptyVoucher != null) {
@@ -160,7 +184,8 @@ class VoucherService(
 
     private fun createPostingEntity(
         postingData: CreatePostingPayload,
-        voucherId: Long
+        voucherId: Long,
+        tenantId: Long? = null
     ): Posting {
         val posting = Posting()
         posting.accountNumber = postingData.accountNumber
@@ -173,6 +198,8 @@ class VoucherService(
         posting.vatCode = postingData.vatCode
         posting.voucherId = voucherId
         posting.rowNumber = postingData.rowNumber
+        // Set tenant ID from parameter or current context
+        posting.tenantId = tenantId ?: tenantId()
 
         return posting
     }
@@ -185,6 +212,22 @@ class VoucherService(
             .filter { it.amount.compareTo(BigDecimal.ZERO) != 0 }
             .map { postingData ->
                 createPostingEntity(postingData, voucherId)
+            }
+
+        if (nonZeroPostings.isNotEmpty()) {
+            postingRepository.saveAll(nonZeroPostings)
+        }
+    }
+
+    private fun saveNonZeroPostingsWithTenantId(
+        postings: List<CreatePostingPayload>,
+        voucherId: Long,
+        tenantId: Long
+    ) {
+        val nonZeroPostings = postings
+            .filter { it.amount.compareTo(BigDecimal.ZERO) != 0 }
+            .map { postingData ->
+                createPostingEntity(postingData, voucherId, tenantId)
             }
 
         if (nonZeroPostings.isNotEmpty()) {
@@ -205,6 +248,7 @@ class VoucherService(
                 vatCode = posting.vatCode,
                 amount = posting.amount
             )
-        }
+        },
+        isAiGenerated = voucher.isAiGenerated()
     )
 }

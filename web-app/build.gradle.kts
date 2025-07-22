@@ -21,14 +21,14 @@ dependencies {
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
     implementation("io.github.wimdeblauwe:htmx-spring-boot:4.0.1")
     implementation("io.github.wimdeblauwe:htmx-spring-boot-thymeleaf:4.0.1")
-//    developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    // converting images to pdf, invoices etc.
     implementation("com.itextpdf:itext7-core:9.2.0")
-    //implementation("org.springframework.boot:spring-boot-starter-validation")
-    //implementation("org.springframework.session:spring-session-jdbc")
+    implementation("org.apache.pdfbox:pdfbox:2.0.29")
+    implementation("net.sourceforge.tess4j:tess4j:5.8.0")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }

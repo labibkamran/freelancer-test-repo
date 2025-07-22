@@ -1,0 +1,118 @@
+<div class="wa-modal" open>
+    <div class="wa-modal__overlay"></div>
+    <div class="wa-modal__container" style="max-width: 600px;">
+        <div class="wa-modal__header">
+            <h2 class="wa-heading-m">AI Extracted Invoice Data</h2>
+            <wa-button size="small" variant="neutral" appearance="ghost" onclick="closeModal()">
+                <wa-icon name="xmark"></wa-icon>
+            </wa-button>
+        </div>
+        
+        <div class="wa-modal__body">
+            <div class="wa-stack wa-gap-m">
+                <!-- Basic Invoice Information -->
+                <div class="wa-cluster wa-gap-m">
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Invoice Number</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.invoice_number}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Invoice Date</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.invoice_date}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Due Date</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.due_date ?: 'Not specified'}">-</span>
+                    </div>
+                </div>
+                
+                <!-- Company Information -->
+                <div class="wa-cluster wa-gap-m">
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Company Name</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.company_name}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Company Number</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.company_number}">-</span>
+                    </div>
+                </div>
+                
+                <!-- Financial Information -->
+                <div class="wa-cluster wa-gap-m">
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Total Amount</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.order_total} + ' ' + ${extraction.invoice_details.currency}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">VAT Amount</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.vat_amount} + ' ' + ${extraction.invoice_details.currency}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">VAT Rate</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.vat_percentage} + '%'">-</span>
+                    </div>
+                </div>
+                
+                <!-- AI Predictions -->
+                <div class="wa-cluster wa-gap-m">
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Predicted Account</label>
+                        <wa-badge variant="brand" th:text="${extraction.debit_prediction.account}">-</wa-badge>
+                    </div>
+                    <div class="wa-stack wa-gap-xs">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">VAT Code</label>
+                        <wa-badge variant="neutral" th:text="${extraction.invoice_details.vat_code}">-</wa-badge>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="wa-stack wa-gap-xs">
+                    <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Description</label>
+                    <span class="wa-body-m" th:text="${extraction.invoice_details.description}">-</span>
+                </div>
+                
+                <!-- Optional Fields -->
+                <div class="wa-cluster wa-gap-m" th:if="${extraction.invoice_details.KID_number != null || extraction.invoice_details.project != null}">
+                    <div class="wa-stack wa-gap-xs" th:if="${extraction.invoice_details.KID_number != null}">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">KID Number</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.KID_number}">-</span>
+                    </div>
+                    <div class="wa-stack wa-gap-xs" th:if="${extraction.invoice_details.project != null}">
+                        <label class="wa-body-s" style="font-weight: 500; color: var(--wa-color-text-quiet);">Project</label>
+                        <span class="wa-body-m" th:text="${extraction.invoice_details.project}">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="wa-modal__footer">
+            <div class="wa-cluster">
+                <wa-button variant="neutral" onclick="closeModal()">Cancel</wa-button>
+                <wa-button variant="success" 
+                           th:hx-post="@{/htmx/voucher-reception/create-voucher(extractionId=${aiExtractionId})}"
+                           th:hx-target="body"
+                           th:hx-swap="beforeend">
+                    <wa-icon slot="prefix" name="plus"></wa-icon>
+                    Create Voucher from AI Data
+                </wa-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function closeModal() {
+    const modal = document.querySelector('.wa-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Close modal when clicking overlay
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('wa-modal__overlay')) {
+        closeModal();
+    }
+});
+</script> 

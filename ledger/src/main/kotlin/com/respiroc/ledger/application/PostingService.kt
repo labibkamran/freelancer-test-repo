@@ -164,7 +164,8 @@ class PostingService(
                                 currency = posting.currency,
                                 amount = posting.amount,
                                 originalCurrency = posting.originalCurrency,
-                                originalAmount = posting.originalAmount
+                                originalAmount = posting.originalAmount,
+                                isAiGenerated = posting.voucher?.isAiGenerated() ?: false
                             )
                         }
                 } else {

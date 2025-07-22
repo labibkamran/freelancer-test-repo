@@ -4,6 +4,7 @@ import com.respiroc.ledger.application.AccountService
 import com.respiroc.ledger.application.PostingService
 import com.respiroc.webapp.controller.BaseController
 import com.respiroc.webapp.controller.response.Callout
+import com.respiroc.webapp.service.AiExtractionDisplayService
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -17,7 +18,8 @@ import java.time.LocalDate
 @RequestMapping(value = ["/ledger"])
 class LedgerWebController(
     private val postingService: PostingService,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val aiExtractionDisplayService: AiExtractionDisplayService
 ) : BaseController() {
 
     @GetMapping(value = ["/general"])

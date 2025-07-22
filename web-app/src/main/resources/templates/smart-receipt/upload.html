@@ -30,7 +30,7 @@
                             <label for="invoiceFile" class="wa-body-s" style="font-weight: 500;">Select Invoice File</label>
                             <input type="file" id="invoiceFile" name="invoiceFile" accept=".pdf,.jpg,.jpeg,.png" required 
                                    style="width: 100%; padding: var(--wa-space-xs); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s);">
-                            <div class="wa-body-s" style="color: var(--wa-color-text-quiet);">Supported formats: PDF, JPG, JPEG, PNG</div>
+                            <div class="wa-body-s" style="color: var(--wa-color-text-quiet);">Supported formats: PDF, JPG, JPEG, PNG (PDF processing available)</div>
                         </div>
 
                         <div>
@@ -47,6 +47,86 @@
                 <div class="wa-card__body">
                     <h3 class="wa-heading-s">Uploaded File</h3>
                     <p class="wa-body-m" th:text="${uploadedFile}">File name will appear here</p>
+                </div>
+            </wa-card>
+
+            <wa-card th:if="${extractedData != null}">
+                <div class="wa-card__body">
+                    <h3 class="wa-heading-s">Extracted Invoice Data</h3>
+                    
+                    <div class="wa-stack wa-gap-m">
+                        <div>
+                            <h4 class="wa-heading-xs">Invoice Details</h4>
+                            <div class="wa-stack wa-gap-xs">
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Invoice Number:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.invoice_number}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Invoice Date:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.invoice_date}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Due Date:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.due_date}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Company Name:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.company_name}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Company Number:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.company_number}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Order Total:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.order_total + ' ' + extractedData.invoice_details.currency}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">VAT Amount:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.vat_amount + ' ' + extractedData.invoice_details.currency}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">VAT Code:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.vat_code}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Description:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.description}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Project:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.project}">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="wa-heading-xs">Payment Details</h4>
+                            <div class="wa-stack wa-gap-xs">
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">KID Number:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.KID_number}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">Account Number:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.account_number}">-</span>
+                                </div>
+                                <div class="wa-cluster">
+                                    <span class="wa-body-s" style="font-weight: 500;">SWIFT/BIC:</span>
+                                    <span class="wa-body-s" th:text="${extractedData.invoice_details.swift_bic}">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="wa-heading-xs">Debit Prediction</h4>
+                            <div class="wa-cluster">
+                                <span class="wa-body-s" style="font-weight: 500;">Account:</span>
+                                <span class="wa-body-s" th:text="${extractedData.debit_prediction.account}">-</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </wa-card>
         </div>

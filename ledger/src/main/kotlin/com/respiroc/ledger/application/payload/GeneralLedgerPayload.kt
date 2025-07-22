@@ -27,5 +27,6 @@ data class GeneralLedgerPostingEntry(
     val amount: BigDecimal,
     val originalCurrency: String?,
     val originalAmount: BigDecimal?,
-    val closed: Boolean = false // For future use
+    val closed: Boolean = false, // For future use
+    val isAiGenerated: Boolean = false
 ) 

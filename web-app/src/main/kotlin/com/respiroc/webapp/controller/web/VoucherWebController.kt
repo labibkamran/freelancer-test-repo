@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.LocalDate
+import com.respiroc.webapp.service.AiExtractionDisplayService
 
 @Controller
 @RequestMapping(value = ["/voucher"])
@@ -25,7 +26,8 @@ class VoucherWebController(
     private val currencyService: CurrencyService,
     private val vatService: VatService,
     private val voucherApi: VoucherService,
-    private val voucherWebService: VoucherWebService
+    private val voucherWebService: VoucherWebService,
+    private val aiExtractionDisplayService: AiExtractionDisplayService
 ) : BaseController() {
 
     @GetMapping(value = [])
@@ -78,6 +80,16 @@ class VoucherWebController(
         model.addAttribute("uiPostingLines", uiPostingLines)
         model.addAttribute("voucherId", id)
         model.addAttribute("voucherDate", voucher.date.toString())
+        
+        // Add AI extraction data if voucher was AI-generated
+        if (aiExtractionDisplayService.isVoucherAiGenerated(voucher)) {
+            val aiData = aiExtractionDisplayService.getAiExtractionForVoucher(voucher)
+            model.addAttribute("aiExtractionData", aiData)
+            model.addAttribute("isAiGenerated", true)
+        } else {
+            model.addAttribute("isAiGenerated", false)
+        }
+        
         return "voucher/advanced-voucher"
     }
 

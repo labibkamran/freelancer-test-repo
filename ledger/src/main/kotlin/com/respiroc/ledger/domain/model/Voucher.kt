@@ -28,7 +28,6 @@ open class Voucher {
     @Column(name = "description", length = Integer.MAX_VALUE)
     open var description: String? = null
 
-    @TenantId
     @Column(name = "tenant_id", nullable = false, updatable = false)
     open var tenantId: Long? = null
 
@@ -47,8 +46,16 @@ open class Voucher {
 
     @OneToMany(mappedBy = "voucher")
     open var postings: MutableSet<Posting> = mutableSetOf()
+    
+    // AI Extraction reference (just the ID to avoid circular dependency)
+    @Column(name = "ai_extraction_id")
+    open var aiExtractionId: Long? = null
 
     open fun getDisplayNumber(): String {
         return "${number}-${date.year}"
+    }
+    
+    open fun isAiGenerated(): Boolean {
+        return aiExtractionId != null
     }
 }

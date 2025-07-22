@@ -5,7 +5,8 @@ import java.time.LocalDate
 data class VoucherSummaryPayload(
     val id: Long,
     val number: String,
-    val postings: List<PostingSummaryPayload> = emptyList()
+    val postings: List<PostingSummaryPayload> = emptyList(),
+    val isAiGenerated: Boolean = false
 )
 
 data class PostingSummaryPayload(
