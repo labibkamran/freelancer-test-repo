@@ -8,7 +8,7 @@
 <body>
 <main layout:fragment="content">
     <div style="visibility:hidden; opacity:0" id="dropzone">
-        <div id="textnode">Drop files anywhere!</div>
+        <div id="textnode" th:text="#{Drop_files_anywhere}" />
     </div>
 
     <form id="upload-form"
@@ -38,10 +38,7 @@
                 <thead>
                 <tr>
                     <th th:text="#{filename}"/>
-                    <th th:text="#{sender_email}"/>
-                    <th th:text="#{mime_type}"/>
-                    <th th:text="#{received}"/>
-                    <th th:text="#{file_created_at}"/>
+                    <th th:text="#{sender_Uploader_email}"/>
                 </tr>
                 </thead>
                 <tbody id="document-table-body" th:fragment="documentTableBody">
@@ -54,9 +51,6 @@
                     style="cursor: pointer;">
                     <td th:text="${document.attachment.filename}"></td>
                     <td th:text="${document.senderEmail ?: '-'}"></td>
-                    <td th:text="${document.attachment.mimetype}"></td>
-                    <td th:text="${#temporals.format(document.receivedAt, 'dd.MM.yyyy HH:mm')}"></td>
-                    <td th:text="${#temporals.format(document.attachment.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
                 </tr>
                 </tbody>
             </table>
