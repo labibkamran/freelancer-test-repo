@@ -2,26 +2,64 @@
 <html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
 <head>
+    <link rel="stylesheet" th:href="@{/assets/voucher/voucher-reception.css}">
+    <script src="/assets/voucher/voucher-reception.js"></script>
 </head>
 
 <body>
 <main layout:fragment="content">
-    <div class="wa-container">
-        <div class="wa-stack wa-gap-s">
-            <div class="wa-split">
-                <div>
-                    <h1 class="wa-heading-l" th:text="#{voucher_reception}">Voucher Reception</h1>
-                    <p class="wa-body-m" th:text="#{voucher_reception_info}">📱 Drag and drop your files directly on this page or send them to</p>
-                    <p class="wa-body-s" th:if="${tenantSlug != null}" th:text="'📧 ' + ${tenantSlug} + '@reai.no'"></p>
-                </div>
-                <div>
-                    <button id="upload-button" class="wa-button wa-button--brand wa-button--medium" style="display: inline-flex; align-items: center; gap: var(--wa-space-xs); padding: var(--wa-space-s) var(--wa-space-m); border: none; border-radius: var(--wa-border-radius-s); background: var(--wa-color-brand-500); color: white; cursor: pointer; font-size: var(--wa-font-size-s); font-weight: 500;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M11 15h2V6h3l-4-4-4 4h3v9zm-5 4h12v-2H6v2z"/>
-                        </svg>
-                        Upload Invoice
-                    </button>
-                    <button id="test-modal" style="margin-left: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer;">Test Modal</button>
+    <div style="visibility:hidden; opacity:0" id="dropzone">
+        <div id="textnode" th:text="#{Drop_files_anywhere}" />
+    </div>
+
+    <form id="upload-form"
+          hx-post="/voucher-reception/upload"
+          hx-target="#document-table-body"
+          hx-swap="outerHTML"
+          hx-encoding="multipart/form-data"
+          style="display:none">
+        <input type="file" name="files" id="file-input" multiple />
+        <input type="hidden" name="tenantSlug" th:value="${tenantSlug}" />
+    </form>
+
+    <div id="pageContent" class="r-voucher-reception-container">
+        <wa-callout variant="neutral" class="r-voucher-reception">
+            <h1 class="wa-heading-xl" th:text="#{voucher_reception}"/>
+            <p class="wa-text">
+                <span th:text="#{voucher_reception_info}"/>
+                <wa-tag variant="brand" appearance="accent">
+                    <span th:text="${tenantSlug + '@ea.reai.no'}"/>
+                    <wa-copy-button th:value="${tenantSlug + '@ea.reai.no'}"></wa-copy-button>
+                </wa-tag>
+            </p>
+        </wa-callout>
+
+        <div style="overflow-x: auto;">
+            <table class="r-voucher-reception-table">
+                <thead>
+                <tr>
+                    <th th:text="#{filename}"/>
+                    <th th:text="#{sender_Uploader_email}"/>
+                </tr>
+                </thead>
+                <tbody id="document-table-body" th:fragment="documentTableBody">
+                <tr th:each="document : ${documents}"
+                    th:hx-get="@{/voucher-reception/document/{id}/pdf(id=${document.id})}"
+                    hx-target="#pdf-embed"
+                    hx-swap="outerHTML"
+                    data-drawer="open drawer-custom-size"
+                    hx-trigger="click delay:200ms"
+                    style="cursor: pointer;">
+                    <td th:text="${document.attachment.filename}"></td>
+                    <td th:text="${document.senderEmail ?: '-'}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="wa-center" th:if="${#lists.isEmpty(documents)}">
+                <div class="wa-stack wa-center wa-gap-m">
+                    <wa-icon name="document-text" style="font-size: var(--wa-font-size-4xl); opacity: 0.5;"></wa-icon>
+                    <h2 class="wa-heading-m" th:text="#{no_voucher_reception_found}"/>
                 </div>
             </div>
 
@@ -132,6 +170,7 @@
             </div>
         </div>
     </div>
+
 </main>
 
 <style>

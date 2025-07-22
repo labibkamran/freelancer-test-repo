@@ -4,12 +4,16 @@ import com.respiroc.tenant.application.TenantService
 import com.respiroc.tenant.domain.model.Tenant
 import com.respiroc.util.repository.CustomJpaRepository
 import com.respiroc.webapp.controller.BaseController
+<<<<<<< HEAD
 import com.respiroc.webapp.domain.model.InvoiceAiExtraction
 import com.respiroc.webapp.domain.model.ExtractionStatus
 import com.respiroc.webapp.repository.InvoiceAiExtractionRepository
 import com.respiroc.webapp.service.InvoiceExtractionService
 import com.respiroc.webapp.service.InvoiceExtractionResult
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+=======
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest
+>>>>>>> 889ba21dfcb027d3a57160aee7e6f7449cd0a9f5
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.slf4j.LoggerFactory
@@ -21,6 +25,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+<<<<<<< HEAD
+=======
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
+>>>>>>> 889ba21dfcb027d3a57160aee7e6f7449cd0a9f5
 import java.time.Instant
 import java.util.*
 
@@ -289,7 +298,11 @@ class VoucherReceptionDocument {
 class VoucherReceptionWebController(
     private val voucherReceptionDocumentRepository: VoucherReceptionDocumentRepository,
     private val voucherReceptionService: VoucherReceptionService,
+<<<<<<< HEAD
     private val tenantService: com.respiroc.tenant.application.TenantService
+=======
+    private val tenantService: TenantService
+>>>>>>> 889ba21dfcb027d3a57160aee7e6f7449cd0a9f5
 ) : BaseController() {
 
     private val logger = LoggerFactory.getLogger(VoucherReceptionWebController::class.java)
@@ -345,4 +358,44 @@ class VoucherReceptionWebController(
         
         return overview(model)
     }
+<<<<<<< HEAD
+=======
+
+    @PostMapping("/upload")
+    @HxRequest
+    fun uploadFiles(
+        @RequestParam("files") files: List<MultipartFile>,
+        @RequestParam("tenantSlug") tenantSlug: String,
+        model: Model): String {
+        val tenant = tenantService.findTenantBySlug(tenantSlug) ?: return "Tenant not found."
+        val currentUser = springUser()
+
+        try {
+            files.forEach { file ->
+                val fileData = file.bytes
+                val filename = file.originalFilename ?: "unnamed"
+                val mimeType = file.contentType ?: "application/octet-stream"
+
+                voucherReceptionService.saveDocument(
+                    fileData = fileData,
+                    filename = filename,
+                    mimeType = mimeType,
+                    senderEmail = currentUser.username,
+                    tenant = tenant
+                )
+            }
+
+            val updatedDocuments = voucherReceptionDocumentRepository.findAll()
+            model.addAttribute("documents", updatedDocuments)
+
+            return "voucher-reception/overview :: documentTableBody"
+        } catch (e: Exception) {
+            return "Error saving files"
+        }
+    }
+
+
+
+
+>>>>>>> 889ba21dfcb027d3a57160aee7e6f7449cd0a9f5
 }
