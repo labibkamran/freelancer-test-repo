@@ -108,15 +108,6 @@
     color: var(--wa-color-gray-50);
 }
 
-.htmx-indicator {
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.htmx-request .htmx-indicator {
-    opacity: 1;
-}
-
 @media (max-width: 768px) {
     .r-filters-form {
         flex-direction: column;

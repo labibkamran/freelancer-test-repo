@@ -26,19 +26,6 @@
     align-items: center;
 }
 
-/* Old dropdown styles removed since we're using r-combobox */
-
-
-
-.htmx-indicator {
-    opacity: 0;
-    transition: opacity 500ms ease-in;
-}
-
-.htmx-request .htmx-indicator {
-    opacity: 1;
-}
-
 .error-message {
     color: var(--wa-color-red-60);
     font-size: var(--wa-font-size-s);
