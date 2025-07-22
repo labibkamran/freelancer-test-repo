@@ -38,13 +38,6 @@ r-combobox {
     font-size: inherit;
 }
 
-r-combobox[style*="font-size: 0.75rem"] {
-    --combobox-font-size: var(--wa-font-size-xs);
-}
-
-r-combobox[style*="font-size: 0.8rem"] {
-    --combobox-font-size: var(--wa-font-size-s);
-}
 r-combobox[style*="font-size: var(--wa-font-size-xs)"] {
     --combobox-font-size: var(--wa-font-size-xs);
 }
