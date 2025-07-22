@@ -13,24 +13,24 @@
 
         <div id="form-messages"></div>
 
-        <div class="htmx-indicator" id="loading-indicator" style="display: none;">
+        <div style="display: none;">
             <div>
                 <wa-icon name="clock" style="margin-right: 0.5rem;"/>
                 <span th:text="#{voucher_saving}"/>
             </div>
         </div>
 
-        <form hx-indicator="#loading-indicator"
-              hx-target="#form-messages"
+        <form th:hx-indicator="'#loading-indicator'"
+              th:hx-target="'#form-messages'"
               th:hx-post="@{/htmx/voucher/update/{voucherId}(voucherId=${voucherId}, tenantId=${user.ctx.currentTenant?.id})}"
               id="voucherForm"
-              hx-swap="innerHTML"
-        >
+              th:hx-swap="'innerHTML'"
+              class="wa-stack">
 
-            <div class="r-posting-form">
-                <div class="form-header">
-                    <h4 style="margin: 0;" th:text="${'Voucher ' + voucher.displayNumber}"/>
-                    <wa-button th:text="#{voucher_upload_files}"/>
+            <wa-card>
+                <div slot="header" class="wa-split">
+                    <h4 th:text="${'Voucher ' + voucher.displayNumber}"/>
+                    <wa-button appearance="plain" th:text="#{voucher_upload_files}"/>
                 </div>
 
                 <div class="wa-stack">
@@ -49,12 +49,11 @@
                                   type="text"/>
                     </div>
                 </div>
-            </div>
+            </wa-card>
 
-            <div class="r-posting-form">
-                <div class="form-header">
-                    <h4 style="margin: 0;" th:text="#{postings}"/>
-                    <small th:text="#{debits.credits}"/>
+            <wa-card>
+                <div slot="header">
+                    <h4 th:text="#{postings}"/>
                 </div>
 
 
@@ -193,15 +192,16 @@
                                type="button"
                                variant="neutral"/>
 
-                    <wa-button id="saveButton"
+                    <wa-button class="r-spinner-button"
+                               id="saveButton"
                                size="small"
-                               th:text="#{voucher_update}" type="submit"
-                               variant="success"
-                    />
+                               type="submit"
+                               variant="success">
+                        <span th:text="#{voucher_update}"></span>
+                    </wa-button>
                 </div>
-            </div>
+            </wa-card>
         </form>
-
 
     </div>
 </main>
