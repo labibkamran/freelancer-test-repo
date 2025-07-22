@@ -8,10 +8,21 @@
 <main layout:fragment="content">
     <div class="wa-container">
         <div class="wa-stack wa-gap-s">
-            <div>
-                <h1 class="wa-heading-l" th:text="#{voucher_reception}">Voucher Reception</h1>
-                <p class="wa-body-m" th:text="#{voucher_reception_info}">📱 Drag and drop your files directly on this page or send them to</p>
-                <p class="wa-body-s" th:if="${tenantSlug != null}" th:text="'📧 ' + ${tenantSlug} + '@reai.no'"></p>
+            <div class="wa-split">
+                <div>
+                    <h1 class="wa-heading-l" th:text="#{voucher_reception}">Voucher Reception</h1>
+                    <p class="wa-body-m" th:text="#{voucher_reception_info}">📱 Drag and drop your files directly on this page or send them to</p>
+                    <p class="wa-body-s" th:if="${tenantSlug != null}" th:text="'📧 ' + ${tenantSlug} + '@reai.no'"></p>
+                </div>
+                <div>
+                    <button id="upload-button" class="wa-button wa-button--brand wa-button--medium" style="display: inline-flex; align-items: center; gap: var(--wa-space-xs); padding: var(--wa-space-s) var(--wa-space-m); border: none; border-radius: var(--wa-border-radius-s); background: var(--wa-color-brand-500); color: white; cursor: pointer; font-size: var(--wa-font-size-s); font-weight: 500;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11 15h2V6h3l-4-4-4 4h3v9zm-5 4h12v-2H6v2z"/>
+                        </svg>
+                        Upload Invoice
+                    </button>
+                    <button id="test-modal" style="margin-left: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer;">Test Modal</button>
+                </div>
             </div>
 
             <wa-card>
@@ -91,29 +102,169 @@
     
     <!-- AI Extraction Modal -->
     <div id="extraction-modal"></div>
+    
+    <!-- Upload Invoice Modal -->
+    <div id="upload-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Invoice</h3>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="upload-message"></div>
+                <form id="upload-form" enctype="multipart/form-data" class="wa-stack wa-gap-m">
+                    <div class="wa-stack wa-gap-xs">
+                        <label for="file" class="wa-body-s" style="font-weight: 500;">Select Invoice File</label>
+                        <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required 
+                               style="width: 100%; padding: var(--wa-space-xs); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s);">
+                        <div class="wa-body-s" style="color: var(--wa-color-text-quiet);">Supported formats: PDF, JPG, JPEG, PNG (AI extraction available for PDF files)</div>
+                    </div>
+                    <div class="wa-split">
+                        <wa-button type="submit" variant="brand">
+                            <wa-icon slot="prefix" name="upload"></wa-icon>
+                            Upload Invoice
+                        </wa-button>
+                        <wa-button type="button" variant="neutral" id="cancel-button">
+                            Cancel
+                        </wa-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
 
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: var(--wa-border-radius-m);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--wa-space-m);
+    border-bottom: 1px solid var(--wa-color-surface-border);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: var(--wa-font-size-l);
+    font-weight: 600;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--wa-color-text-quiet);
+}
+
+.close-button:hover {
+    color: var(--wa-color-text);
+}
+
+.modal-body {
+    padding: var(--wa-space-m);
+}
+
+#upload-message {
+    margin-bottom: var(--wa-space-m);
+}
+</style>
+
 <script>
-// Auto-refresh table after voucher creation
-document.addEventListener('htmx:afterRequest', function(event) {
-    if (event.detail.xhr.responseURL && event.detail.xhr.responseURL.includes('/create-voucher')) {
-        // Wait a moment for the database to update, then refresh the table
-        setTimeout(function() {
-            htmx.ajax('GET', '/htmx/voucher-reception/refresh-table', {
-                target: '.wa-card__body',
-                swap: 'innerHTML'
-            });
-        }, 1000);
+// Simple test to see if JavaScript is running
+console.log('JavaScript is loading...');
+
+// Basic modal functions
+function openModal() {
+    console.log('Opening modal...');
+    const modal = document.getElementById('upload-modal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('Modal opened!');
+    } else {
+        console.error('Modal not found!');
     }
+}
+
+function closeModal() {
+    console.log('Closing modal...');
+    const modal = document.getElementById('upload-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Wait for page to load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, setting up buttons...');
+    
+    // Set up upload button
+    const uploadBtn = document.getElementById('upload-button');
+    if (uploadBtn) {
+        console.log('Upload button found');
+        uploadBtn.onclick = openModal;
+    } else {
+        console.error('Upload button not found');
+    }
+    
+    // Set up test button
+    const testBtn = document.getElementById('test-modal');
+    if (testBtn) {
+        console.log('Test button found');
+        testBtn.onclick = function() {
+            alert('Test button works!');
+            openModal();
+        };
+    } else {
+        console.error('Test button not found');
+    }
+    
+    // Set up close button
+    const closeBtn = document.querySelector('.close-button');
+    if (closeBtn) {
+        console.log('Close button found');
+        closeBtn.onclick = closeModal;
+    }
+    
+    // Set up cancel button
+    const cancelBtn = document.getElementById('cancel-button');
+    if (cancelBtn) {
+        console.log('Cancel button found');
+        cancelBtn.onclick = closeModal;
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('upload-modal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+    
+    console.log('All buttons set up!');
 });
 
-// Auto-refresh table every 30 seconds to show AI processing status
-setInterval(function() {
-    htmx.ajax('GET', '/htmx/voucher-reception/refresh-table', {
-        target: '.wa-card__body',
-        swap: 'innerHTML'
-    });
-}, 30000);
+console.log('Script loaded successfully!');
 </script>
 </body>
 </html>

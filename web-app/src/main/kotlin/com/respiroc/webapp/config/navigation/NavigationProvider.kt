@@ -21,13 +21,6 @@ class NavigationProvider {
             ),
 
             NavigationSection(
-                title = "Smart Receipt", icon = "receipt",
-                items = listOf(
-                    NavigationSectionItem(label = "Upload Invoice", url = "/smart-receipt/upload")
-                )
-            ),
-
-            NavigationSection(
                 title = "Accounts", icon = "receipt",
                 items = listOf(
                     NavigationSectionItem(label = "General Ledger", url = "/ledger/general"),
