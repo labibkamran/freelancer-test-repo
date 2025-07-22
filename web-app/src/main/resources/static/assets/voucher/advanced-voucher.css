@@ -11,7 +11,7 @@
 
 .balance-total {
     text-align: right;
-    font-size: 0.8rem;
+    font-size: var(--wa-font-size-xs);
     font-weight: 600;
 }
 
@@ -41,8 +41,8 @@
 }
 
 .error-message {
-    color: #dc2626;
-    font-size: 0.875rem;
+    color: var(--wa-color-red-60);
+    font-size: var(--wa-font-size-s);
     margin-top: var(--wa-space-xs);
     display: block;
 }
@@ -53,11 +53,18 @@ r-combobox {
 }
 
 r-combobox[style*="font-size: 0.75rem"] {
-    --combobox-font-size: 0.75rem;
+    --combobox-font-size: var(--wa-font-size-xs);
 }
 
 r-combobox[style*="font-size: 0.8rem"] {
-    --combobox-font-size: 0.8rem;
+    --combobox-font-size: var(--wa-font-size-s);
+}
+r-combobox[style*="font-size: var(--wa-font-size-xs)"] {
+    --combobox-font-size: var(--wa-font-size-xs);
+}
+
+r-combobox[style*="font-size: var(--wa-font-size-s)"] {
+    --combobox-font-size: var(--wa-font-size-s);
 }
 
 #scroller_voucher_postings {

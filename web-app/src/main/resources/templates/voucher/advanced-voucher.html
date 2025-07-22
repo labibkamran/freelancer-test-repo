@@ -93,7 +93,7 @@
                                                 placeholder="Select debit account..."
                                                 th:tabindex="${iterStat.index * 10 + 3}"
                                                 th:value="${postingLine.debitAccount}"
-                                                style="font-size: 0.8rem;">
+                                                style="font-size: var(--wa-font-size-xs);">
                                     </r-combobox>
                                     <r-combobox th:id="'debit-vat-' + ${iterStat.index}"
                                                 th:name="'postingLines[' + ${iterStat.index} + '].debitVatCode'"
@@ -101,7 +101,7 @@
                                                 th:tabindex="${iterStat.index * 10 + 8}"
                                                 th:value="${postingLine.debitVatCode}"
                                                 th:data-default-value="${defaultVatCode}"
-                                                style="font-size: 0.75rem;">
+                                                style="font-size: var(--wa-font-size-xs);">
                                     </r-combobox>
                                 </div>
                             </td>
@@ -112,7 +112,7 @@
                                                 placeholder="Select credit account..."
                                                 th:tabindex="${iterStat.index * 10 + 2}"
                                                 th:value="${postingLine.creditAccount}"
-                                                style="font-size: 0.8rem;">
+                                                style="font-size: var(--wa-font-size-xs);">
                                     </r-combobox>
                                     <r-combobox th:id="'credit-vat-' + ${iterStat.index}"
                                                 th:name="'postingLines[' + ${iterStat.index} + '].creditVatCode'"
@@ -120,7 +120,7 @@
                                                 th:tabindex="${iterStat.index * 10 + 7}"
                                                 th:value="${postingLine.creditVatCode}"
                                                 th:data-default-value="${defaultVatCode}"
-                                                style="font-size: 0.75rem;">
+                                                style="font-size: var(--wa-font-size-xs);">
                                     </r-combobox>
                                 </div>
                             </td>

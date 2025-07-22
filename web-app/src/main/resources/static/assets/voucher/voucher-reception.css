@@ -23,7 +23,7 @@ wa-copy-button::part(button) {
 .r-voucher-reception-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: var(--wa-font-size-s);
 }
 
 .r-voucher-reception-table th {
@@ -50,7 +50,7 @@ wa-copy-button::part(button) {
 @media (max-width: 768px) {
 
     .r-voucher-reception-table {
-        font-size: 0.75rem;
+        font-size: var(--wa-font-size-xs);
     }
 
     .r-voucher-reception-table th,

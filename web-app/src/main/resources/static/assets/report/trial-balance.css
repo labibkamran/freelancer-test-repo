@@ -26,14 +26,14 @@
 
 .r-filter-label {
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: var(--wa-font-size-s);
     color: var(--wa-color-gray-30);
 }
 
 .r-trial-balance-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: var(--wa-font-size-s);
 }
 
 .r-trial-balance-table th {
@@ -95,7 +95,7 @@
 }
 
 .r-empty-state-icon {
-    font-size: 3rem;
+    font-size: var(--wa-font-size-4xl);
     margin-bottom: var(--wa-space-m);
     opacity: 0.5;
 }
@@ -115,7 +115,7 @@
     }
 
     .r-trial-balance-table {
-        font-size: 0.75rem;
+        font-size: var(--wa-font-size-xs);
     }
 
     .r-trial-balance-table th,
